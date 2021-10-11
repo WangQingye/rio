@@ -10,7 +10,6 @@ const i18n = createI18n({
   fallbackLocale: localeEN.name,
   messages,
 })
-
 export default (app) => {
   app.use(ElementPlus, { locale:localeZH })
   app.use(i18n)
