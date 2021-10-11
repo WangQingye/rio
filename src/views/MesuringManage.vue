@@ -216,12 +216,12 @@ export default {
     return {
       columns: [
         {
-          label: '量具编号',
-          prop: 'mesuringId',
+          label: '量具规格',
+          prop: 'mesuringSpecs',
         },
         {
-          label: '名称',
-          prop: 'name',
+          label: '量具编号',
+          prop: 'mesuringId',
         },
         {
           label: '归属任务号',
@@ -229,8 +229,8 @@ export default {
           slot: 'taskId',
         },
         {
-          label: '归属公司',
-          prop: 'company',
+          label: '状态',
+          prop: 'status',
         },
         {
           label: '剩余数量',
@@ -242,8 +242,8 @@ export default {
         },
       ],
       formItems: [
+        { label: '量具规格', key: 'mesuringSpecs', required: true },
         { label: '量具编号', key: 'mesuringId', required: true },
-        { label: '名称', key: 'name', required: true },
         {
           label: '归属任务号',
           key: 'taskId',
@@ -256,7 +256,7 @@ export default {
             },
           ],
         },
-        { label: '归属公司', key: 'company', required: true },
+        { label: '状态', key: 'status', required: true },
         { label: '总数量', key: 'totalNum', required: true },
       ],
       query,
@@ -275,20 +275,24 @@ export default {
       handleLendingRecords,
       lendingRecordsColumns: [
         {
-          label: '出借人',
+          label: '领用人',
           prop: 'lendUser',
         },
         {
-          label: '出借时间',
+          label: '领用时间',
           prop: 'lendTime',
         },
         {
-          label: '出借数量',
+          label: '领用数量',
           prop: 'lendnum',
         },
         {
           label: '当前状态',
           prop: 'status',
+        },
+        {
+          label: '归还时间',
+          prop: 'returnTime',
         },
         {
           label: '备注',

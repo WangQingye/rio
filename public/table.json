@@ -89,9 +89,17 @@
     "mesuring": [
         {
             "mesuringId": "41N751-0-1",
-            "name": "测量尺",
+            "mesuringSpecs": "Ω9.6+0.0036",
             "taskId": "J2101-1050D(E)",
-            "company": "某单位",
+            "status": "在线",
+            "restNum": "10",
+            "totalNum": "20"
+        },
+        {
+            "mesuringId": "41N751-0-2",
+            "mesuringSpecs": "Ω1.6+0.0036",
+            "taskId": "J2101-1050D(E)",
+            "status": "归还",
             "restNum": "10",
             "totalNum": "20"
         }
@@ -100,6 +108,7 @@
         {
             "lendUser": "小王",
             "lendTime": "2021-10-03",
+            "returnTime": "",
             "lendnum": "5",
             "status": "未归还",
             "remark": "正常使用"
@@ -107,8 +116,9 @@
         {
             "lendUser": "小李",
             "lendTime": "2021-10-03",
+            "returnTime": "2021-10-10",
             "lendnum": "5",
-            "status": "未归还",
+            "status": "已归还",
             "remark": "借用至xxx任务"
         }
     ],
