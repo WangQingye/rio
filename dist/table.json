@@ -1,0 +1,181 @@
+{
+    "list": [{
+            "index": "21-9-1",
+            "taskId": "J2101-1050D(E)",
+            "productId": "41N751-0",
+            "partId": "ND751-0C/ND751-05C-B",
+            "name": "保护堵盖",
+            "blueprintProcess": "1-9",
+            "factoryProcess": "1、2、3、4、5序",
+            "backFactoryNum": "1200",
+            "backFactoryTime": "2021-09-03",
+            "dispatchRemark": "",
+            "customerBackFactoryTime": "2021-11-11",
+            "status": "已出库",
+            "remark": "已上账",
+            "outFactoryNum": "1200",
+            "outFactoryTime": "2021-10-03",
+            "finalCustomerQualifiedNum": "1122"
+        },{
+            "index": "21-9-1",
+            "taskId": "J2101-1050D(E)",
+            "productId": "41N751-0",
+            "partId": "ND751-0C/ND751-05C-B",
+            "name": "保护堵盖",
+            "blueprintProcess": "1-9",
+            "factoryProcess": "1、2、3、4、5序",
+            "backFactoryNum": "1200",
+            "backFactoryTime": "2021-09-03",
+            "dispatchRemark": "",
+            "customerBackFactoryTime": "2021-11-11",
+            "status": "已出库",
+            "remark": "已上账",
+            "outFactoryNum": "1200",
+            "outFactoryTime": "2021-10-03",
+            "finalCustomerQualifiedNum": "1122"
+        },{
+            "index": "21-9-1",
+            "taskId": "J2101-1050D(E)",
+            "productId": "41N751-0",
+            "partId": "ND751-0C/ND751-05C-B",
+            "name": "保护堵盖",
+            "blueprintProcess": "1-9",
+            "factoryProcess": "1、2、3、4、5序",
+            "backFactoryNum": "1200",
+            "backFactoryTime": "2021-09-03",
+            "dispatchRemark": "",
+            "customerBackFactoryTime": "2021-11-11",
+            "status": "已出库",
+            "remark": "已上账",
+            "outFactoryNum": "1200",
+            "outFactoryTime": "2021-10-03",
+            "finalCustomerQualifiedNum": "1122"
+        },{
+            "index": "21-9-1",
+            "taskId": "J2101-1050D(E)",
+            "productId": "41N751-0",
+            "partId": "ND751-0C/ND751-05C-B",
+            "name": "保护堵盖",
+            "blueprintProcess": "1-9",
+            "factoryProcess": "1、2、3、4、5序",
+            "backFactoryNum": "1200",
+            "backFactoryTime": "2021-09-03",
+            "dispatchRemark": "",
+            "customerBackFactoryTime": "2021-11-11",
+            "status": "已出库",
+            "remark": "已上账",
+            "outFactoryNum": "1200",
+            "outFactoryTime": "2021-10-03",
+            "finalCustomerQualifiedNum": "1122"
+        },{
+            "index": "21-9-1",
+            "taskId": "J2101-1050D(E)",
+            "productId": "41N751-0",
+            "partId": "ND751-0C/ND751-05C-B",
+            "name": "保护堵盖",
+            "blueprintProcess": "1-9",
+            "factoryProcess": "1、2、3、4、5序",
+            "backFactoryNum": "1200",
+            "backFactoryTime": "2021-09-03",
+            "dispatchRemark": "",
+            "customerBackFactoryTime": "2021-11-11",
+            "status": "已出库",
+            "remark": "已上账",
+            "outFactoryNum": "1200",
+            "outFactoryTime": "2021-10-03",
+            "finalCustomerQualifiedNum": "1122"
+        }
+    ],
+    "mesuring": [
+        {
+            "mesuringId": "41N751-0-1",
+            "name": "测量尺",
+            "taskId": "J2101-1050D(E)",
+            "company": "某单位",
+            "restNum": "10",
+            "totalNum": "20"
+        }
+    ],
+    "lendRecords": [
+        {
+            "lendUser": "小王",
+            "lendTime": "2021-10-03",
+            "lendnum": "5",
+            "status": "未归还",
+            "remark": "正常使用"
+        },
+        {
+            "lendUser": "小李",
+            "lendTime": "2021-10-03",
+            "lendnum": "5",
+            "status": "未归还",
+            "remark": "借用至xxx任务"
+        }
+    ],
+    "knife": [
+        {
+            "knifeId": "41N751-0-1",
+            "name": "刀具-1",
+            "company": "某车间",
+            "restNum": "10",
+            "totalNum": "20"
+        }
+    ],
+    "tool": [
+        {
+            "toolId": "41N751-0-1",
+            "name": "工具-1",
+            "company": "某部门",
+            "restNum": "10",
+            "totalNum": "20"
+        },
+        {
+            "toolId": "41N751-0-1",
+            "name": "工具-2",
+            "company": "某部门",
+            "restNum": "10",
+            "totalNum": "20"
+        }
+    ],
+    "user": [
+        {
+            "userName": "小王",
+            "role": "管理员",
+            "contact": "13313331333"
+        },
+        {
+            "userName": "小李",
+            "role": "仓库管理员",
+            "contact": "13313331333"
+        },
+        {
+            "userName": "小张",
+            "role": "普通员工",
+            "contact": "13313331333"
+        }
+    ],
+    "step": [
+        {
+            "stepIndex": "1",
+            "stepName": "工序1",
+            "userName": "小王",
+            "status": "已完成",
+            "finishTime": "2021-10-03"
+        },
+        {
+            "stepIndex": "2",
+            "stepName": "工序2",
+            "userName": "小张",
+            "status": "进行中",
+            "finishTime": ""
+        },
+        {
+            "stepIndex": "3",
+            "stepName": "工序3",
+            "userName": "小李",
+            "status": "未开始",
+            "finishTime": ""
+        }
+    ],
+    "pageTotal": 4
+}
