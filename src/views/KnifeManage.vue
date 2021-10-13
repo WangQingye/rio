@@ -36,7 +36,7 @@
           <el-button type="text"
             icon="el-icon-document"
             class="color-success"
-            @click="handleLendingRecords(slotProps.scopeData)">出借记录
+            @click="handleLendingRecords(slotProps.scopeData)">领用记录
           </el-button>
           <el-button type="text"
             icon="el-icon-edit"
@@ -55,7 +55,7 @@
       :itemData="editItemData"
       :formItems="formItems"
       @dialog-submit="editSubmit"></ProductAdd>
-    <el-dialog :title="`出借记录 - ${editItemData && editItemData.knifeId}` "
+    <el-dialog :title="`领用记录 - ${editItemData && editItemData.knifeId}` "
       v-model="lendingRecordsVisible"
       :close-on-click-modal="false"
       :close-on-press-escape="false"

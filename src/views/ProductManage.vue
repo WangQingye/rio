@@ -4,11 +4,31 @@
       <el-form :inline="true"
         :model="query"
         class="demo-form-inline">
-        <el-form-item label="批次号">
+        <el-form-item label="序号">
           <el-input v-model="query.address"
-            placeholder="批次号"></el-input>
+            placeholder="序号"></el-input>
         </el-form-item>
-        <el-form-item label="产品状态">
+        <el-form-item label="任务号">
+          <el-input v-model="query.address"
+            placeholder="任务号"></el-input>
+        </el-form-item>
+        <el-form-item label="产品代号">
+          <el-input v-model="query.address"
+            placeholder="产品代号"></el-input>
+        </el-form-item>
+        <el-form-item label="零件代号">
+          <el-input v-model="query.address"
+            placeholder="零件代号"></el-input>
+        </el-form-item>
+        <el-form-item label="零件名称">
+          <el-input v-model="query.address"
+            placeholder="零件名称"></el-input>
+        </el-form-item>
+        <el-form-item label="调度备注">
+          <el-input v-model="query.address"
+            placeholder="调度备注"></el-input>
+        </el-form-item>
+        <el-form-item label="状态">
           <el-select v-model="query.address"
             placeholder="状态"
             class="handle-select mr10">
@@ -33,10 +53,15 @@
         <template v-slot:status="slotProps">
           <el-tag :type="slotProps.scopeData.status === '成功'? 'success': slotProps.scopeData.status === '失败'? 'danger': ''">{{ slotProps.scopeData.status }}</el-tag>
         </template>
-        <template v-slot:taskId="slotProps">
+        <template v-slot:index="slotProps">
           <el-link href="javascript:void(0)"
             type="primary"
-            @click="showDetail(slotProps.scopeData)">{{slotProps.scopeData.taskId}}</el-link>
+            @click="showDetail(slotProps.scopeData)">{{slotProps.scopeData.index}}</el-link>
+        </template>
+        <template v-slot:partId="slotProps">
+          <el-link href="javascript:void(0)"
+            type="primary"
+            @click="showPartDetail(slotProps.scopeData)">{{slotProps.scopeData.partId}}</el-link>
         </template>
         <template v-slot:operation="slotProps">
           <el-button type="text"
@@ -60,6 +85,10 @@
       @close="detailVisible = false"
       key="detail"
       :itemData="editItemData"></ProductDetail>
+    <PartDetail :visible="partDetailVisible"
+      @close="partDetailVisible = false"
+      key="detail"
+      :partId="detailPartId"></PartDetail>
   </div>
 </template>
 
@@ -70,12 +99,14 @@ import { fetchData } from '../api/index'
 import BaseTable from '@/components/BaseTable.vue'
 import ProductAdd from './ProductAdd.vue'
 import ProductDetail from './ProductDetail.vue'
+import PartDetail from './PartDetail.vue'
 
 export default {
   components: {
     BaseTable,
     ProductAdd,
     ProductDetail,
+    PartDetail
   },
   name: 'product-manage',
   setup() {
@@ -123,7 +154,6 @@ export default {
     const editVisible = ref(false)
     const editItemData = ref(null)
     const handleAdd = () => {
-      console.log(222)
       editVisible.value = true
       editItemData.value = null
     }
@@ -133,25 +163,31 @@ export default {
       editItemData.value = row
     }
     const editSubmit = (row) => {
-      console.log(row)
     }
 
     const detailVisible = ref(false)
     const showDetail = (row) => {
-      console.log(111)
       detailVisible.value = true
       editItemData.value = row
+    }
+
+    // 零件生产详情
+    const partDetailVisible = ref(false)
+    const detailPartId = ref('')
+    const showPartDetail = (row) => {
+      partDetailVisible.value = true
+      detailPartId.value = row.partId
     }
     return {
       columns: [
         {
           label: '序号',
           prop: 'index',
+          slot: 'index',
         },
         {
           label: '任务号',
-          prop: 'taskId',
-          slot: 'taskId',
+          prop: 'taskId'
         },
         {
           label: '产品代号',
@@ -160,6 +196,7 @@ export default {
         {
           label: '零件代号',
           prop: 'partId',
+          slot: 'partId',
         },
         {
           label: '名称',
@@ -261,6 +298,9 @@ export default {
       editSubmit,
       handleAdd,
       detailVisible,
+      partDetailVisible,
+      detailPartId,
+      showPartDetail
     }
   },
 }

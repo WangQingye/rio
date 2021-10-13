@@ -88,20 +88,34 @@
     ],
     "mesuring": [
         {
+            "mesuringName": "圆规",
             "mesuringId": "41N751-0-1",
             "mesuringSpecs": "Ω9.6+0.0036",
-            "taskId": "J2101-1050D(E)",
-            "status": "在线",
-            "restNum": "10",
-            "totalNum": "20"
+            "fromIndex": "21-9-1",
+            "status": "在库房",
+            "num": "0",
+            "inTime": "2021-10-10",
+            "returnTime": "2021-11-10"
         },
         {
+            "mesuringName": "直尺",
             "mesuringId": "41N751-0-2",
             "mesuringSpecs": "Ω1.6+0.0036",
-            "taskId": "J2101-1050D(E)",
-            "status": "归还",
-            "restNum": "10",
-            "totalNum": "20"
+            "fromIndex": "21-9-1",
+            "status": "在使用",
+            "num": "1",
+            "inTime": "2021-10-10",
+            "returnTime": "2021-11-10"
+        },
+        {
+            "mesuringName": "三角直尺",
+            "mesuringId": "41N751-0-2",
+            "mesuringSpecs": "Ω1.6+0.0036",
+            "fromIndex": "21-9-1",
+            "status": "已归还",
+            "num": "0",
+            "inTime": "2021-10-10",
+            "returnTime": "2021-11-10"
         }
     ],
     "lendRecords": [
@@ -109,16 +123,12 @@
             "lendUser": "小王",
             "lendTime": "2021-10-03",
             "returnTime": "",
-            "lendnum": "5",
-            "status": "未归还",
             "remark": "正常使用"
         },
         {
             "lendUser": "小李",
             "lendTime": "2021-10-03",
             "returnTime": "2021-10-10",
-            "lendnum": "5",
-            "status": "已归还",
             "remark": "借用至xxx任务"
         }
     ],
@@ -166,25 +176,51 @@
     ],
     "step": [
         {
-            "stepIndex": "1",
-            "stepName": "工序1",
+            "stepName": "1车",
             "userName": "小王",
             "status": "已完成",
-            "finishTime": "2021-10-03"
+            "equipment": "车床",
+            "startTime": "2021-10-03",
+            "finishTime": "2021-10-05",
+            "runTime": "",
+            "highScore": "111",
+            "stepPrice": "3"
         },
         {
-            "stepIndex": "2",
-            "stepName": "工序2",
+            "stepName": "2钳",
             "userName": "小张",
-            "status": "进行中",
-            "finishTime": ""
+            "status": "加工中",
+            "equipment": "车床",
+            "startTime": "2021-10-03",
+            "finishTime": "",
+            "runTime": "",
+            "highScore": "111",
+            "stepPrice": "2"
         },
         {
-            "stepIndex": "3",
-            "stepName": "工序3",
-            "userName": "小李",
+            "stepName": "3铣",
+            "userName": "",
             "status": "未开始",
-            "finishTime": ""
+            "equipment": "车床",
+            "startTime": "",
+            "finishTime": "",
+            "runTime": "",
+            "highScore": "111",
+            "stepPrice": "1"
+        }
+    ],
+    "partStep": [
+        {
+            "stepName": "1车",
+            "equipment": "车床"
+        },
+        {
+            "stepName": "2钳",
+            "equipment": "钳车"
+        },
+        {
+            "stepName": "3铣",
+            "equipment": "铣床"
         }
     ],
     "pageTotal": 4

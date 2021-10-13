@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-table :data="tableData"
-      border
+      :border="!noBorder"
       class="table"
       ref="multipleTable"
       header-cell-class-name="table-header">
@@ -54,6 +54,10 @@ export default {
       type: Boolean,
       default: true,
     },
+    noBorder: {
+      type: Boolean,
+      default: false,
+    },
   },
   setup(props, context) {
     const query = reactive({
@@ -76,7 +80,6 @@ export default {
       })
     }
     getData()
-
     // 查询操作
     const handleSearch = () => {
       query.pageIndex = 1
@@ -110,7 +113,6 @@ export default {
     const handleEdit = (row) => {
       context.emit('edit', row)
     }
-
     return {
       query,
       tableData,
@@ -120,7 +122,7 @@ export default {
       handleSearch,
       handlePageChange,
       handleDelete,
-      handleEdit,
+      handleEdit
     }
   },
 }

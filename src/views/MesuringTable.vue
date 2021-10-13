@@ -1,53 +1,36 @@
 <template>
   <div>
-    <div class="container">
-      <el-form :inline="true"
-        :model="query"
-        class="demo-form-inline">
-        <el-form-item label="工具编号">
-          <el-input v-model="query.address"
-            placeholder="工具编号"></el-input>
-        </el-form-item>
-        <el-form-item label="工具名称">
-          <el-input v-model="query.address"
-            placeholder="工具名称"></el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary"
-            @click="handleSearch">查询</el-button>
-        </el-form-item>
-      </el-form>
-      <el-button type="primary"
-        icon="el-icon-plus"
-        style="margin-bottom: 20px;"
-        @click="handleAdd">添加工具</el-button>
-      <BaseTable :cols="columns"
-      :url="'/tool'"
-        @edit="handleEdit">
-        <template v-slot:operation="slotProps">
-          <el-button type="text"
-            icon="el-icon-document"
-            class="color-success"
-            @click="handleLendingRecords(slotProps.scopeData)">领用记录
-          </el-button>
-          <el-button type="text"
-            icon="el-icon-edit"
-            style="margin-left:0"
-            @click="handleEdit(slotProps.scopeData)">编辑
-          </el-button>
-          <el-button type="text"
-            icon="el-icon-delete"
-            class="color-danger"
-            @click="handleDelete(slotProps.scopeData)">删除</el-button>
-        </template>
-      </BaseTable>
-    </div>
-    <ProductAdd :visible="editVisible"
-      @close="editVisible = false"
-      :itemData="editItemData"
-      :formItems="formItems"
-      @dialog-submit="editSubmit"></ProductAdd>
-    <el-dialog :title="`领用记录 - ${editItemData && editItemData.toolId}` "
+    <BaseTable :cols="columns"
+      :url="'/mesuring'"
+      @edit="handleEdit">
+      <template v-slot:status="slotProps">
+        <el-tag :type="slotProps.scopeData.status === '成功'? 'success': slotProps.scopeData.status === '失败'? 'danger': ''">{{ slotProps.scopeData.status }}</el-tag>
+      </template>
+      <template v-slot:taskId="slotProps">
+        <el-link href="javascript:void(0)"
+          type="primary"
+          @click="showDetail(slotProps.scopeData)">{{slotProps.scopeData.taskId}}</el-link>
+      </template>
+      <template v-slot:operation="slotProps">
+        <el-button type="text"
+          icon="el-icon-document"
+          class="color-success"
+          @click="handleLendingRecords(slotProps.scopeData)">领用记录
+        </el-button>
+        <el-button type="text"
+          icon="el-icon-edit"
+          style="margin-left:0"
+          v-if="!taskIndex"
+          @click="handleEdit(slotProps.scopeData)">编辑
+        </el-button>
+        <el-button type="text"
+          icon="el-icon-delete"
+          class="color-danger"
+          v-if="!taskIndex"
+          @click="handleDelete(slotProps.scopeData)">删除</el-button>
+      </template>
+    </BaseTable>
+    <el-dialog :title="`领用记录 - ${editItemData && editItemData.mesuringId}` "
       v-model="lendingRecordsVisible"
       :close-on-click-modal="false"
       :close-on-press-escape="false"
@@ -56,13 +39,15 @@
         icon="el-icon-plus"
         style="margin-bottom:20px"
         @click="showAddLend">
-        借出
+        领用
       </el-button>
-      <BaseTable :cols="lendingRecordsColumns" :url="'/lendRecords'">
+      <BaseTable :cols="lendingRecordsColumns"
+        :url="'/lendRecords'">
         <template v-slot:operation="slotProps">
           <el-button type="text"
             icon="el-icon-download"
             class="color-success"
+            v-if="!slotProps.scopeData.returnTime"
             @click="showReturnMesuring(slotProps.scopeData)">归还
           </el-button>
           <el-button type="text"
@@ -77,41 +62,54 @@
         </span>
       </template>
     </el-dialog>
+    <ProductAdd :visible="editVisible"
+      @close="editVisible = false"
+      :itemData="editItemData"
+      :formItems="formItems"
+      key="product-edit"
+      @dialog-submit="editSubmit"></ProductAdd>
     <ProductAdd :visible="addLendVisible"
       @close="addLendVisible = false"
       :formItems="addLendFormItems"
-      :propTitle="'借出工具'"
+      :propTitle="'领用量具'"
       @dialog-submit="addLendSubmit"></ProductAdd>
     <ProductAdd :visible="returnMesuringVisible"
       @close="returnMesuringVisible = false"
       :formItems="returnMesuringItems"
-      :propTitle="'归还工具'"
+      :propTitle="'归还量具'"
       @dialog-submit="returnMesuringSubmit"></ProductAdd>
   </div>
 </template>
 
 <script>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { fetchData } from '../api/index'
 import BaseTable from '../components/BaseTable.vue'
 import ProductAdd from './ProductAdd.vue'
-import ProductDetail from './ProductDetail.vue'
 
 export default {
   components: {
     BaseTable,
     ProductAdd,
-    ProductDetail,
+  },
+  props: {
+    taskIndex: {
+      type: String,
+    },
+    query: {
+      type: Object,
+    },
   },
   name: 'product-manage',
-  setup() {
+  setup(props) {
     const query = reactive({
       address: '',
       name: '',
       pageIndex: 1,
       pageSize: 10,
     })
+
     const tableData = ref([])
     const pageTotal = ref(0)
     // 获取表格数据
@@ -154,6 +152,7 @@ export default {
     }
 
     const handleAdd = () => {
+      console.log(111)
       editVisible.value = true
       editItemData.value = null
     }
@@ -167,21 +166,21 @@ export default {
       detailVisible.value = true
     }
 
-    // 借出记录相关
+    // 领用记录相关
     const lendingRecordsVisible = ref(false)
     const handleLendingRecords = (row) => {
       lendingRecordsVisible.value = true
       editItemData.value = row
     }
-    // 添加借出记录
+    // 添加领用记录
     const addLendVisible = ref(false)
     const showAddLend = (row) => {
       addLendVisible.value = true
     }
     const addLendFormItems = [
-      { label: '出借人', key: 'lendUser', required: true },
-        { label: '出借数量', key: 'num', required: true, type: 'number' },
-        { label: '备注', key: 'remark', required: true, type: 'textarea' },
+      { label: '领用人', key: 'lendUser', required: true },
+      { label: '领用数量', key: 'num', required: true, type: 'number' },
+      { label: '备注', key: 'remark', required: true, type: 'textarea' },
     ]
     const addLendSubmit = (formData) => {
       console.log(formData)
@@ -199,46 +198,82 @@ export default {
     const returnMesuringSubmit = (formData) => {
       console.log(formData)
     }
-    
+
     return {
       columns: [
         {
-          label: '工具编号',
-          prop: 'toolId',
+          label: '量具名称',
+          prop: 'mesuringName',
         },
         {
-          label: '名称',
-          prop: 'name',
+          label: '量具规格',
+          prop: 'mesuringSpecs',
         },
         {
-          label: '归属部门',
-          prop: 'company',
+          label: '量具编号',
+          prop: 'mesuringId',
         },
         {
-          label: '剩余数量',
-          prop: 'restNum',
+          label: '归属序号',
+          prop: 'fromIndex',
         },
         {
-          label: '总数',
-          prop: 'totalNum',
+          label: '数量',
+          prop: 'num',
+        },
+        {
+          label: '状态',
+          prop: 'status',
+        },
+        {
+          label: '入库时间',
+          prop: 'inTime',
+        },
+        {
+          label: '归还时间',
+          prop: 'returnTime',
         },
       ],
       formItems: [
-        { label: '工具编号', key: 'toolId', required: true },
-        { label: '名称', key: 'name', required: true },
+        { label: '量具名称', key: 'mesuringName', required: true },
+        { label: '量具规格', key: 'mesuringSpecs', required: true },
+        { label: '量具编号', key: 'mesuringId', required: true },
         {
-          label: '归属部门',
-          key: 'taskId',
+          label: '归属序号',
+          key: 'fromIndex',
           required: true,
           type: 'select',
           options: [
             {
-              label: '一车间',
-              value: '1',
+              label: '21-9-1',
+              value: '21-9-1',
             },
           ],
         },
-        { label: '总数量', key: 'totalNum', required: true },
+        { label: '数量', type:'number', key: 'num', required: true },
+        {
+          label: '状态',
+          key: 'status',
+          required: true,
+          type: 'select',
+          options: [
+            {
+              label: '在使用',
+              value: '在使用',
+            },
+            {
+              label: '已归还',
+              value: '已归还',
+            },
+          ],
+        },
+        { label: '入库时间', key: 'inTime', type: 'date', required: true },
+        {
+          label: '归还时间',
+          key: 'returnTime',
+          type: 'date',
+          required: true,
+        },
       ],
       query,
       tableData,
@@ -256,26 +291,21 @@ export default {
       handleLendingRecords,
       lendingRecordsColumns: [
         {
-          label: '出借人',
+          label: '领用人',
           prop: 'lendUser',
         },
         {
-          label: '出借时间',
+          label: '领用日期',
           prop: 'lendTime',
         },
         {
-          label: '出借数量',
-          prop: 'lendnum',
-        },
-        {
-          label: '当前状态',
-          prop: 'status',
+          label: '还回日期',
+          prop: 'returnTime',
         },
         {
           label: '备注',
           prop: 'remark',
         },
-
       ],
       lendingRecordsVisible,
       showAddLend,
@@ -285,7 +315,7 @@ export default {
       showReturnMesuring,
       returnMesuringVisible,
       returnMesuringItems,
-      returnMesuringSubmit
+      returnMesuringSubmit,
     }
   },
 }

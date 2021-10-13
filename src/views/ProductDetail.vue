@@ -1,30 +1,54 @@
 <template>
   <!-- 编辑弹出框 -->
-  <el-dialog :append-to-body="true" :title="`任务详情 - ${itemData && itemData.taskId}` "
+  <el-dialog :append-to-body="true"
+    :title="`序号详情 - ${itemData && itemData.index}` "
     v-model="visible"
     :destroy-on-close="true"
     :close-on-click-modal="false"
     :close-on-press-escape="false"
     width="60%">
     <el-tabs v-model="activeName">
-      <el-tab-pane label="基本信息"
-        name="detail">
-        <el-form label-width="170px"
-          inline>
-          <el-form-item style="width: 48%"
-            v-for="item in formItems"
-            :key="item.key"
-            :label="`${item.label} : `">
-            <span style="font-weight: bold">{{form[item.key]}}</span>
-          </el-form-item>
-        </el-form>
+      <el-tab-pane label="生产过程"
+        name="process">
+        <ProcessPriceTag :fromIndex="itemData.index"
+          :isInIndex="true"></ProcessPriceTag>
+        <BaseTable :cols="stepColumns"
+          :url="'/step'"
+          :needOperation="false">
+          <template v-slot:userName="slotProps">
+            <span v-if="slotProps.scopeData.userName">{{slotProps.scopeData.userName}}</span>
+            <el-button v-else
+              type="text"
+              icon="el-icon-collection-tag" @click="showDispathTask">分配任务</el-button>
+          </template>
+          <template v-slot:runTime="slotProps">
+            <span v-if="slotProps.scopeData.runTime">{{slotProps.scopeData.runTime}}</span>
+            <el-button v-if="(!slotProps.scopeData.runTime && slotProps.scopeData.finishTime)"
+              type="text"
+              icon="el-icon-time" @click="showEditRunTime">填报工时</el-button>
+          </template>
+        </BaseTable>
+        <ProductAdd :visible="dispathTaskVisible"
+          @close="dispathTaskVisible = false"
+          :title="'分配任务'"
+          :formItems="[{
+            label:'操作者', key: 'userName', required: true
+          }]"
+          key="product-edit"
+          @dialog-submit="dispathTaskSubmit"></ProductAdd>
+        <ProductAdd :visible="editRunTimeVisible"
+          @close="editRunTimeVisible = false"
+          :title="'填报工时'"
+          :formItems="[{
+            label:'运行时间', key: 'runTime', required: true
+          }]"
+          key="product-edit"
+          @dialog-submit="editRunTimeSubmit"></ProductAdd>
       </el-tab-pane>
-      <el-tab-pane label="工序进展"
-        name="second">
-        <BaseTable :cols="stepColumns" :url="'/step'" :needOperation="false"></BaseTable>
+      <el-tab-pane label="量具情况"
+        name="mesuring">
+        <MesuringTable :taskIndex="'111'"></MesuringTable>
       </el-tab-pane>
-      <!-- <el-tab-pane label="量具信息"
-        name="third">量具信息</el-tab-pane> -->
     </el-tabs>
     <template #footer>
       <span class="dialog-footer">
@@ -37,8 +61,11 @@
 <script>
 import { ref, reactive, computed, watch } from 'vue'
 import BaseTable from '@/components/BaseTable.vue'
+import MesuringTable from './MesuringTable.vue'
+import ProcessPriceTag from './ProcessPriceTag.vue'
+import ProductAdd from './ProductAdd.vue'
 export default {
-  components: {BaseTable},
+  components: { BaseTable, MesuringTable, ProcessPriceTag, ProductAdd },
   props: {
     visible: {
       type: Boolean,
@@ -52,7 +79,7 @@ export default {
   name: 'product-add',
   setup(props, { emit }) {
     const form = reactive({})
-    const activeName = ref('detail')
+    const activeName = ref('process')
     const dialogVisible = computed(() => props.visible)
     watch(dialogVisible, () => {
       if (dialogVisible.value == true) {
@@ -72,6 +99,20 @@ export default {
     }
     const saveEdit = () => {
       emit('dialog-submit', form)
+    }
+    
+    // 分配任务、填报工时
+    const dispathTaskVisible = ref(false)
+    const showDispathTask = () => {
+      dispathTaskVisible.value = true
+    }
+    const dispathTaskSubmit = () => {
+    }
+    const editRunTimeVisible = ref(false)
+    const showEditRunTime = () => {
+      editRunTimeVisible.value = true
+    }
+    const editRunTimeSubmit = () => {
     }
     return {
       formItems: [
@@ -113,30 +154,88 @@ export default {
       ],
       stepColumns: [
         {
-          label: '步骤编号',
-          prop: 'stepIndex',
-        },
-        {
-          label: '步骤名',
+          label: '工序',
           prop: 'stepName',
         },
         {
-          label: '负责人',
+          label: '操作者',
           prop: 'userName',
+          slot: 'userName',
         },
         {
           label: '当前状态',
           prop: 'status',
         },
         {
-          label: '完成时间',
+          label: '操作设备',
+          prop: 'equipment',
+        },
+        {
+          label: '开工时间',
+          prop: 'startTime',
+        },
+        {
+          label: '完工时间',
           prop: 'finishTime',
-        }
+        },
+        {
+          label: '运行时间',
+          prop: 'runTime',
+          slot: 'runTime',
+        },
+        {
+          label: '最高记录',
+          prop: 'highScore',
+        },
+        {
+          label: '工序单价（元）',
+          prop: 'stepPrice',
+        },
+      ],
+      meusringColumns: [
+        {
+          label: '量具名称',
+          prop: 'mesuringName',
+        },
+        {
+          label: '量具规格',
+          prop: 'mesuringSpecs',
+        },
+        {
+          label: '量具编号',
+          prop: 'mesuringId',
+        },
+        {
+          label: '归属序号',
+          prop: 'fromIndex',
+        },
+        {
+          label: '数量',
+          prop: 'num',
+        },
+        {
+          label: '状态',
+          prop: 'status',
+        },
+        {
+          label: '入库时间',
+          prop: 'inTime',
+        },
+        {
+          label: '归还时间',
+          prop: 'returnTime',
+        },
       ],
       close,
       activeName,
       saveEdit,
-      form
+      form,
+      dispathTaskVisible,
+      dispathTaskSubmit,
+      editRunTimeVisible,
+      editRunTimeSubmit,
+      showDispathTask,
+      showEditRunTime
     }
   },
 }
