@@ -134,11 +134,44 @@
     ],
     "knife": [
         {
-            "knifeId": "41N751-0-1",
-            "name": "刀具-1",
-            "company": "某车间",
-            "restNum": "10",
-            "totalNum": "20"
+            "company": "肯纳",
+            "name": "内螺纹刀",
+            "type": "20cm",
+            "storePlace": "1-1-1",
+            "restNum": "20",
+            "totalNum": "30",
+            "reuseNum": "5",
+            "disuseNum": "5"
+        },
+        {
+            "company": "三特维克",
+            "name": "内螺纹刀",
+            "type": "20cm",
+            "storePlace": "1-1-1",
+            "restNum": "20",
+            "totalNum": "30",
+            "reuseNum": "5",
+            "disuseNum": "5"
+        },
+        {
+            "company": "肯纳",
+            "name": "外螺纹刀",
+            "type": "20cm",
+            "storePlace": "1-1-1",
+            "restNum": "20",
+            "totalNum": "30",
+            "reuseNum": "5",
+            "disuseNum": "5"
+        },
+        {
+            "company": "肯纳",
+            "name": "外螺纹刀",
+            "type": "20cm",
+            "storePlace": "1-1-1",
+            "restNum": "20",
+            "totalNum": "30",
+            "reuseNum": "5",
+            "disuseNum": "5"
         }
     ],
     "tool": [

@@ -4,13 +4,17 @@
       <el-form :inline="true"
         :model="query"
         class="demo-form-inline">
-        <el-form-item label="刀具编号">
+        <el-form-item label="采购单位">
           <el-input v-model="query.address"
-            placeholder="刀具编号"></el-input>
+            placeholder="采购单位"></el-input>
         </el-form-item>
         <el-form-item label="刀具名称">
           <el-input v-model="query.address"
             placeholder="刀具名称"></el-input>
+        </el-form-item>
+        <el-form-item label="规格型号">
+          <el-input v-model="query.address"
+            placeholder="规格型号"></el-input>
         </el-form-item>
         <el-form-item>
           <el-button type="primary"
@@ -21,18 +25,23 @@
         icon="el-icon-plus"
         style="margin-bottom: 20px;"
         @click="handleAdd">添加刀具</el-button>
-      <BaseTable :cols="columns"
+      <BaseTable :cols="columns" :needOperation="false"
       :url="'/knife'"
         @edit="handleEdit">
         <template v-slot:status="slotProps">
           <el-tag :type="slotProps.scopeData.status === '成功'? 'success': slotProps.scopeData.status === '失败'? 'danger': ''">{{ slotProps.scopeData.status }}</el-tag>
         </template>
-        <template v-slot:taskId="slotProps">
+        <template v-slot:type="slotProps">
           <el-link href="javascript:void(0)"
             type="primary"
-            @click="showDetail(slotProps.scopeData)">{{slotProps.scopeData.taskId}}</el-link>
+            @click="showDetail(slotProps.scopeData)">{{slotProps.scopeData.type}}</el-link>
         </template>
-        <template v-slot:operation="slotProps">
+        <template v-slot:company="slotProps">
+          <el-link href="javascript:void(0)"
+            type="primary"
+            @click="showDetail(slotProps.scopeData)">{{slotProps.scopeData.company}}</el-link>
+        </template>
+        <!-- <template v-slot:operation="slotProps">
           <el-button type="text"
             icon="el-icon-document"
             class="color-success"
@@ -47,7 +56,7 @@
             icon="el-icon-delete"
             class="color-danger"
             @click="handleDelete(slotProps.scopeData)">删除</el-button>
-        </template>
+        </template> -->
       </BaseTable>
     </div>
     <ProductAdd :visible="editVisible"
@@ -55,7 +64,7 @@
       :itemData="editItemData"
       :formItems="formItems"
       @dialog-submit="editSubmit"></ProductAdd>
-    <el-dialog :title="`领用记录 - ${editItemData && editItemData.knifeId}` "
+    <el-dialog :title="`采购记录 - ${editItemData && editItemData.company}` "
       v-model="lendingRecordsVisible"
       :close-on-click-modal="false"
       :close-on-press-escape="false"
@@ -211,24 +220,38 @@ export default {
     return {
       columns: [
         {
-          label: '刀具编号',
-          prop: 'knifeId',
+          label: '采购单位',
+          prop: 'company',
+          slot: 'company'
         },
         {
-          label: '名称',
+          label: '刀具名称',
           prop: 'name',
         },
         {
-          label: '归属车间',
-          prop: 'company',
+          label: '规格型号',
+          prop: 'type',
+          slot: 'type',
         },
         {
-          label: '剩余数量',
+          label: '库房存放点',
+          prop: 'storePlace',
+        },
+        {
+          label: '库房剩余数量',
           prop: 'restNum',
         },
         {
-          label: '总数',
+          label: '总购数量',
           prop: 'totalNum',
+        },
+        {
+          label: '归还后可二次使用数量',
+          prop: 'reuseNum',
+        },
+        {
+          label: '废弃数量',
+          prop: 'disuseNum',
         },
       ],
       formItems: [
