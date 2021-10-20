@@ -198,6 +198,10 @@ export default {
           label: '操作设备',
           prop: 'equipment',
         },
+        {
+          label: '工序单价',
+          prop: 'stepPrice',
+        },
       ],
       editPartStepFormItems: [
         {

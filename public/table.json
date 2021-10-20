@@ -174,20 +174,120 @@
             "disuseNum": "5"
         }
     ],
-    "tool": [
+    "knifeLendRecords": [
         {
-            "toolId": "41N751-0-1",
-            "name": "工具-1",
-            "company": "某部门",
-            "restNum": "10",
-            "totalNum": "20"
+            "lendUser": "小王",
+            "lendNum": "5",
+            "lendTime": "2021-10-03",
+            "returnNum": "4",
+            "reuseNum": "3",
+            "disuseNum": "1",
+            "returnTime": "2021-10-05",
+            "fromIndex": "21-9-1",
+            "partId": "ND751-0C/ND751-05C-B",
+            "partName": "保护堵盖",
+            "price": "100",
+            "remark": "正常使用"
         },
         {
-            "toolId": "41N751-0-1",
-            "name": "工具-2",
-            "company": "某部门",
-            "restNum": "10",
-            "totalNum": "20"
+            "lendUser": "小王",
+            "lendNum": "5",
+            "lendTime": "2021-10-03",
+            "returnNum": "4",
+            "reuseNum": "3",
+            "disuseNum": "1",
+            "returnTime": "2021-10-05",
+            "fromIndex": "21-9-1",
+            "partId": "ND751-0C/ND751-05C-B",
+            "partName": "保护堵盖",
+            "price": "100",
+            "remark": "正常使用"
+        }
+    ],
+    "knifeBuyRecords": [
+        {
+            "company": "肯纳",
+            "knifeName": "内螺纹刀",
+            "knifeType": "20cm",
+            "buyTime": "2021-10-05",
+            "buyNum": "30",
+            "price": "100",
+            "backTime": "2021-10-06"
+        },
+        {
+            "company": "肯纳",
+            "knifeName": "内螺纹刀",
+            "knifeType": "20cm",
+            "buyTime": "2021-10-05",
+            "buyNum": "30",
+            "price": "100",
+            "backTime": "2021-10-06"
+        }
+    ],
+    "toolTypes": [
+        {
+            "toolId": "1",
+            "toolName": "刀杆",
+            "toolProps": [{
+                "label": "采购单位",
+                "key": "prop1"
+            },{
+                "label": "名称",
+                "key": "prop2"
+            },{
+                "label": "规格型号",
+                "key": "prop3"
+            },{
+                "label": "库房存放点",
+                "key": "prop4"
+            },{
+                "label": "库房剩余数量",
+                "key": "prop5"
+            },{
+                "label": "总购数量",
+                "key": "prop6"
+            }]
+        },
+        {
+            "toolId": "2",
+            "toolName": "装夹工具",
+            "toolProps": [{
+                "label": "采购单位",
+                "key": "prop1"
+            },{
+                "label": "名称",
+                "key": "prop2"
+            },{
+                "label": "规格型号2",
+                "key": "prop3"
+            },{
+                "label": "库房存放点2",
+                "key": "prop4"
+            },{
+                "label": "库房剩余数量2",
+                "key": "prop5"
+            },{
+                "label": "总购数量",
+                "key": "prop6"
+            }]
+        }
+    ],
+    "toolDetail": [
+        {
+            "prop1": "肯纳",
+            "prop2": "某量尺",
+            "prop3": "20cm",
+            "prop4": "1-2-3",
+            "prop5": "20",
+            "prop6": "30"
+        },
+        {
+            "prop1": "肯纳",
+            "prop2": "某量尺2",
+            "prop3": "20cm",
+            "prop4": "1-2-3",
+            "prop5": "20",
+            "prop6": "30"
         }
     ],
     "user": [
@@ -245,15 +345,76 @@
     "partStep": [
         {
             "stepName": "1车",
-            "equipment": "车床"
+            "equipment": "车床",
+            "stepPrice": "1"
         },
         {
             "stepName": "2钳",
-            "equipment": "钳车"
+            "equipment": "钳车",
+            "stepPrice": "1"
         },
         {
             "stepName": "3铣",
-            "equipment": "铣床"
+            "equipment": "铣床",
+            "stepPrice": "1"
+        }
+    ],
+    "worklist": [
+        {
+            "productId": "41N751-0",
+            "partId": "ND751-0C/ND751-05C-B",
+            "partName": "保护堵盖",
+            "status": "未开始",
+            "stepName": "3铣",
+            "equipment": "铣床",
+            "startTime": "",
+            "endTime": ""
+        },
+        {
+            "productId": "41N751-0",
+            "partId": "ND751-0C/ND751-05C-B",
+            "partName": "保护堵盖",
+            "status": "进行中",
+            "stepName": "2钳",
+            "equipment": "钳车",
+            "startTime": "2021-10-03",
+            "endTime": ""
+        },
+        {
+            "productId": "41N751-0",
+            "partId": "ND751-0C/ND751-05C-B",
+            "partName": "保护堵盖",
+            "status": "已完成",
+            "startTime": "2021-10-03",
+            "endTime": "2021-10-05",
+            "stepName": "1车",
+            "equipment": "车床"
+        }
+    ],
+    "lendlist": [
+        {
+            "toolName": "螺纹刀具",
+            "type": "20cm",
+            "lendTime": "2020-10-03",
+            "lendNum": "3",
+            "returnNum": "3",
+            "returnTime": "2020-10-06"
+        },
+        {
+            "toolName": "量尺",
+            "type": "20cm",
+            "lendTime": "2020-10-03",
+            "lendNum": "3",
+            "returnNum": "",
+            "returnTime": ""
+        },
+        {
+            "toolName": "某杂件",
+            "type": "20cm",
+            "lendTime": "2020-10-03",
+            "lendNum": "3",
+            "returnNum": "2",
+            "returnTime": ""
         }
     ],
     "pageTotal": 4

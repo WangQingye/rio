@@ -4,24 +4,9 @@
       <el-form :inline="true"
         :model="query"
         class="demo-form-inline">
-        <el-form-item label="用户名">
+        <el-form-item label="工具类名称">
           <el-input v-model="query.address"
-            placeholder="用户名"></el-input>
-        </el-form-item>
-        <el-form-item label="用户角色">
-          <el-select v-model="query.address"
-            placeholder="用户角色"
-            class="handle-select mr10">
-            <el-option key="1"
-              label="管理员"
-              value="admin"></el-option>
-            <el-option key="2"
-              label="仓库管理员"
-              value="storeAdmin"></el-option>
-            <el-option key="3"
-              label="普通员工"
-              value="employee"></el-option>
-          </el-select>
+            placeholder="工具类名称"></el-input>
         </el-form-item>
         <el-form-item>
           <el-button type="primary"
@@ -31,24 +16,21 @@
       <el-button type="primary"
         icon="el-icon-plus"
         style="margin-bottom: 20px;"
-        @click="handleAdd">添加用户</el-button>
-      <BaseTable :cols="columns" :url="'/user'">
-        <template v-slot:status="slotProps">
-          <el-tag :type="slotProps.scopeData.status === '成功'? 'success': slotProps.scopeData.status === '失败'? 'danger': ''">{{ slotProps.scopeData.status }}</el-tag>
-        </template>
-        <template v-slot:taskId="slotProps">
-          <el-link href="javascript:void(0)"
-            type="primary"
-            @click="showDetail(slotProps.scopeData)">{{slotProps.scopeData.taskId}}</el-link>
+        @click="handleAdd">添加工具种类</el-button>
+      <BaseTable :cols="columns"
+      :url="'/toolTypes'">
+        <template v-slot:toolProps="slotProps">
+          <span>{{slotProps.scopeData.toolProps.map(p => p.label).join(' | ')}}</span>
         </template>
         <template v-slot:operation="slotProps">
           <el-button type="text"
             icon="el-icon-edit"
+            style="margin-left:0"
             @click="handleEdit(slotProps.scopeData)">编辑
           </el-button>
           <el-button type="text"
             icon="el-icon-delete"
-            class="red"
+            class="color-danger"
             @click="handleDelete(slotProps.scopeData)">删除</el-button>
         </template>
       </BaseTable>
@@ -58,9 +40,6 @@
       :itemData="editItemData"
       :formItems="formItems"
       @dialog-submit="editSubmit"></ProductAdd>
-    <ProductDetail :visible="detailVisible"
-      @close="detailVisible = false"
-      :itemData="editItemData"></ProductDetail>
   </div>
 </template>
 
@@ -86,26 +65,9 @@ export default {
       pageIndex: 1,
       pageSize: 10,
     })
-    const tableData = ref([])
-    const pageTotal = ref(0)
-    // 获取表格数据
-    const getData = () => {
-      fetchData(query).then((res) => {
-        tableData.value = res.list
-        pageTotal.value = res.pageTotal || 50
-      })
-    }
-    getData()
-
     // 查询操作
     const handleSearch = () => {
       query.pageIndex = 1
-      getData()
-    }
-    // 分页导航
-    const handlePageChange = (val) => {
-      query.pageIndex = val
-      getData()
     }
 
     // 删除操作
@@ -126,8 +88,10 @@ export default {
     let editItemData = ref(null)
     const handleEdit = (row) => {
       editVisible.value = true
-      editItemData.value = row
+      editItemData.value = JSON.parse(JSON.stringify(row))
+      editItemData.value.toolProps = editItemData.value.toolProps.map(p => p.label).join('|')
     }
+
     const handleAdd = () => {
       editVisible.value = true
       editItemData.value = null
@@ -141,62 +105,98 @@ export default {
       editItemData.value = row
       detailVisible.value = true
     }
+
+    // 借出记录相关
+    const lendingRecordsVisible = ref(false)
+    const handleLendingRecords = (row) => {
+      lendingRecordsVisible.value = true
+      editItemData.value = row
+    }
+    // 添加借出记录
+    const addLendVisible = ref(false)
+    const showAddLend = (row) => {
+      addLendVisible.value = true
+    }
+    const addLendFormItems = [
+      { label: '出借人', key: 'lendUser', required: true },
+        { label: '出借数量', key: 'num', required: true, type: 'number' },
+        { label: '备注', key: 'remark', required: true, type: 'textarea' },
+    ]
+    const addLendSubmit = (formData) => {
+      console.log(formData)
+    }
+    // 归还
+    const returnMesuringVisible = ref(false)
+    const editLendRecord = ref(null)
+    const returnMesuringItems = [
+      { label: '归还数量', key: 'num', required: true, type: 'number' },
+    ]
+    const showReturnMesuring = (row) => {
+      returnMesuringVisible.value = true
+      editLendRecord.value = row
+    }
+    const returnMesuringSubmit = (formData) => {
+      console.log(formData)
+    }
+    
     return {
       columns: [
         {
-          label: '用户名',
-          prop: 'userName',
+          label: '工具名称',
+          prop: 'toolName',
         },
         {
-          label: '用户角色',
-          prop: 'role',
-        },
-        {
-          label: '联系方式',
-          prop: 'contact',
+          label: '展示字段',
+          prop: 'toolProps',
+          slot: 'toolProps'
         }
       ],
-      formItems:[
-        { label: '用户名', key: 'userName', required: true },
-        {
-          label: '用户角色',
-          key: 'role',
-          required: true,
-          type: 'select',
-          options: [
-            {
-              label: '管理员',
-              value: 'admin',
-            },
-            {
-              label: '仓库管理员',
-              value: 'storeAdmin',
-            },
-            {
-              label: '生产管理员',
-              value: 'productAdmin',
-            },
-            {
-              label: '普通员工',
-              value: 'employee',
-            },
-          ],
-        },
-        { label: '联系方式', key: 'contact', required: true, placeholder: '联系方式即为登录账号' }
+      formItems: [
+        { label: '工具类名称', key: 'toolName', required: true, width:'100%' },
+        { label: '展示字段', key: 'toolProps', required: true, placeholder: '英文逗号隔开', width:'100%'}
       ],
       query,
-      tableData,
-      pageTotal,
       editVisible,
       handleSearch,
-      handlePageChange,
       handleDelete,
       handleEdit,
-      showDetail,
       editItemData,
       editSubmit,
       handleAdd,
       detailVisible,
+      handleLendingRecords,
+      lendingRecordsColumns: [
+        {
+          label: '出借人',
+          prop: 'lendUser',
+        },
+        {
+          label: '出借时间',
+          prop: 'lendTime',
+        },
+        {
+          label: '出借数量',
+          prop: 'lendnum',
+        },
+        {
+          label: '当前状态',
+          prop: 'status',
+        },
+        {
+          label: '备注',
+          prop: 'remark',
+        },
+
+      ],
+      lendingRecordsVisible,
+      showAddLend,
+      addLendVisible,
+      addLendFormItems,
+      addLendSubmit,
+      showReturnMesuring,
+      returnMesuringVisible,
+      returnMesuringItems,
+      returnMesuringSubmit
     }
   },
 }
@@ -214,9 +214,6 @@ export default {
 .table {
   width: 100%;
   font-size: 14px;
-}
-.red {
-  color: #ff0000;
 }
 .mr10 {
   margin-right: 10px;

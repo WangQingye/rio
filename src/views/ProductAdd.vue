@@ -9,11 +9,11 @@
     width="60%">
     <el-form label-width="170px"
       inline>
-      <el-form-item style="width: 48%"
+      <el-form-item :style="item.width ? `width:${item.width}` : 'width: 48%'"
         v-for="item in formItems"
         :key="item.key"
         :label="item.label"
-        :required="item.required">
+        :required="item.required === false ? false : true">
         <el-date-picker v-if="item.type=='date'"
           v-model="form[item.key]"
           type="date"

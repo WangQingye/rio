@@ -7,6 +7,7 @@
       text-color="#bfcbd9"
       active-text-color="#20a0ff"
       unique-opened
+      v-if="items.length"
       router>
       <template v-for="item in items">
         <template v-if="item.subs">
@@ -46,40 +47,87 @@
 </template>
 
 <script>
-import { computed, watch } from 'vue'
+import { onBeforeMount, computed, watch, ref } from 'vue'
 import { useStore } from 'vuex'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { fetchData } from '../api/index'
 export default {
   setup() {
-    const items = [
-      {
-        icon: 'el-icon-lx-cascades',
-        index: '/product',
-        title: '产品管理',
-      },
-      {
-        icon: 'el-icon-lx-filter',
-        index: '/mesuring',
-        title: '量具管理',
-      },
-      {
-        icon: 'el-icon-lx-tag',
-        index: '/knife',
-        title: '刀具管理',
-      },
-      {
-        icon: 'el-icon-lx-file',
-        index: '/tool',
-        title: '工具管理',
-      },
-      {
-        icon: 'el-icon-lx-friendadd',
-        index: '/user',
-        title: '员工管理',
-      },
-    ]
-
+    const toolSubs = ref(null)
+    const items = ref([])
     const route = useRoute()
+    const router = useRouter()
+    onBeforeMount(() => {
+      fetchData('/toolTypes').then((res) => {
+        toolSubs.value = res['toolTypes'].map(t => {
+          return {
+            index: `/tool?id=${t.toolId}`,
+            title: t.toolName,
+          }
+        })
+        if (localStorage.getItem("ms_username") == 'admin') {
+          items.value = [
+            {
+              icon: 'el-icon-lx-cascades',
+              index: '/product',
+              title: '产品管理',
+            },
+            {
+              icon: 'el-icon-lx-filter',
+              index: '/mesuring',
+              title: '量具管理',
+            },
+            {
+              icon: 'el-icon-lx-tag',
+              index: '/knife',
+              title: '刀具管理',
+            },
+            {
+              icon: 'el-icon-lx-file',
+              title: '工具管理',
+              subs: [
+                ...toolSubs.value,
+                {
+                  icon: 'el-icon-lx-file',
+                  index: '/tool-add',
+                  title: '添加工具种类',
+                },
+              ],
+            },
+            {
+              icon: 'el-icon-lx-friendadd',
+              index: '/user',
+              title: '员工管理',
+            },
+            {
+              icon: 'el-icon-date',
+              index: '/work-list',
+              title: '工作列表',
+            },
+            {
+              icon: 'el-icon-document',
+              index: '/lend-list',
+              title: '领用清单',
+            },
+          ]
+        } else {
+          items.value = [
+            {
+              icon: 'el-icon-date',
+              index: '/work-list',
+              title: '工作列表',
+            },
+            {
+              icon: 'el-icon-document',
+              index: '/lend-list',
+              title: '领用清单',
+            },
+          ]
+          router.push('/work-list')
+        }
+      })
+    })
+
 
     const onRoutes = computed(() => {
       return route.path

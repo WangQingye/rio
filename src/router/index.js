@@ -40,12 +40,33 @@ const routes = [{
         },
         component: () => import( /* webpackChunkName: "tool" */ "../views/ToolManage.vue")
     }, {
+        path: "/tool-add",
+        name: "tool-add",
+        meta: {
+            title: '添加工具种类'
+        },
+        component: () => import( /* webpackChunkName: "tool" */ "../views/ToolAdd.vue")
+    }, {
         path: "/user",
         name: "user",
         meta: {
             title: '员工管理'
         },
         component: () => import( /* webpackChunkName: "user" */ "../views/UserManage.vue")
+    }, {
+        path: "/work-list",
+        name: "work-list",
+        meta: {
+            title: '工作任务'
+        },
+        component: () => import( /* webpackChunkName: "work-list" */ "../views/WorkList.vue")
+    }, {
+        path: "/lend-list",
+        name: "lend-list",
+        meta: {
+            title: '领用记录'
+        },
+        component: () => import( /* webpackChunkName: "lend-list" */ "../views/LendList.vue")
     }]
 }, {
     path: "/login",
