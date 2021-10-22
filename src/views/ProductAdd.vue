@@ -3,6 +3,7 @@
   <el-dialog :title="propTitle || title"
     v-model="visible"
     :destroy-on-close="true"
+    :show-close="false"
     :close-on-click-modal="false"
     :close-on-press-escape="false"
     :append-to-body="true"

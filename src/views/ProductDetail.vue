@@ -4,9 +4,10 @@
     :title="`序号详情 - ${itemData && itemData.index}` "
     v-model="visible"
     :destroy-on-close="true"
+    :show-close="false"
     :close-on-click-modal="false"
     :close-on-press-escape="false"
-    width="60%">
+    width="80%">
     <el-tabs v-model="activeName">
       <el-tab-pane label="生产过程"
         name="process">
@@ -171,12 +172,24 @@ export default {
           prop: 'equipment',
         },
         {
+          label: '接受产品数量',
+          prop: 'receiveNum',
+        },
+        {
           label: '开工时间',
           prop: 'startTime',
         },
         {
-          label: '完工时间',
+          label: '要求完工时间',
+          prop: 'planFinishTime',
+        },
+        {
+          label: '实际完工时间',
           prop: 'finishTime',
+        },
+        {
+          label: '合格产品数量',
+          prop: 'qualifiedNum',
         },
         {
           label: '运行时间',
@@ -190,6 +203,10 @@ export default {
         {
           label: '工序单价（元）',
           prop: 'stepPrice',
+        },
+        {
+          label: '备注',
+          prop: 'remark',
         },
       ],
       meusringColumns: [

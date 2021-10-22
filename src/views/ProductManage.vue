@@ -199,8 +199,8 @@ export default {
           slot: 'partId',
         },
         {
-          label: '名称',
-          prop: 'name',
+          label: '零件名称',
+          prop: 'partName',
         },
         {
           label: '图纸工序',

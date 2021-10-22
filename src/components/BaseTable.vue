@@ -25,7 +25,7 @@
         </template>
       </el-table-column>
     </el-table>
-    <div class="pagination">
+    <div class="pagination" v-if="!noPager">
       <el-pagination background
         layout="total, prev, pager, next"
         :current-page="query.pageIndex"
@@ -55,6 +55,10 @@ export default {
       default: true,
     },
     noBorder: {
+      type: Boolean,
+      default: false,
+    },
+    noPager: {
       type: Boolean,
       default: false,
     },

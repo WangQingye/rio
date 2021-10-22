@@ -3,17 +3,40 @@
     <el-form :inline="true"
       :model="query"
       class="demo-form-inline">
-      <el-form-item label="量具编号">
-        <el-input v-model="query.address"
-          placeholder="量具编号"></el-input>
-      </el-form-item>
       <el-form-item label="量具名称">
         <el-input v-model="query.address"
           placeholder="量具名称"></el-input>
       </el-form-item>
+      <el-form-item label="量具规格">
+        <el-input v-model="query.address"
+          placeholder="量具规格"></el-input>
+      </el-form-item>
+      <el-form-item label="量具编号">
+        <el-input v-model="query.address"
+          placeholder="量具编号"></el-input>
+      </el-form-item>
       <el-form-item label="归属序号">
         <el-input v-model="query.address"
           placeholder="归属序号"></el-input>
+      </el-form-item>
+      <el-form-item label="数量">
+        <el-input v-model="query.address"
+          placeholder="数量"></el-input>
+      </el-form-item>
+      <el-form-item label="状态">
+          <el-select v-model="query.address"
+            placeholder="状态"
+            class="handle-select mr10">
+            <el-option key="1"
+              label="在库房"
+              value="在库房"></el-option>
+            <el-option key="2"
+              label="在使用"
+              value="在使用"></el-option>
+            <el-option key="3"
+              label="已归还"
+              value="已归还"></el-option>
+          </el-select>
       </el-form-item>
       <el-form-item>
         <el-button type="primary"

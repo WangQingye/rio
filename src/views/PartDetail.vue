@@ -3,10 +3,11 @@
   <el-dialog :append-to-body="true"
     :title="`零件生产详情 - ${partId}` "
     v-model="visible"
+    :show-close="false"
     :destroy-on-close="true"
     :close-on-click-modal="false"
     :close-on-press-escape="false"
-    width="60%">
+    width="80%">
     <el-tabs v-model="activeName">
       <el-tab-pane label="生产情况"
         name="process"
@@ -16,7 +17,9 @@
           :key="i"
           style="padding: 0; margin-bottom:10px">
           <ProcessPriceTag :fromIndex="'21-9-1'"></ProcessPriceTag>
-          <BaseTable :noBorder="true"
+          <BaseTable 
+            noBorder
+            noPager
             :cols="stepColumns"
             :url="'/step'"
             :needOperation="false"></BaseTable>
@@ -125,6 +128,7 @@ export default {
         {
           label: '操作者',
           prop: 'userName',
+          slot: 'userName',
         },
         {
           label: '当前状态',
@@ -135,16 +139,29 @@ export default {
           prop: 'equipment',
         },
         {
+          label: '接受产品数量',
+          prop: 'receiveNum',
+        },
+        {
           label: '开工时间',
           prop: 'startTime',
         },
         {
-          label: '完工时间',
+          label: '要求完工时间',
+          prop: 'planFinishTime',
+        },
+        {
+          label: '实际完工时间',
           prop: 'finishTime',
+        },
+        {
+          label: '合格产品数量',
+          prop: 'qualifiedNum',
         },
         {
           label: '运行时间',
           prop: 'runTime',
+          slot: 'runTime',
         },
         {
           label: '最高记录',
@@ -153,6 +170,10 @@ export default {
         {
           label: '工序单价（元）',
           prop: 'stepPrice',
+        },
+        {
+          label: '备注',
+          prop: 'remark',
         },
       ],
       meusringColumns: [
