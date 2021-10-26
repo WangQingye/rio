@@ -14,37 +14,21 @@
         <ProcessPriceTag :fromIndex="itemData.index"
           :isInIndex="true"></ProcessPriceTag>
         <BaseTable :cols="stepColumns"
-          :url="'/step'"
-          :needOperation="false">
-          <template v-slot:userName="slotProps">
-            <span v-if="slotProps.scopeData.userName">{{slotProps.scopeData.userName}}</span>
-            <el-button v-else
-              type="text"
-              icon="el-icon-collection-tag" @click="showDispathTask">分配任务</el-button>
-          </template>
-          <template v-slot:runTime="slotProps">
-            <span v-if="slotProps.scopeData.runTime">{{slotProps.scopeData.runTime}}</span>
-            <el-button v-if="(!slotProps.scopeData.runTime && slotProps.scopeData.finishTime)"
-              type="text"
-              icon="el-icon-time" @click="showEditRunTime">填报工时</el-button>
+          :url="'/step'">
+          <template v-slot:operation="slotProps">
+            <el-button type="text"
+              icon="el-icon-edit"
+              @click="handleStepEdit(slotProps.scopeData)">信息填报
+            </el-button>
           </template>
         </BaseTable>
-        <ProductAdd :visible="dispathTaskVisible"
-          @close="dispathTaskVisible = false"
-          :title="'分配任务'"
-          :formItems="[{
-            label:'操作者', key: 'userName', required: true
-          }]"
+        <ProductAdd :visible="stepEditVisible"
+          @close="stepEditVisible = false"
+          :title="'工序信息填报'"
+          :formItems="stepItems"
           key="product-edit"
-          @dialog-submit="dispathTaskSubmit"></ProductAdd>
-        <ProductAdd :visible="editRunTimeVisible"
-          @close="editRunTimeVisible = false"
-          :title="'填报工时'"
-          :formItems="[{
-            label:'运行时间', key: 'runTime', required: true
-          }]"
-          key="product-edit"
-          @dialog-submit="editRunTimeSubmit"></ProductAdd>
+          :itemData="stepEditItem"
+          @dialog-submit="stepEditSubmit"></ProductAdd>
       </el-tab-pane>
       <el-tab-pane label="量具情况"
         name="mesuring">
@@ -101,58 +85,16 @@ export default {
     const saveEdit = () => {
       emit('dialog-submit', form)
     }
-    
-    // 分配任务、填报工时
-    const dispathTaskVisible = ref(false)
-    const showDispathTask = () => {
-      dispathTaskVisible.value = true
+    // 工序信息填报
+    const stepEditVisible = ref(false)
+    const stepEditItem = ref({})
+    const handleStepEdit = (row) => {
+      stepEditVisible.value = true
+      stepEditItem.value = row
     }
-    const dispathTaskSubmit = () => {
-    }
-    const editRunTimeVisible = ref(false)
-    const showEditRunTime = () => {
-      editRunTimeVisible.value = true
-    }
-    const editRunTimeSubmit = () => {
+    const stepEditSubmit = () => {
     }
     return {
-      formItems: [
-        { label: '序号', key: 'index', required: true },
-        { label: '任务号', key: 'taskId', required: true },
-        { label: '产品代号', key: 'productId', required: true },
-        { label: '零件代号', key: 'partId', required: true },
-        { label: '名称', key: 'name', required: true },
-        { label: '图纸工序', key: 'blueprintProcess', required: true },
-        { label: '本厂实际工序', key: 'factoryProcess', required: true },
-        { label: '回厂数量', key: 'backFactoryNum', required: true },
-        {
-          label: '回厂日期',
-          key: 'backFactoryTime',
-          required: true,
-          type: 'date',
-        },
-        { label: '调度备注', key: 'dispatchRemark', required: true },
-        {
-          label: '甲方要求回厂时间',
-          key: 'customerBackFactoryTime',
-          required: true,
-          type: 'date',
-        },
-        { label: '状态', key: 'status', required: true },
-        { label: '备注', key: 'remark', required: true },
-        { label: '出厂数量', key: 'outFactoryNum', required: true },
-        {
-          label: '出厂时间',
-          key: 'outFactoryTime',
-          required: true,
-          type: 'date',
-        },
-        {
-          label: '最终甲方检验合格数',
-          key: 'finalCustomerQualifiedNum',
-          required: true,
-        },
-      ],
       stepColumns: [
         {
           label: '工序',
@@ -160,8 +102,7 @@ export default {
         },
         {
           label: '操作者',
-          prop: 'userName',
-          slot: 'userName',
+          prop: 'userName'
         },
         {
           label: '当前状态',
@@ -193,8 +134,7 @@ export default {
         },
         {
           label: '运行时间',
-          prop: 'runTime',
-          slot: 'runTime',
+          prop: 'runTime'
         },
         {
           label: '最高记录',
@@ -207,6 +147,67 @@ export default {
         {
           label: '备注',
           prop: 'remark',
+        },
+      ],
+      stepItems: [
+        {
+          label: '工序',
+          key: 'stepName',
+          disabled: true
+        },
+        {
+          label: '操作者',
+          key: 'userName', 
+          type: 'user'
+        },
+        {
+          label: '当前状态',
+          key: 'status',
+          disabled: true
+        },
+        {
+          label: '操作设备',
+          key: 'equipment',
+          disabled: true
+        },
+        {
+          label: '接受产品数量',
+          key: 'receiveNum',
+        },
+        {
+          label: '开工时间',
+          key: 'startTime',
+          disabled: true
+        },
+        {
+          label: '要求完工时间',
+          key: 'planFinishTime'
+        },
+        {
+          label: '实际完工时间',
+          key: 'finishTime',
+          disabled: true
+        },
+        {
+          label: '合格产品数量',
+          key: 'qualifiedNum',
+        },
+        {
+          label: '运行时间',
+          key: 'runTime'
+        },
+        {
+          label: '最高记录',
+          key: 'highScore',
+        },
+        {
+          label: '工序单价（元）',
+          key: 'stepPrice',
+        },
+        {
+          label: '备注',
+          key: 'remark',
+          type:'textarea'
         },
       ],
       meusringColumns: [
@@ -247,12 +248,10 @@ export default {
       activeName,
       saveEdit,
       form,
-      dispathTaskVisible,
-      dispathTaskSubmit,
-      editRunTimeVisible,
-      editRunTimeSubmit,
-      showDispathTask,
-      showEditRunTime
+      stepEditVisible,
+      stepEditItem,
+      handleStepEdit,
+      stepEditSubmit
     }
   },
 }

@@ -1,5 +1,16 @@
 <template>
   <div>
+    <el-dropdown style="float:right;margin-bottom:10px">
+      <el-button type="primary" size="small">
+        导出表格<i class="el-icon-arrow-down el-icon--right"></i>
+      </el-button>
+      <template #dropdown>
+        <el-dropdown-menu>
+          <el-dropdown-item>导出当页</el-dropdown-item>
+          <el-dropdown-item>导出全部</el-dropdown-item>
+        </el-dropdown-menu>
+      </template>
+    </el-dropdown>
     <el-table :data="tableData"
       :border="!noBorder"
       class="table"
@@ -25,7 +36,8 @@
         </template>
       </el-table-column>
     </el-table>
-    <div class="pagination" v-if="!noPager">
+    <div class="pagination"
+      v-if="!noPager">
       <el-pagination background
         layout="total, prev, pager, next"
         :current-page="query.pageIndex"
@@ -77,7 +89,7 @@ export default {
       fetchData(query).then((res) => {
         if (props.url) {
           tableData.value = res[props.url.slice(1)]
-        }else {
+        } else {
           tableData.value = res.list
         }
         pageTotal.value = res.pageTotal || 50
@@ -126,7 +138,7 @@ export default {
       handleSearch,
       handlePageChange,
       handleDelete,
-      handleEdit
+      handleEdit,
     }
   },
 }

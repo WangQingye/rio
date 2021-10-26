@@ -31,15 +31,25 @@
             icon="el-icon-video-play"
             style="margin-left:0"
             v-if="slotProps.scopeData.status == '未开始'"
-            @click="handleEdit(slotProps.scopeData)">开工
+            @click="handleWorkStatus(slotProps.scopeData, 'start')">开工
           </el-button>
           <el-button type="success"
             icon="el-icon-finished"
             v-if="slotProps.scopeData.status == '进行中'"
-            @click="handleDelete(slotProps.scopeData)">完成</el-button>
+            @click="handleWorkStatus(slotProps.scopeData, 'finish')">完成</el-button>
         </template>
       </BaseTable>
     </div>
+    <ProductAdd :visible="finishEditVisible"
+      @close="finishEditVisible = false"
+      :title="'完工填报'"
+      :formItems="[{
+        label: '合格产品数量',
+        key: 'qualifiedNum',
+        required: true
+      }]"
+      key="product-edit"
+      @dialog-submit="finishEditSubmit"></ProductAdd>
   </div>
 </template>
 
@@ -71,18 +81,22 @@ export default {
     }
 
     // 删除操作
-    const handleDelete = (index) => {
-      // 二次确认删除
-      ElMessageBox.confirm('确定要删除吗？', '提示', {
-        type: 'warning',
-      })
+    const editItemData = ref(null)
+    const finishEditVisible = ref(false)
+    const handleWorkStatus = (row, status) => {
+      editItemData.value = row
+      if (status === 'start') {
+        ElMessageBox.confirm('确定开始本工序吗？', '提示')
         .then(() => {
-          ElMessage.success('删除成功')
-          tableData.value.splice(index, 1)
+          ElMessage.success('操作成功')
         })
-        .catch(() => {})
+      } else if (status === 'finish') {
+        finishEditVisible.value = true
+      }
     }
-    
+    const finishEditSubmit = (formData) => {
+      console.log(formData)
+    }
     return {
       columns: [
         {
@@ -111,16 +125,34 @@ export default {
           slot: 'status',
         },
         {
-          label: '开始日期',
+          label: '要求完工时间',
+          prop: 'planFinishTime'
+        },
+        {
+          label: '开工时间',
           prop: 'startTime'
         },
         {
-          label: '结束日期',
+          label: '完工时间',
           prop: 'endTime'
+        },
+        {
+          label: '接受产品数量',
+          prop: 'receiveNum'
+        },
+        {
+          label: '合格产品数量',
+          prop: 'qualifiedNum'
+        },
+        {
+          label: '工序单价（元）',
+          prop: 'stepPrice'
         },
       ],
       query,
-      handleDelete
+      handleWorkStatus,
+      finishEditVisible,
+      finishEditSubmit
     }
   },
 }

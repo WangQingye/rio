@@ -12,18 +12,37 @@
       <el-tab-pane label="生产情况"
         name="process"
         class="part-info">
+        <el-form :inline="true"
+          :model="processQuery"
+          class="demo-form-inline">
+          <el-form-item label="序号">
+            <el-input v-model="processQuery.address"
+              placeholder="序号"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary"
+              @click="handleProcessSearch">查询</el-button>
+          </el-form-item>
+        </el-form>
         <el-card class="part-card"
           v-for="i in 3"
           :key="i"
           style="padding: 0; margin-bottom:10px">
           <ProcessPriceTag :fromIndex="'21-9-1'"></ProcessPriceTag>
-          <BaseTable 
-            noBorder
+          <BaseTable noBorder
             noPager
             :cols="stepColumns"
             :url="'/step'"
             :needOperation="false"></BaseTable>
         </el-card>
+        <div class="pagination">
+          <el-pagination background
+            layout="total, prev, pager, next"
+            :current-page="processQuery.pageIndex"
+            :page-size="processQuery.pageSize"
+            :total="pageTotal"
+            @current-change="handlePageChange"></el-pagination>
+        </div>
       </el-tab-pane>
       <el-tab-pane label="工序设置"
         name="mesuring">
@@ -81,6 +100,14 @@ export default {
   emits: ['close', 'dialog-submit'],
   name: 'product-add',
   setup(props, { emit }) {
+    // 搜索
+    const processQuery = reactive({})
+    const handleProcessSearch = () => {
+    }
+    const pageTotal = ref(0)
+    const handlePageChange = () => {
+    }
+    // 编辑
     const form = reactive({})
     const activeName = ref('process')
     const dialogVisible = computed(() => props.visible)
@@ -104,7 +131,6 @@ export default {
       emit('dialog-submit', form)
     }
 
-    
     const partStepEditVisible = ref(false)
     const editPartStepItemData = ref(null)
     const handleAddStep = () => {
@@ -117,8 +143,7 @@ export default {
       editPartStepItemData.value = row
     }
     const handleDeleteStep = (row) => {}
-    const editPartStepSubmit = (row) => {
-    }
+    const editPartStepSubmit = (row) => {}
     return {
       stepColumns: [
         {
@@ -245,7 +270,11 @@ export default {
       handleEditStep,
       handleDeleteStep,
       editPartStepItemData,
-      editPartStepSubmit
+      editPartStepSubmit,
+      processQuery,
+      handleProcessSearch,
+      pageTotal,
+      handlePageChange
     }
   },
 }
