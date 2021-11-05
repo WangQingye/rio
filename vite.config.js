@@ -10,5 +10,17 @@ export default {
     plugins: [vue()],
     optimizeDeps: {
         include: ['schart.js']
+    },  
+    // 本地运行配置，及反向代理配置
+    server: {
+      cors: true, // 默认启用并允许任何源
+      //反向代理配置，注意rewrite写法，开始没看文档在这里踩了坑
+      proxy: {
+        '/api': {
+          target: 'http://162.14.79.68',   //代理接口
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api/, '')
+        }
+      }
     }
 }

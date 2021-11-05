@@ -1,7 +1,8 @@
 <template>
   <div>
     <el-dropdown style="float:right;margin-bottom:10px">
-      <el-button type="primary" size="small">
+      <el-button type="primary"
+        size="small">
         导出表格<i class="el-icon-arrow-down el-icon--right"></i>
       </el-button>
       <template #dropdown>
@@ -40,7 +41,7 @@
       v-if="!noPager">
       <el-pagination background
         layout="total, prev, pager, next"
-        :current-page="query.pageIndex"
+        :current-page="query.pageNo"
         :page-size="query.pageSize"
         :total="pageTotal"
         @current-change="handlePageChange"></el-pagination>
@@ -50,7 +51,7 @@
 
 <script>
 import { ref, reactive } from 'vue'
-import { fetchData } from '../api/index'
+import { fetchData, getList } from '../api/index'
 
 export default {
   name: 'basetable',
@@ -74,36 +75,35 @@ export default {
       type: Boolean,
       default: false,
     },
+    queryBase: {
+      type: Object,
+      default: () => {}
+    },
   },
   setup(props, context) {
     const query = reactive({
-      address: '',
-      name: '',
-      pageIndex: 1,
+      pageNo: 1,
       pageSize: 10,
     })
     const tableData = ref([])
     const pageTotal = ref(0)
     // 获取表格数据
     const getData = () => {
-      fetchData(query).then((res) => {
-        if (props.url) {
-          tableData.value = res[props.url.slice(1)]
-        } else {
-          tableData.value = res.list
-        }
-        pageTotal.value = res.pageTotal || 50
+      getList(props.url, {...query, ...props.queryBase}).then((res) => {
+        console.log(res)
+        tableData.value = res.data.records
+        pageTotal.value = res.data.total || 0
       })
     }
     getData()
     // 查询操作
     const handleSearch = () => {
-      query.pageIndex = 1
+      query.pageNo = 1
       getData()
     }
     // 分页导航
     const handlePageChange = (val) => {
-      query.pageIndex = val
+      query.pageNo = val
       getData()
     }
 
@@ -129,6 +129,16 @@ export default {
     const handleEdit = (row) => {
       context.emit('edit', row)
     }
+    const refresh = (searchData) => {
+      console.log(searchData)
+      query.pageNo = 1
+      for (const key in searchData) {
+        // if (searchData[key] !== '') {
+        query[key] = searchData[key]
+        // }
+      }
+      getData()
+    }
     return {
       query,
       tableData,
@@ -139,6 +149,7 @@ export default {
       handlePageChange,
       handleDelete,
       handleEdit,
+      refresh,
     }
   },
 }

@@ -16,6 +16,7 @@
         v-for="item in formItems"
         :key="item.key"
         :label="item.label"
+        :prop="item.key"
         :rules="[
           { required: item.required === false ? false : true, message: `请填写${item.label}` }
         ]"
@@ -23,14 +24,15 @@
         <el-date-picker v-if="item.type=='date'"
           v-model="form[item.key]"
           type="date"
-          :disabled="item.disabled"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          :disabled="item.disabled || (itemData && item.editDisabled)"
           style="width: 100%"
           placeholder=选择日期>
         </el-date-picker>
         <el-select v-else-if="item.type=='select'"
           v-model="form[item.key]"
           type="date"
-          :disabled="item.disabled"
+          :disabled="item.disabled || (itemData && item.editDisabled)"
           style="width: 100%">
           <el-option v-for="op in item.options"
             :key="op.value"
@@ -43,7 +45,7 @@
         </UserSelect>
         <el-input v-else
           v-model="form[item.key]"
-          :disabled="item.disabled"
+          :disabled="item.disabled || (itemData && item.editDisabled)"
           :type="item.type || 'text'"
           :placeholder="item.placeholder"></el-input>
       </el-form-item>
@@ -59,8 +61,9 @@
 </template>
 
 <script>
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import UserSelect from '@/components/UserSelect.vue'
+import { ElMessage } from 'element-plus'
 export default {
   components: { UserSelect },
   props: {
@@ -82,6 +85,21 @@ export default {
   emits: ['close', 'dialog-submit'],
   name: 'product-add',
   setup(props, { emit }) {
+    // const formRulesObj = {}
+    // onMounted(() => {
+    //   props.formItems.forEach((item) => {
+    //     if (item.required !== false) {
+    //       formRulesObj[item.key] = [
+    //         {
+    //           required: true,
+    //           message: `请填写${item.label}`,
+    //           trigger: 'blur',
+    //         },
+    //       ]
+    //     }
+    //   })
+    // })
+    // const formRules = reactive(formRulesObj)
     const form = reactive({})
     const dialogVisible = computed(() => {
       return props.visible
@@ -90,13 +108,13 @@ export default {
     watch(dialogVisible, () => {
       if (dialogVisible.value == true) {
         if (props.itemData) {
-          Object.keys(props.itemData).map((key) => {
-            form[key] = props.itemData[key]
-          })
           title.value = '编辑'
         } else {
           title.value = '添加'
         }
+        props.formItems.map((item) => {
+          form[item.key] = (props.itemData && props.itemData[item.key]) || ''
+        })
       } else {
         Object.keys(form).map((key) => {
           delete form[key]
@@ -108,11 +126,13 @@ export default {
     }
     const ruleForm = ref()
     const saveEdit = async () => {
-      // let res = await ruleForm.value.validate()
       ruleForm.value.validate((validte) => {
-        console.log(validte)
+        if (validte) {
+          emit('dialog-submit', form)
+        } else {
+          ElMessage.warning('请完善表格')
+        }
       })
-      emit('dialog-submit', form)
     }
     return {
       title,
@@ -121,7 +141,7 @@ export default {
       form,
       ruleForm,
     }
-  },
+  }
 }
 </script>
 

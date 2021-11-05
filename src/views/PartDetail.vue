@@ -1,7 +1,7 @@
 <template>
   <!-- 编辑弹出框 -->
   <el-dialog :append-to-body="true"
-    :title="`零件生产详情 - ${partId}` "
+    :title="`零件生产详情 - ${partCode}` "
     v-model="visible"
     :show-close="false"
     :destroy-on-close="true"
@@ -16,7 +16,7 @@
           :model="processQuery"
           class="demo-form-inline">
           <el-form-item label="序号">
-            <el-input v-model="processQuery.address"
+            <el-input v-model="processQuery.serial"
               placeholder="序号"></el-input>
           </el-form-item>
           <el-form-item>
@@ -25,20 +25,19 @@
           </el-form-item>
         </el-form>
         <el-card class="part-card"
-          v-for="i in 3"
-          :key="i"
+          v-for="p in processesList"
+          :key="p.id"
           style="padding: 0; margin-bottom:10px">
-          <ProcessPriceTag :fromIndex="'21-9-1'"></ProcessPriceTag>
+          <ProcessPriceTag :fromIndex="p.serial"></ProcessPriceTag>
           <BaseTable noBorder
             noPager
             :cols="stepColumns"
-            :url="'/step'"
             :needOperation="false"></BaseTable>
         </el-card>
         <div class="pagination">
           <el-pagination background
             layout="total, prev, pager, next"
-            :current-page="processQuery.pageIndex"
+            :current-page="processQuery.pageNo"
             :page-size="processQuery.pageSize"
             :total="pageTotal"
             @current-change="handlePageChange"></el-pagination>
@@ -50,8 +49,9 @@
           icon="el-icon-plus"
           style="margin-bottom:10px"
           @click="handleAddStep">添加工序</el-button>
-        <BaseTable :cols="partStepColumns"
-          :url="'/partStep'">
+        <BaseTable :cols="partStepColumns" :url="'/products-manage/query/workings'"
+          :queryBase="{'partCode':partCode}"
+        >
           <template v-slot:operation="slotProps">
             <el-button type="text"
               icon="el-icon-edit"
@@ -86,6 +86,8 @@ import BaseTable from '@/components/BaseTable.vue'
 import MesuringTable from './MesuringTable.vue'
 import ProcessPriceTag from './ProcessPriceTag.vue'
 import ProductAdd from './ProductAdd.vue'
+import { ElMessage } from 'element-plus'
+import { getProcessDetailList, editPartStep } from '@/api/product'
 export default {
   components: { BaseTable, MesuringTable, ProcessPriceTag, ProductAdd },
   props: {
@@ -93,19 +95,39 @@ export default {
       type: Boolean,
       required: true,
     },
-    partId: {
+    partCode: {
+      type: String,
+    },
+    serialId: {
       type: String,
     },
   },
   emits: ['close', 'dialog-submit'],
   name: 'product-add',
   setup(props, { emit }) {
-    // 搜索
-    const processQuery = reactive({})
-    const handleProcessSearch = () => {
-    }
+    const processesList = ref([])
     const pageTotal = ref(0)
-    const handlePageChange = () => {
+    const getProcessDetail = async () => {
+      let res = await getProcessDetailList({
+        partCode: props.partCode,
+        ...processQuery,
+      })
+      processesList.value = res.data.records
+      pageTotal.value = res.data.total
+    }
+    // 搜索
+    const processQuery = reactive({
+      serial: '',
+      pageNo: 1,
+      pageSize: 10,
+    })
+    const handleProcessSearch = () => {
+      processQuery.pageNo = 1
+      getProcessDetail()
+    }
+    const handlePageChange = (page) => {
+      processQuery.pageNo = page
+      getProcessDetail()
     }
     // 编辑
     const form = reactive({})
@@ -113,15 +135,7 @@ export default {
     const dialogVisible = computed(() => props.visible)
     watch(dialogVisible, () => {
       if (dialogVisible.value == true) {
-        if (props.itemData) {
-          Object.keys(props.itemData).map((key) => {
-            form[key] = props.itemData[key]
-          })
-        }
-      } else {
-        Object.keys(form).map((key) => {
-          delete form[key]
-        })
+        getProcessDetail()
       }
     })
     const close = () => {
@@ -143,12 +157,17 @@ export default {
       editPartStepItemData.value = row
     }
     const handleDeleteStep = (row) => {}
-    const editPartStepSubmit = (row) => {}
+    const editPartStepSubmit = async (formData) => {
+      console.log(formData)
+      await editPartStep({ id: editPartStepItemData.value?.id, ...formData, partCode: props.partCode})
+      ElMessage.success('操作成功')
+      partStepEditVisible.value = false
+    }
     return {
       stepColumns: [
         {
           label: '工序',
-          prop: 'stepName',
+          prop: 'workingName',
         },
         {
           label: '操作者',
@@ -161,7 +180,7 @@ export default {
         },
         {
           label: '操作设备',
-          prop: 'equipment',
+          prop: 'deviceName',
         },
         {
           label: '接受产品数量',
@@ -194,7 +213,7 @@ export default {
         },
         {
           label: '工序单价（元）',
-          prop: 'stepPrice',
+          prop: 'price',
         },
         {
           label: '备注',
@@ -238,26 +257,31 @@ export default {
       partStepColumns: [
         {
           label: '工序',
-          prop: 'stepName',
+          prop: 'workingName',
         },
         {
           label: '操作设备',
-          prop: 'equipment',
+          prop: 'deviceName',
         },
         {
           label: '工序单价',
-          prop: 'stepPrice',
+          prop: 'price',
         },
       ],
       editPartStepFormItems: [
         {
           label: '工序',
-          key: 'stepName',
+          key: 'workingName',
           required: true,
         },
         {
           label: '操作设备',
-          key: 'equipment',
+          key: 'deviceName',
+          required: true,
+        },
+        {
+          label: '工序单价',
+          key: 'price',
           required: true,
         },
       ],
@@ -274,7 +298,8 @@ export default {
       processQuery,
       handleProcessSearch,
       pageTotal,
-      handlePageChange
+      handlePageChange,
+      processesList
     }
   },
 }

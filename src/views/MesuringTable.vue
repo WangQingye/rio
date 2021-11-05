@@ -1,10 +1,12 @@
 <template>
   <div>
     <BaseTable :cols="columns"
-      :url="'/mesuring'"
+      ref="mesureTable"
+      :url="'/measures-manage/list'"
+      :queryBase="{'serialNum':serialNum}"
       @edit="handleEdit">
       <template v-slot:status="slotProps">
-        <el-tag :type="slotProps.scopeData.status === '成功'? 'success': slotProps.scopeData.status === '失败'? 'danger': ''">{{ slotProps.scopeData.status }}</el-tag>
+        <el-tag :type="{'USE':'danger', 'STORAGE': 'primary', 'RETURN':'success'}[slotProps.scopeData.status]">{{ {'USE':'在使用', 'STORAGE': '在库房', 'RETURN':'已归还'}[slotProps.scopeData.status] }}</el-tag>
       </template>
       <template v-slot:taskId="slotProps">
         <el-link href="javascript:void(0)"
@@ -82,11 +84,11 @@
 </template>
 
 <script>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { fetchData } from '../api/index'
 import BaseTable from '../components/BaseTable.vue'
 import ProductAdd from './ProductAdd.vue'
+import { editMesure, delMesure } from '@/api/mesure'
 
 export default {
   components: {
@@ -94,51 +96,41 @@ export default {
     ProductAdd,
   },
   props: {
-    taskIndex: {
+    serialNum: {
       type: String,
-    },
-    query: {
-      type: Object,
     },
   },
   name: 'product-manage',
   setup(props) {
-    const query = reactive({
-      address: '',
-      name: '',
-      pageIndex: 1,
-      pageSize: 10,
-    })
-
-    const tableData = ref([])
-    const pageTotal = ref(0)
-    // 获取表格数据
-    const getData = () => {
-      fetchData(query).then((res) => {
-        tableData.value = res.list
-        pageTotal.value = res.pageTotal || 50
-      })
-    }
+    // const serialNumOptions = ref([])
+    // const getSerialNumOptions = async () => {
+    //   let res = await getSerialNums({
+    //     pageNo: 1,
+    //     pageSize: 1000,
+    //   })
+    //   serialNumOptions.value = res.data.records.map((r) => {
+    //     console.log(r)
+    //     return { label: r.serial, value: r.serial }
+    //   })
+    // }
+    // onMounted(() => {
+    //   getSerialNumOptions()
+    // })
+    const mesureTable = ref({})
     // 查询操作
-    const handleSearch = () => {
-      query.pageIndex = 1
-      getData()
-    }
-    // 分页导航
-    const handlePageChange = (val) => {
-      query.pageIndex = val
-      getData()
+    const handleSearch = (query) => {
+      mesureTable.value.refresh(query)
     }
 
     // 删除操作
-    const handleDelete = (index) => {
+    const handleDelete = (row) => {
       // 二次确认删除
       ElMessageBox.confirm('确定要删除吗？', '提示', {
         type: 'warning',
       })
-        .then(() => {
+        .then(async () => {
+          await delMesure({ mesureId: row.id })
           ElMessage.success('删除成功')
-          tableData.value.splice(index, 1)
         })
         .catch(() => {})
     }
@@ -156,8 +148,11 @@ export default {
       editVisible.value = true
       editItemData.value = null
     }
-    const editSubmit = (row) => {
-      console.log(row)
+    const editSubmit = async (formData) => {
+      await editMesure({ id: editItemData.value?.id, ...formData })
+      ElMessage.success('操作成功')
+      editVisible.value = false
+      handleSearch()
     }
 
     const detailVisible = ref(false)
@@ -203,54 +198,49 @@ export default {
       columns: [
         {
           label: '量具名称',
-          prop: 'mesuringName',
+          prop: 'name',
         },
         {
           label: '量具规格',
-          prop: 'mesuringSpecs',
+          prop: 'specification',
         },
         {
           label: '量具编号',
-          prop: 'mesuringId',
+          prop: 'code',
         },
         {
           label: '归属序号',
-          prop: 'fromIndex',
+          prop: 'serialNum',
         },
         {
           label: '数量',
-          prop: 'num',
+          prop: 'numbers',
         },
         {
           label: '状态',
           prop: 'status',
+          slot: 'status',
         },
         {
           label: '入库时间',
-          prop: 'inTime',
+          prop: 'putDate',
         },
         {
           label: '归还时间',
-          prop: 'returnTime',
+          prop: 'returnDate',
         },
       ],
       formItems: [
-        { label: '量具名称', key: 'mesuringName', required: true },
-        { label: '量具规格', key: 'mesuringSpecs', required: true },
-        { label: '量具编号', key: 'mesuringId', required: true },
+        { label: '量具名称', key: 'name', required: true },
+        { label: '量具规格', key: 'specification', required: true },
+        { label: '量具编号', key: 'code', required: true },
         {
           label: '归属序号',
-          key: 'fromIndex',
+          key: 'serialNum',
           required: true,
-          type: 'select',
-          options: [
-            {
-              label: '21-9-1',
-              value: '21-9-1',
-            },
-          ],
+          placeholder: '请关联已存在的序号',
         },
-        { label: '数量', type:'number', key: 'num', required: true },
+        { label: '数量', type: 'number', key: 'numbers', required: true },
         {
           label: '状态',
           key: 'status',
@@ -259,28 +249,28 @@ export default {
           options: [
             {
               label: '在使用',
-              value: '在使用',
+              value: 'USE',
+            },
+            {
+              label: '在库房',
+              value: 'STORAGE',
             },
             {
               label: '已归还',
-              value: '已归还',
+              value: 'RETURN',
             },
           ],
         },
-        { label: '入库时间', key: 'inTime', type: 'date', required: true },
+        { label: '入库时间', key: 'putDate', type: 'date', required: true },
         {
           label: '归还时间',
-          key: 'returnTime',
+          key: 'returnDate',
           type: 'date',
           required: true,
         },
       ],
-      query,
-      tableData,
-      pageTotal,
       editVisible,
       handleSearch,
-      handlePageChange,
       handleDelete,
       handleEdit,
       showDetail,
@@ -316,6 +306,7 @@ export default {
       returnMesuringVisible,
       returnMesuringItems,
       returnMesuringSubmit,
+      mesureTable,
     }
   },
 }

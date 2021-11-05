@@ -7,3 +7,10 @@ export const fetchData = query => {
         params: query
     });
 };
+export const getList = (url,query) => {
+    return request({
+        url: url,
+        method: 'get',
+        params: query
+    });
+};

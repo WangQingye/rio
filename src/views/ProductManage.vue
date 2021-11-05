@@ -5,31 +5,31 @@
         :model="query"
         class="demo-form-inline">
         <el-form-item label="序号">
-          <el-input v-model="query.address"
+          <el-input v-model="query.serial"
             placeholder="序号"></el-input>
         </el-form-item>
         <el-form-item label="任务号">
-          <el-input v-model="query.address"
+          <el-input v-model="query.code"
             placeholder="任务号"></el-input>
         </el-form-item>
         <el-form-item label="产品代号">
-          <el-input v-model="query.address"
+          <el-input v-model="query.productCode"
             placeholder="产品代号"></el-input>
         </el-form-item>
         <el-form-item label="零件代号">
-          <el-input v-model="query.address"
+          <el-input v-model="query.partCode"
             placeholder="零件代号"></el-input>
         </el-form-item>
         <el-form-item label="零件名称">
-          <el-input v-model="query.address"
+          <el-input v-model="query.partName"
             placeholder="零件名称"></el-input>
         </el-form-item>
         <el-form-item label="调度备注">
-          <el-input v-model="query.address"
+          <el-input v-model="query.remark"
             placeholder="调度备注"></el-input>
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="query.address"
+          <el-select v-model="query.status"
             placeholder="状态"
             class="handle-select mr10">
             <el-option key="1"
@@ -49,19 +49,21 @@
         icon="el-icon-plus"
         style="margin-bottom: 20px;"
         @click="handleAdd">添加批次</el-button>
-      <BaseTable :cols="columns">
+      <BaseTable :cols="columns"
+        ref="userTable"
+        :url="'/products-manage/product/list'">
         <template v-slot:status="slotProps">
           <el-tag :type="slotProps.scopeData.status === '成功'? 'success': slotProps.scopeData.status === '失败'? 'danger': ''">{{ slotProps.scopeData.status }}</el-tag>
         </template>
-        <template v-slot:index="slotProps">
+        <template v-slot:serial="slotProps">
           <el-link href="javascript:void(0)"
             type="primary"
-            @click="showDetail(slotProps.scopeData)">{{slotProps.scopeData.index}}</el-link>
+            @click="showDetail(slotProps.scopeData)">{{slotProps.scopeData.serial}}</el-link>
         </template>
-        <template v-slot:partId="slotProps">
+        <template v-slot:partCode="slotProps">
           <el-link href="javascript:void(0)"
             type="primary"
-            @click="showPartDetail(slotProps.scopeData)">{{slotProps.scopeData.partId}}</el-link>
+            @click="showPartDetail(slotProps.scopeData)">{{slotProps.scopeData.partCode}}</el-link>
         </template>
         <template v-slot:operation="slotProps">
           <el-button type="text"
@@ -84,11 +86,12 @@
     <ProductDetail :visible="detailVisible"
       @close="detailVisible = false"
       key="detail"
-      :itemData="editItemData"></ProductDetail>
+      :serial="editItemData.serial"></ProductDetail>
     <PartDetail :visible="partDetailVisible"
       @close="partDetailVisible = false"
-      key="detail"
-      :partId="detailPartId"></PartDetail>
+      key="detail1"
+      :serialId="editItemData.id"
+      :partCode="editItemData.partCode"></PartDetail>
   </div>
 </template>
 
@@ -100,42 +103,31 @@ import BaseTable from '@/components/BaseTable.vue'
 import ProductAdd from './ProductAdd.vue'
 import ProductDetail from './ProductDetail.vue'
 import PartDetail from './PartDetail.vue'
+import { editProduct } from '@/api/product'
 
 export default {
   components: {
     BaseTable,
     ProductAdd,
     ProductDetail,
-    PartDetail
+    PartDetail,
   },
   name: 'product-manage',
   setup() {
     const query = reactive({
-      address: '',
-      name: '',
-      pageIndex: 1,
-      pageSize: 10,
+      serial: '',
+      code: '',
+      productCode: '',
+      partCode: '',
+      partName: '',
+      remark: '',
+      status: '',
     })
-    const tableData = ref([])
-    const pageTotal = ref(0)
-    // 获取表格数据
-    const getData = () => {
-      fetchData(query).then((res) => {
-        tableData.value = res.list
-        pageTotal.value = res.pageTotal || 50
-      })
-    }
-    getData()
 
     // 查询操作
+    const userTable = ref()
     const handleSearch = () => {
-      query.pageIndex = 1
-      getData()
-    }
-    // 分页导航
-    const handlePageChange = (val) => {
-      query.pageIndex = val
-      getData()
+      userTable.value.refresh(query)
     }
 
     // 删除操作
@@ -146,13 +138,12 @@ export default {
       })
         .then(() => {
           ElMessage.success('删除成功')
-          tableData.value.splice(index, 1)
         })
         .catch(() => {})
     }
 
     const editVisible = ref(false)
-    const editItemData = ref(null)
+    const editItemData = ref({})
     const handleAdd = () => {
       editVisible.value = true
       editItemData.value = null
@@ -162,7 +153,12 @@ export default {
       editVisible.value = true
       editItemData.value = row
     }
-    const editSubmit = (row) => {
+    const editSubmit = async (formData) => {
+      console.log(formData)
+      await editProduct({ id: editItemData.value?.id, ...formData })
+      ElMessage.success('添加成功')
+      editVisible.value = false
+      handleSearch()
     }
 
     const detailVisible = ref(false)
@@ -173,30 +169,29 @@ export default {
 
     // 零件生产详情
     const partDetailVisible = ref(false)
-    const detailPartId = ref('')
     const showPartDetail = (row) => {
       partDetailVisible.value = true
-      detailPartId.value = row.partId
+      editItemData.value = row
     }
     return {
       columns: [
         {
           label: '序号',
-          prop: 'index',
-          slot: 'index',
+          prop: 'serial',
+          slot: 'serial',
         },
         {
           label: '任务号',
-          prop: 'taskId'
+          prop: 'code',
         },
         {
           label: '产品代号',
-          prop: 'productId',
+          prop: 'productCode',
         },
         {
           label: '零件代号',
-          prop: 'partId',
-          slot: 'partId',
+          prop: 'partCode',
+          slot: 'partCode',
         },
         {
           label: '零件名称',
@@ -204,7 +199,7 @@ export default {
         },
         {
           label: '图纸工序',
-          prop: 'blueprintProcess',
+          prop: 'processes',
         },
         {
           label: '本厂实际工序',
@@ -212,19 +207,19 @@ export default {
         },
         {
           label: '回厂数量',
-          prop: 'backFactoryNum',
+          prop: 'returnQuantity',
         },
         {
           label: '回厂日期',
-          prop: 'backFactoryTime',
+          prop: 'returnDate',
         },
         {
           label: '调度备注',
-          prop: 'dispatchRemark',
+          prop: 'remark',
         },
         {
           label: '甲方要求回厂时间',
-          prop: 'customerBackFactoryTime',
+          prop: 'requiredReturnDate',
         },
         {
           label: '状态',
@@ -232,65 +227,61 @@ export default {
           slot: 'status',
         },
         {
-          label: '备注',
-          prop: 'remark',
+          label: '上账备注',
+          prop: 'remark1',
         },
         {
           label: '出厂数量',
-          prop: 'outFactoryNum',
+          prop: 'exQuantity',
         },
         {
           label: '出厂时间',
-          prop: 'outFactoryTime',
+          prop: 'deliveryTime',
         },
         {
           label: '最终甲方检验合格数',
-          prop: 'finalCustomerQualifiedNum',
+          prop: 'requiredQualified',
         },
       ],
       formItems: [
-        { label: '序号', key: 'index', required: true },
-        { label: '任务号', key: 'taskId', required: true },
-        { label: '产品代号', key: 'productId', required: true },
-        { label: '零件代号', key: 'partId', required: true },
-        { label: '名称', key: 'name', required: true },
-        { label: '图纸工序', key: 'blueprintProcess', required: true },
-        { label: '本厂实际工序', key: 'factoryProcess', required: true },
-        { label: '回厂数量', key: 'backFactoryNum', required: true },
+        { label: '序号', key: 'serial', required: true, editDisabled: true },
+        { label: '任务号', key: 'code', required: true, editDisabled: true },
+        { label: '产品代号', key: 'productCode', required: true, editDisabled: true },
+        { label: '零件代号', key: 'partCode', required: true, editDisabled: true },
+        { label: '零件名称', key: 'partName', required: true, editDisabled: true },
+        { label: '图纸工序', key: 'processes', required: false },
+        { label: '回厂数量', key: 'returnQuantity', required: false },
         {
           label: '回厂日期',
-          key: 'backFactoryTime',
-          required: true,
+          key: 'returnDate',
+          required: false,
           type: 'date',
         },
-        { label: '调度备注', key: 'dispatchRemark', required: true },
+        { label: '调度备注', key: 'remark', required: false },
         {
           label: '甲方要求回厂时间',
-          key: 'customerBackFactoryTime',
-          required: true,
+          key: 'requiredReturnDate',
+          required: false,
           type: 'date',
         },
         { label: '状态', key: 'status', required: true },
-        { label: '备注', key: 'remark', required: true },
-        { label: '出厂数量', key: 'outFactoryNum', required: true },
+        { label: '上账备注', key: 'remark1', required: false },
+        { label: '出厂数量', key: 'exQuantity', required: false },
         {
           label: '出厂时间',
-          key: 'outFactoryTime',
-          required: true,
+          key: 'deliveryTime',
+          required: false,
           type: 'date',
         },
         {
           label: '最终甲方检验合格数',
-          key: 'finalCustomerQualifiedNum',
-          required: true,
+          key: 'requiredQualified',
+          required: false,
         },
       ],
       query,
-      tableData,
-      pageTotal,
       editVisible,
       handleSearch,
-      handlePageChange,
       handleDelete,
       handleEdit,
       showDetail,
@@ -299,8 +290,8 @@ export default {
       handleAdd,
       detailVisible,
       partDetailVisible,
-      detailPartId,
-      showPartDetail
+      showPartDetail,
+      userTable,
     }
   },
 }

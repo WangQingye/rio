@@ -53,79 +53,80 @@ import { useRoute, useRouter } from 'vue-router'
 import { fetchData } from '../api/index'
 export default {
   setup() {
-    const toolSubs = ref(null)
+    const toolSubs = ref([])
     const items = ref([])
     const route = useRoute()
+    const store = useStore()
     const router = useRouter()
     onBeforeMount(() => {
-      fetchData('/toolTypes').then((res) => {
-        toolSubs.value = res['toolTypes'].map(t => {
-          return {
-            index: `/tool?id=${t.toolId}`,
-            title: t.toolName,
-          }
-        })
-        if (localStorage.getItem("ms_username") == 'admin') {
-          items.value = [
-            {
-              icon: 'el-icon-lx-cascades',
-              index: '/product',
-              title: '产品管理',
-            },
-            {
-              icon: 'el-icon-lx-filter',
-              index: '/mesuring',
-              title: '量具管理',
-            },
-            {
-              icon: 'el-icon-lx-tag',
-              index: '/knife',
-              title: '刀具管理',
-            },
-            {
-              icon: 'el-icon-lx-file',
-              title: '工具管理',
-              subs: [
-                ...toolSubs.value,
-                {
-                  icon: 'el-icon-lx-file',
-                  index: '/tool-add',
-                  title: '添加工具种类',
-                },
-              ],
-            },
-            {
-              icon: 'el-icon-lx-friendadd',
-              index: '/user',
-              title: '员工管理',
-            },
-            {
-              icon: 'el-icon-date',
-              index: '/work-list',
-              title: '工作列表',
-            },
-            {
-              icon: 'el-icon-document',
-              index: '/lend-list',
-              title: '领用清单',
-            },
-          ]
-        } else {
-          items.value = [
-            {
-              icon: 'el-icon-date',
-              index: '/work-list',
-              title: '工作列表',
-            },
-            {
-              icon: 'el-icon-document',
-              index: '/lend-list',
-              title: '领用清单',
-            },
-          ]
-          router.push('/work-list')
-        }
-      })
+      // fetchData('/toolTypes').then((res) => {
+      //   toolSubs.value = res['toolTypes'].map(t => {
+      //     return {
+      //       index: `/tool?id=${t.toolId}`,
+      //       title: t.toolName,
+      //     }
+      //   })
+      // })
+      if (store.state.userInfo.authorities[0].authority === 'SYS_ADMIN') {
+        items.value = [
+          {
+            icon: 'el-icon-lx-cascades',
+            index: '/product',
+            title: '产品管理',
+          },
+          {
+            icon: 'el-icon-lx-filter',
+            index: '/mesuring',
+            title: '量具管理',
+          },
+          {
+            icon: 'el-icon-lx-tag',
+            index: '/knife',
+            title: '刀具管理',
+          },
+          {
+            icon: 'el-icon-lx-file',
+            title: '工具管理',
+            subs: [
+              ...toolSubs.value,
+              {
+                icon: 'el-icon-lx-file',
+                index: '/tool-add',
+                title: '添加工具种类',
+              },
+            ],
+          },
+          {
+            icon: 'el-icon-lx-friendadd',
+            index: '/user',
+            title: '员工管理',
+          },
+          {
+            icon: 'el-icon-date',
+            index: '/work-list',
+            title: '工作列表',
+          },
+          {
+            icon: 'el-icon-document',
+            index: '/lend-list',
+            title: '领用清单',
+          },
+        ]
+      } else {
+        items.value = [
+          {
+            icon: 'el-icon-date',
+            index: '/work-list',
+            title: '工作列表',
+          },
+          {
+            icon: 'el-icon-document',
+            index: '/lend-list',
+            title: '领用清单',
+          },
+        ]
+        router.push('/work-list')
+      }
     })
 
 
@@ -133,7 +134,6 @@ export default {
       return route.path
     })
 
-    const store = useStore()
     const collapse = computed(() => store.state.collapse)
 
     return {

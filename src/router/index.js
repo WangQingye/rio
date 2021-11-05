@@ -3,7 +3,7 @@ import {
     createWebHashHistory
 } from "vue-router";
 import Home from "../views/Home.vue";
-
+import {myStore} from '../store'
 const routes = [{
     path: '/',
     redirect: '/product'
@@ -82,9 +82,10 @@ const router = createRouter({
     routes
 });
 
+const store = myStore();
 router.beforeEach((to, from, next) => {
     document.title = `${to.meta.title} | 瑞奥机械`;
-    const role = localStorage.getItem('ms_username');
+    const role = store.state.userInfo;
     if (!role && to.path !== '/login') {
         next('/login');
     } else if (to.meta.permission) {

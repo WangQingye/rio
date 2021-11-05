@@ -1,7 +1,7 @@
 <template>
   <!-- 编辑弹出框 -->
   <el-dialog :append-to-body="true"
-    :title="`序号详情 - ${itemData && itemData.index}` "
+    :title="`序号详情 - ${serial}` "
     v-model="visible"
     :destroy-on-close="true"
     :show-close="false"
@@ -11,7 +11,7 @@
     <el-tabs v-model="activeName">
       <el-tab-pane label="生产过程"
         name="process">
-        <ProcessPriceTag :fromIndex="itemData.index"
+        <ProcessPriceTag :fromIndex="serial"
           :isInIndex="true"></ProcessPriceTag>
         <BaseTable :cols="stepColumns"
           :url="'/step'">
@@ -32,7 +32,35 @@
       </el-tab-pane>
       <el-tab-pane label="量具情况"
         name="mesuring">
-        <MesuringTable :taskIndex="'111'"></MesuringTable>
+        <MesuringTable :serialNum="serial"></MesuringTable>
+      </el-tab-pane>
+      <el-tab-pane label="工序设置"
+        name="step">
+        <el-button type="primary"
+          icon="el-icon-plus"
+          style="margin-bottom:10px"
+          @click="handleAddStep">添加工序</el-button>
+        <BaseTable :cols="partStepColumns" :url="'/products-manage/query/workings'"
+          :queryBase="{'serialNum':serial}"
+        >
+          <template v-slot:operation="slotProps">
+            <el-button type="text"
+              icon="el-icon-edit"
+              @click="handleEditStep(slotProps.scopeData)">编辑
+            </el-button>
+            <el-button type="text"
+              icon="el-icon-delete"
+              class="color-warning"
+              @click="handleDeleteStep(slotProps.scopeData)">删除</el-button>
+          </template>
+        </BaseTable>
+        <ProductAdd :visible="partStepEditVisible"
+          @close="partStepEditVisible = false"
+          :title="'工序设置'"
+          :itemData="editPartStepItemData"
+          :formItems="editPartStepFormItems"
+          key="product-edit"
+          @dialog-submit="editPartStepSubmit"></ProductAdd>
       </el-tab-pane>
     </el-tabs>
     <template #footer>
@@ -49,6 +77,7 @@ import BaseTable from '@/components/BaseTable.vue'
 import MesuringTable from './MesuringTable.vue'
 import ProcessPriceTag from './ProcessPriceTag.vue'
 import ProductAdd from './ProductAdd.vue'
+import { getProcessDetailList } from '@/api/product'
 export default {
   components: { BaseTable, MesuringTable, ProcessPriceTag, ProductAdd },
   props: {
@@ -56,34 +85,31 @@ export default {
       type: Boolean,
       required: true,
     },
-    itemData: {
-      type: Object,
+    serial: {
+      type: String,
     },
   },
   emits: ['close', 'dialog-submit'],
   name: 'product-add',
   setup(props, { emit }) {
-    const form = reactive({})
+    const processesList = ref([])
+    const getProcessDetail = async () => {
+      let res = await getProcessDetailList({
+        partCode: props.partCode,
+        ...processQuery,
+      })
+      processesList.value = res.data.records
+    }
     const activeName = ref('process')
     const dialogVisible = computed(() => props.visible)
     watch(dialogVisible, () => {
       if (dialogVisible.value == true) {
-        if (props.itemData) {
-          Object.keys(props.itemData).map((key) => {
-            form[key] = props.itemData[key]
-          })
+        if (props.serial) {
         }
-      } else {
-        Object.keys(form).map((key) => {
-          delete form[key]
-        })
       }
     })
     const close = () => {
       emit('close')
-    }
-    const saveEdit = () => {
-      emit('dialog-submit', form)
     }
     // 工序信息填报
     const stepEditVisible = ref(false)
@@ -94,6 +120,30 @@ export default {
     }
     const stepEditSubmit = () => {
     }
+
+    // 工序设置
+    
+
+    const partStepEditVisible = ref(false)
+    const editPartStepItemData = ref(null)
+    const handleAddStep = () => {
+      partStepEditVisible.value = true
+      editPartStepItemData.value = null
+    }
+    // 表格编辑时弹窗和保存
+    const handleEditStep = (row) => {
+      partStepEditVisible.value = true
+      editPartStepItemData.value = row
+    }
+    const handleDeleteStep = (row) => {}
+    const editPartStepSubmit = async (formData) => {
+      console.log(formData)
+      await editPartStep({ id: editPartStepItemData.value?.id, ...formData, partCode: props.partCode})
+      ElMessage.success('操作成功')
+      partStepEditVisible.value = false
+    }
+
+
     return {
       stepColumns: [
         {
@@ -246,12 +296,47 @@ export default {
       ],
       close,
       activeName,
-      saveEdit,
-      form,
       stepEditVisible,
       stepEditItem,
       handleStepEdit,
-      stepEditSubmit
+      stepEditSubmit,
+      partStepEditVisible,
+      editPartStepItemData,
+      handleAddStep,
+      handleEditStep,
+      handleDeleteStep,
+      editPartStepSubmit,
+      partStepColumns: [
+        {
+          label: '工序',
+          prop: 'workingName',
+        },
+        {
+          label: '操作设备',
+          prop: 'deviceName',
+        },
+        {
+          label: '工序单价',
+          prop: 'price',
+        },
+      ],
+      editPartStepFormItems: [
+        {
+          label: '工序',
+          key: 'workingName',
+          required: true,
+        },
+        {
+          label: '操作设备',
+          key: 'deviceName',
+          required: true,
+        },
+        {
+          label: '工序单价',
+          key: 'price',
+          required: true,
+        },
+      ],
     }
   },
 }

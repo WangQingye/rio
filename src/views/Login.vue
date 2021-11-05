@@ -39,14 +39,16 @@
 import { ref, reactive } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
+import * as api from '@/api/user'
 import { ElMessage } from 'element-plus'
 
 export default {
   setup() {
     const router = useRouter()
+    const store = useStore()
     const param = reactive({
-      username: 'admin',
-      password: '123123',
+      username: '',
+      password: '',
     })
 
     const rules = {
@@ -60,16 +62,21 @@ export default {
       password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
     }
     const login = ref(null)
-    const submitForm = () => {
-      login.value.validate((valid) => {
+    const submitForm = async () => {
+      login.value.validate(async (valid) => {
         if (valid) {
+          let res = await api.login({
+            username: param.username,
+            password: param.password
+          })
+          console.log(res)
           ElMessage.success('登录成功')
-          localStorage.setItem('ms_username', param.username)
-
-          if (localStorage.getItem('ms_username') !== 'admin') {
-            router.push('/work-list')
-          } else {
+          store.commit('setUserInfo', res)
+          if (res.authorities[0].authority === 'SYS_ADMIN') {
+            console.log('aaa')
             router.push('/')
+          } else {
+            router.push('/work-list')
           }
         } else {
           ElMessage.error('登录成功')
@@ -78,7 +85,6 @@ export default {
       })
     }
 
-    const store = useStore()
     store.commit('clearTags')
 
     return {

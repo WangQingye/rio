@@ -268,6 +268,16 @@ export default {
     const addLendFormItems = [
       { label: '领用人', key: 'lendUser', required: true },
       { label: '领用数量', key: 'lendNum', required: true, type: 'number' },
+      {
+        label: '领用类型',
+        key: 'lendType',
+        required: true,
+        type: 'select',
+        options: [
+          { label: '全新', value: 'new' },
+          { label: '二次使用', value: 'reuse' },
+        ],
+      },
       { label: '备注', key: 'remark', required: true, type: 'textarea' },
     ]
     const addLendSubmit = (formData) => {

@@ -4,23 +4,19 @@
       <el-form :inline="true"
         :model="query"
         class="demo-form-inline">
-        <el-form-item label="用户名">
-          <el-input v-model="query.address"
-            placeholder="用户名"></el-input>
+        <el-form-item label="用户姓名">
+          <el-input v-model="query.realName"
+            placeholder="用户姓名"></el-input>
         </el-form-item>
         <el-form-item label="用户角色">
-          <el-select v-model="query.address"
+          <el-select v-model="query.roleId"
             placeholder="用户角色"
+            clearable
             class="handle-select mr10">
-            <el-option key="1"
-              label="管理员"
-              value="admin"></el-option>
-            <el-option key="2"
-              label="仓库管理员"
-              value="storeAdmin"></el-option>
-            <el-option key="3"
-              label="普通员工"
-              value="employee"></el-option>
+            <el-option v-for="role in roleList"
+              :label="role.roleName"
+              :key="role.id"
+              :value="role.id"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -32,7 +28,9 @@
         icon="el-icon-plus"
         style="margin-bottom: 20px;"
         @click="handleAdd">添加用户</el-button>
-      <BaseTable :cols="columns" :url="'/user'">
+      <BaseTable :cols="columns"
+        ref="userTable"
+        :url="'/rui_ao/users'">
         <template v-slot:status="slotProps">
           <el-tag :type="slotProps.scopeData.status === '成功'? 'success': slotProps.scopeData.status === '失败'? 'danger': ''">{{ slotProps.scopeData.status }}</el-tag>
         </template>
@@ -71,6 +69,7 @@ import { fetchData } from '../api/index'
 import BaseTable from '../components/BaseTable.vue'
 import ProductAdd from './ProductAdd.vue'
 import ProductDetail from './ProductDetail.vue'
+import { editUser, getRoleList } from '@/api/user'
 
 export default {
   components: {
@@ -81,31 +80,16 @@ export default {
   name: 'product-manage',
   setup() {
     const query = reactive({
-      address: '',
-      name: '',
-      pageIndex: 1,
-      pageSize: 10,
+      realName: '',
+      roleId: ''
     })
     const tableData = ref([])
     const pageTotal = ref(0)
-    // 获取表格数据
-    const getData = () => {
-      fetchData(query).then((res) => {
-        tableData.value = res.list
-        pageTotal.value = res.pageTotal || 50
-      })
-    }
-    getData()
 
     // 查询操作
+    const userTable = ref()
     const handleSearch = () => {
-      query.pageIndex = 1
-      getData()
-    }
-    // 分页导航
-    const handlePageChange = (val) => {
-      query.pageIndex = val
-      getData()
+      userTable.value.refresh(query)
     }
 
     // 删除操作
@@ -132,8 +116,13 @@ export default {
       editVisible.value = true
       editItemData.value = null
     }
-    const editSubmit = (row) => {
+    const editSubmit = async (row) => {
       console.log(row)
+      let res = await editUser({
+        id: editItemData.value?.id,
+        ...row,
+      })
+      console.log(res)
     }
 
     const detailVisible = ref(false)
@@ -141,55 +130,56 @@ export default {
       editItemData.value = row
       detailVisible.value = true
     }
-    return {
-      columns: [
-        {
-          label: '用户名',
-          prop: 'userName',
-        },
-        {
-          label: '用户角色',
-          prop: 'role',
-        },
-        {
-          label: '联系方式',
-          prop: 'contact',
-        }
-      ],
-      formItems:[
-        { label: '用户名', key: 'userName', required: true },
+
+    // 用户字段
+    const roleList = ref(null)
+    const formItems = ref(null)
+    getRoleList().then((res) => {
+      roleList.value = res.data
+      formItems.value = [
+        { label: '用户姓名', key: 'realName', required: true },
         {
           label: '用户角色',
           key: 'role',
           required: true,
           type: 'select',
-          options: [
-            {
-              label: '管理员',
-              value: 'admin',
-            },
-            {
-              label: '仓库管理员',
-              value: 'storeAdmin',
-            },
-            {
-              label: '生产管理员',
-              value: 'productAdmin',
-            },
-            {
-              label: '普通员工',
-              value: 'employee',
-            },
-          ],
+          options: res.data.map((r) => {
+            return {
+              label: r.roleName,
+              value: r.id,
+            }
+          }),
         },
-        { label: '联系方式', key: 'contact', required: true, placeholder: '联系方式即为登录账号' }
+        {
+          label: '手机号(登录账号)',
+          key: 'phone',
+          required: true,
+          placeholder: '',
+        },
+      ]
+    })
+    return {
+      roleList,
+      columns: [
+        {
+          label: '用户姓名',
+          prop: 'realName',
+        },
+        {
+          label: '手机号',
+          prop: 'phone',
+        },
+        {
+          label: '用户角色',
+          prop: 'role',
+        },
       ],
+      formItems,
       query,
       tableData,
       pageTotal,
       editVisible,
       handleSearch,
-      handlePageChange,
       handleDelete,
       handleEdit,
       showDetail,
@@ -197,6 +187,7 @@ export default {
       editSubmit,
       handleAdd,
       detailVisible,
+      userTable
     }
   },
 }

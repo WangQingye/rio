@@ -4,38 +4,39 @@
       :model="query"
       class="demo-form-inline">
       <el-form-item label="量具名称">
-        <el-input v-model="query.address"
+        <el-input v-model="query.name"
           placeholder="量具名称"></el-input>
       </el-form-item>
       <el-form-item label="量具规格">
-        <el-input v-model="query.address"
+        <el-input v-model="query.specification"
           placeholder="量具规格"></el-input>
       </el-form-item>
       <el-form-item label="量具编号">
-        <el-input v-model="query.address"
+        <el-input v-model="query.code"
           placeholder="量具编号"></el-input>
       </el-form-item>
       <el-form-item label="归属序号">
-        <el-input v-model="query.address"
+        <el-input v-model="query.serialNum"
           placeholder="归属序号"></el-input>
       </el-form-item>
       <el-form-item label="数量">
-        <el-input v-model="query.address"
+        <el-input v-model="query.numbers"
           placeholder="数量"></el-input>
       </el-form-item>
       <el-form-item label="状态">
-          <el-select v-model="query.address"
+          <el-select v-model="query.status"
             placeholder="状态"
+            clearable
             class="handle-select mr10">
             <el-option key="1"
               label="在库房"
-              value="在库房"></el-option>
+              value="STORAGE"></el-option>
             <el-option key="2"
               label="在使用"
-              value="在使用"></el-option>
+              value="USE"></el-option>
             <el-option key="3"
               label="已归还"
-              value="已归还"></el-option>
+              value="RETURN"></el-option>
           </el-select>
       </el-form-item>
       <el-form-item>
@@ -62,16 +63,18 @@ export default {
   name: 'mesuring-manage',
   setup() {
     const query = reactive({
-      address: '',
+      specification: '',
       name: '',
-      pageIndex: 1,
-      pageSize: 10,
+      code: '',
+      serialNum: '',
+      numbers: '',
+      status: '',
     })
     // 查询操作
-    const handleSearch = () => {
-      query.pageIndex = 1
-    }
     let mesuringTable = ref(null)
+    const handleSearch = () => {
+      mesuringTable.value.handleSearch(query)
+    }
     const handleAdd = () => {
       mesuringTable.value.handleAdd()
     }

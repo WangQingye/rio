@@ -47,10 +47,10 @@ import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 export default {
     setup() {
-        const username = localStorage.getItem("ms_username");
+        const store = useStore();
+        const username = store.state.userInfo.user.realName;
         const message = 2;
 
-        const store = useStore();
         const collapse = computed(() => store.state.collapse);
         // 侧边栏折叠
         const collapseChage = () => {
@@ -67,7 +67,7 @@ export default {
         const router = useRouter();
         const handleCommand = (command) => {
             if (command == "loginout") {
-                localStorage.removeItem("ms_username");
+                store.commit('removeUserInfo');
                 router.push("/login");
             } else if (command == "user") {
                 router.push("/user");
