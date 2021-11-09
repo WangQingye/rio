@@ -22,17 +22,15 @@
         <el-button type="text"
           icon="el-icon-edit"
           style="margin-left:0"
-          v-if="!taskIndex"
           @click="handleEdit(slotProps.scopeData)">编辑
         </el-button>
         <el-button type="text"
           icon="el-icon-delete"
           class="color-danger"
-          v-if="!taskIndex"
           @click="handleDelete(slotProps.scopeData)">删除</el-button>
       </template>
     </BaseTable>
-    <el-dialog :title="`领用记录 - ${editItemData && editItemData.mesuringId}` "
+    <el-dialog :title="`领用记录 - ${editItemData && editItemData.name}` "
       v-model="lendingRecordsVisible"
       :close-on-click-modal="false"
       :close-on-press-escape="false"
@@ -131,6 +129,7 @@ export default {
         .then(async () => {
           await delMesure({ mesureId: row.id })
           ElMessage.success('删除成功')
+          handleSearch()
         })
         .catch(() => {})
     }

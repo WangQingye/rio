@@ -31,13 +31,20 @@
         <el-form-item label="状态">
           <el-select v-model="query.status"
             placeholder="状态"
+            clearable
             class="handle-select mr10">
-            <el-option key="1"
-              label="在线"
-              value="在线"></el-option>
-            <el-option key="2"
-              label="完结"
-              value="完结"></el-option>
+            <el-option
+              label="未开工"
+              value="NOT_STARTED"></el-option>
+            <el-option
+              label="生产中"
+              value="PROCESSING"></el-option>
+            <el-option
+              label="已完工"
+              value="COMPLETED"></el-option>
+            <el-option
+              label="已完结"
+              value="CLOSED"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -53,7 +60,7 @@
         ref="userTable"
         :url="'/products-manage/product/list'">
         <template v-slot:status="slotProps">
-          <el-tag :type="slotProps.scopeData.status === '成功'? 'success': slotProps.scopeData.status === '失败'? 'danger': ''">{{ slotProps.scopeData.status }}</el-tag>
+          <el-tag :type="slotProps.scopeData.status === '成功'? 'success': slotProps.scopeData.status === '失败'? 'danger': ''">{{ {'NOT_STARTED':'未开工', 'PROCESSING': '生产中', 'COMPLETED': '已完工', 'CLOSED': '已完结'}[slotProps.scopeData.status] }}</el-tag>
         </template>
         <template v-slot:serial="slotProps">
           <el-link href="javascript:void(0)"
@@ -86,10 +93,13 @@
     <ProductDetail :visible="detailVisible"
       @close="detailVisible = false"
       key="detail"
+      v-if="editItemData.id"
+      :serialId="editItemData.id"
       :serial="editItemData.serial"></ProductDetail>
     <PartDetail :visible="partDetailVisible"
       @close="partDetailVisible = false"
       key="detail1"
+      v-if="editItemData"
       :serialId="editItemData.id"
       :partCode="editItemData.partCode"></PartDetail>
   </div>
@@ -246,9 +256,24 @@ export default {
       formItems: [
         { label: '序号', key: 'serial', required: true, editDisabled: true },
         { label: '任务号', key: 'code', required: true, editDisabled: true },
-        { label: '产品代号', key: 'productCode', required: true, editDisabled: true },
-        { label: '零件代号', key: 'partCode', required: true, editDisabled: true },
-        { label: '零件名称', key: 'partName', required: true, editDisabled: true },
+        {
+          label: '产品代号',
+          key: 'productCode',
+          required: true,
+          editDisabled: true,
+        },
+        {
+          label: '零件代号',
+          key: 'partCode',
+          required: true,
+          editDisabled: true,
+        },
+        {
+          label: '零件名称',
+          key: 'partName',
+          required: true,
+          editDisabled: true,
+        },
         { label: '图纸工序', key: 'processes', required: false },
         { label: '回厂数量', key: 'returnQuantity', required: false },
         {
@@ -264,7 +289,25 @@ export default {
           required: false,
           type: 'date',
         },
-        { label: '状态', key: 'status', required: true },
+        {
+          label: '状态',
+          key: 'status',
+          required: true,
+          type: 'select',
+          options: [{
+            label: '未开工',
+            value: 'NOT_STARTED'
+          },{
+            label: '生产中',
+            value: 'PROCESSING'
+          },{
+            label: '已完工',
+            value: 'COMPLETED'
+          },{
+            label: '已完结',
+            value: 'CLOSED'
+          }],
+        },
         { label: '上账备注', key: 'remark1', required: false },
         { label: '出厂数量', key: 'exQuantity', required: false },
         {

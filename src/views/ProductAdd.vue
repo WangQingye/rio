@@ -24,7 +24,7 @@
         <el-date-picker v-if="item.type=='date'"
           v-model="form[item.key]"
           type="date"
-          value-format="YYYY-MM-DD HH:mm:ss"
+          value-format="YYYY-MM-DD"
           :disabled="item.disabled || (itemData && item.editDisabled)"
           style="width: 100%"
           placeholder=选择日期>

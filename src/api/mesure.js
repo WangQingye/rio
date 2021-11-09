@@ -10,7 +10,7 @@ export const editMesure = query => {
 export const delMesure = query => {
     return request({
         url: `/measures-manage/remove/${query.mesureId}`,
-        method: 'del',
+        method: 'delete',
         data: query
     });
 };

@@ -12,7 +12,7 @@
         </el-dropdown-menu>
       </template>
     </el-dropdown>
-    <el-table :data="tableData"
+    <el-table :data="url ? tableData : tableRealData"
       :border="!noBorder"
       class="table"
       ref="multipleTable"
@@ -63,6 +63,9 @@ export default {
     url: {
       type: String,
     },
+    tableRealData: {
+      type: Array
+    },
     needOperation: {
       type: Boolean,
       default: true,
@@ -89,11 +92,12 @@ export default {
     const pageTotal = ref(0)
     // 获取表格数据
     const getData = () => {
-      getList(props.url, {...query, ...props.queryBase}).then((res) => {
-        console.log(res)
-        tableData.value = res.data.records
-        pageTotal.value = res.data.total || 0
-      })
+      if (props.url) {
+        getList(props.url, {...query, ...props.queryBase}).then((res) => {
+          tableData.value = res.data.records
+          pageTotal.value = res.data.total || 0
+        })
+      }
     }
     getData()
     // 查询操作

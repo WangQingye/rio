@@ -16,11 +16,29 @@ export const getProcessDetailList = query => {
 };
 export const editPartStep = query => {
     return request({
-        url: '/working-manage/working/addOrModify',
+        url: '/products-manage/workings/addOrModify',
         method: 'post',
         data: query
     });
 };
+export const delPartStep = query => {
+    return request({
+        url: `/products-manage/remove/workings/${query.stepId}`,
+        method: 'delete',
+        data: query
+    });
+};
+
+// 填报价格
+export const fillSerialPrice = query => {
+    return request({
+        url: '/products-manage/fill/price',
+        method: 'post',
+        data: query
+    });
+};
+
+
 export const getSerialNums = query => {
     return request({
         url: '/products-manage/product/list',

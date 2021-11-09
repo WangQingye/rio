@@ -28,11 +28,17 @@
           v-for="p in processesList"
           :key="p.id"
           style="padding: 0; margin-bottom:10px">
-          <ProcessPriceTag :fromIndex="p.serial"></ProcessPriceTag>
+          <ProcessPriceTag :pricesData="p"></ProcessPriceTag>
           <BaseTable noBorder
             noPager
             :cols="stepColumns"
-            :needOperation="false"></BaseTable>
+            :tableRealData="p.workings" 
+            :key="p.id"
+            :needOperation="false">
+            <template v-slot:status="slotProps">
+              <el-tag :type="slotProps.scopeData.status === 'NORMAL'? 'warning': slotProps.scopeData.status === 'RUNNING'? 'primary': 'success'">{{ {'NORMAL':'未开工', 'RUNNING': '已开工', 'CLOSED': '已完工'}[slotProps.scopeData.status] }}</el-tag>
+            </template>
+          </BaseTable>
         </el-card>
         <div class="pagination">
           <el-pagination background
@@ -42,34 +48,6 @@
             :total="pageTotal"
             @current-change="handlePageChange"></el-pagination>
         </div>
-      </el-tab-pane>
-      <el-tab-pane label="工序设置"
-        name="mesuring">
-        <el-button type="primary"
-          icon="el-icon-plus"
-          style="margin-bottom:10px"
-          @click="handleAddStep">添加工序</el-button>
-        <BaseTable :cols="partStepColumns" :url="'/products-manage/query/workings'"
-          :queryBase="{'partCode':partCode}"
-        >
-          <template v-slot:operation="slotProps">
-            <el-button type="text"
-              icon="el-icon-edit"
-              @click="handleEditStep(slotProps.scopeData)">编辑
-            </el-button>
-            <el-button type="text"
-              icon="el-icon-delete"
-              class="color-warning"
-              @click="handleDeleteStep(slotProps.scopeData)">删除</el-button>
-          </template>
-        </BaseTable>
-        <ProductAdd :visible="partStepEditVisible"
-          @close="partStepEditVisible = false"
-          :title="'工序设置'"
-          :itemData="editPartStepItemData"
-          :formItems="editPartStepFormItems"
-          key="product-edit"
-          @dialog-submit="editPartStepSubmit"></ProductAdd>
       </el-tab-pane>
     </el-tabs>
     <template #footer>
@@ -144,25 +122,6 @@ export default {
     const saveEdit = () => {
       emit('dialog-submit', form)
     }
-
-    const partStepEditVisible = ref(false)
-    const editPartStepItemData = ref(null)
-    const handleAddStep = () => {
-      partStepEditVisible.value = true
-      editPartStepItemData.value = null
-    }
-    // 表格编辑时弹窗和保存
-    const handleEditStep = (row) => {
-      partStepEditVisible.value = true
-      editPartStepItemData.value = row
-    }
-    const handleDeleteStep = (row) => {}
-    const editPartStepSubmit = async (formData) => {
-      console.log(formData)
-      await editPartStep({ id: editPartStepItemData.value?.id, ...formData, partCode: props.partCode})
-      ElMessage.success('操作成功')
-      partStepEditVisible.value = false
-    }
     return {
       stepColumns: [
         {
@@ -171,12 +130,12 @@ export default {
         },
         {
           label: '操作者',
-          prop: 'userName',
-          slot: 'userName',
+          prop: 'user'
         },
         {
           label: '当前状态',
           prop: 'status',
+          slot: 'status'
         },
         {
           label: '操作设备',
@@ -184,32 +143,31 @@ export default {
         },
         {
           label: '接受产品数量',
-          prop: 'receiveNum',
+          prop: 'acceptAmt',
         },
         {
           label: '开工时间',
-          prop: 'startTime',
+          prop: 'startDate',
         },
         {
           label: '要求完工时间',
-          prop: 'planFinishTime',
+          prop: 'needFinalDate',
         },
         {
           label: '实际完工时间',
-          prop: 'finishTime',
+          prop: 'finalDate',
         },
         {
           label: '合格产品数量',
-          prop: 'qualifiedNum',
+          prop: 'qualAmt',
         },
         {
           label: '运行时间',
-          prop: 'runTime',
-          slot: 'runTime',
+          prop: 'runningDate'
         },
         {
           label: '最高记录',
-          prop: 'highScore',
+          prop: 'highRecord',
         },
         {
           label: '工序单价（元）',
@@ -254,52 +212,15 @@ export default {
           prop: 'returnTime',
         },
       ],
-      partStepColumns: [
-        {
-          label: '工序',
-          prop: 'workingName',
-        },
-        {
-          label: '操作设备',
-          prop: 'deviceName',
-        },
-        {
-          label: '工序单价',
-          prop: 'price',
-        },
-      ],
-      editPartStepFormItems: [
-        {
-          label: '工序',
-          key: 'workingName',
-          required: true,
-        },
-        {
-          label: '操作设备',
-          key: 'deviceName',
-          required: true,
-        },
-        {
-          label: '工序单价',
-          key: 'price',
-          required: true,
-        },
-      ],
       close,
       activeName,
       saveEdit,
       form,
-      partStepEditVisible,
-      handleAddStep,
-      handleEditStep,
-      handleDeleteStep,
-      editPartStepItemData,
-      editPartStepSubmit,
       processQuery,
       handleProcessSearch,
       pageTotal,
       handlePageChange,
-      processesList
+      processesList,
     }
   },
 }

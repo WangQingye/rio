@@ -121,6 +121,7 @@ export default {
       let res = await editUser({
         id: editItemData.value?.id,
         ...row,
+        password: row.phone
       })
       console.log(res)
     }
