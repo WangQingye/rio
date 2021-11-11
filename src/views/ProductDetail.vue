@@ -80,7 +80,7 @@ import BaseTable from '@/components/BaseTable.vue'
 import MesuringTable from './MesuringTable.vue'
 import ProcessPriceTag from './ProcessPriceTag.vue'
 import ProductAdd from './ProductAdd.vue'
-import { getProcessDetailList, editPartStep, delPartStep } from '@/api/product'
+import { getProcessDetailList, editPartStep, delPartStep, editWorkingStep } from '@/api/product'
 import { ElMessage, ElMessageBox } from 'element-plus'
 export default {
   components: { BaseTable, MesuringTable, ProcessPriceTag, ProductAdd },
@@ -111,7 +111,7 @@ export default {
       pricesData.value = res.data.records[0]
       processesList.value = res.data.records[0]?.workings
     }
-    getProcessDetail()
+    if (props.serial) getProcessDetail()
     const activeName = ref('process')
     const dialogVisible = computed(() => props.visible)
     watch(dialogVisible, () => {
@@ -131,7 +131,14 @@ export default {
       stepEditVisible.value = true
       stepEditItem.value = row
     }
-    const stepEditSubmit = () => {}
+    const stepEditSubmit = async (formData) => {
+      await editWorkingStep({
+        id: stepEditItem.value.id,
+        ...formData
+      })
+      ElMessage.success('操作成功')
+      getProcessDetail()
+    }
 
     // 工序设置
 
@@ -237,7 +244,7 @@ export default {
         },
         {
           label: '操作者',
-          key: 'userName',
+          key: 'user',
           type: 'user',
         },
         // {
@@ -252,7 +259,7 @@ export default {
         // },
         {
           label: '接受产品数量',
-          key: 'receiveNum',
+          key: 'acceptAmt',
         },
         // {
         //   label: '开工时间',
@@ -261,7 +268,8 @@ export default {
         // },
         {
           label: '要求完工时间',
-          key: 'planFinishTime',
+          key: 'needFinalDate',
+          type: 'date',
         },
         // {
         //   label: '实际完工时间',
@@ -270,19 +278,19 @@ export default {
         // },
         {
           label: '合格产品数量',
-          key: 'qualifiedNum',
+          key: 'qualAmt',
         },
         {
           label: '运行时间',
-          key: 'runTime',
+          key: 'runningDate',
         },
         {
           label: '最高记录',
-          key: 'highScore',
+          key: 'highRecord',
         },
         {
           label: '工序单价（元）',
-          key: 'stepPrice',
+          key: 'price',
         },
         {
           label: '备注',

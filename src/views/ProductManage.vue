@@ -93,15 +93,15 @@
     <ProductDetail :visible="detailVisible"
       @close="detailVisible = false"
       key="detail"
-      v-if="editItemData.id"
-      :serialId="editItemData.id"
-      :serial="editItemData.serial"></ProductDetail>
+      v-if="editItemData?.id"
+      :serialId="editItemData?.id"
+      :serial="editItemData?.serial"></ProductDetail>
     <PartDetail :visible="partDetailVisible"
       @close="partDetailVisible = false"
       key="detail1"
       v-if="editItemData"
-      :serialId="editItemData.id"
-      :partCode="editItemData.partCode"></PartDetail>
+      :serialId="editItemData?.id"
+      :partCode="editItemData?.partCode"></PartDetail>
   </div>
 </template>
 

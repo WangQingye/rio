@@ -10,9 +10,9 @@
       v-if="items.length"
       router>
       <template v-for="item in items">
-        <template v-if="item.subs">
-          <el-submenu :index="item.index"
-            :key="item.index">
+        <template v-if="item.subs && item.subs.length">
+          <el-submenu :index="item.icon"
+            :key="item.icon">
             <template #title>
               <i :class="item.icon"></i>
               <span>{{ item.title }}</span>

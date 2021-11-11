@@ -5,7 +5,7 @@
         :model="query"
         class="demo-form-inline">
         <el-form-item label="用户姓名">
-          <el-input v-model="query.realName"
+          <el-input v-model="query.userName"
             placeholder="用户姓名"></el-input>
         </el-form-item>
         <el-form-item label="用户角色">
@@ -31,13 +31,8 @@
       <BaseTable :cols="columns"
         ref="userTable"
         :url="'/rui_ao/users'">
-        <template v-slot:status="slotProps">
-          <el-tag :type="slotProps.scopeData.status === '成功'? 'success': slotProps.scopeData.status === '失败'? 'danger': ''">{{ slotProps.scopeData.status }}</el-tag>
-        </template>
-        <template v-slot:taskId="slotProps">
-          <el-link href="javascript:void(0)"
-            type="primary"
-            @click="showDetail(slotProps.scopeData)">{{slotProps.scopeData.taskId}}</el-link>
+        <template v-slot:role="slotProps">
+          <span>{{ {'SYS_ADMIN':'系统管理员', 'SYS_EMPLOYEE':'普通员工', 'SYS_CONTACT': '外协联络员', 'SYS_PRODUCT': '生产管理员', 'SYS_STORE': '仓库管理员'}[slotProps.scopeData.roles[0].roleCode] }}</span>
         </template>
         <template v-slot:operation="slotProps">
           <el-button type="text"
@@ -80,8 +75,8 @@ export default {
   name: 'product-manage',
   setup() {
     const query = reactive({
-      realName: '',
-      roleId: ''
+      userName: '',
+      roleId: '',
     })
     const tableData = ref([])
     const pageTotal = ref(0)
@@ -117,13 +112,14 @@ export default {
       editItemData.value = null
     }
     const editSubmit = async (row) => {
-      console.log(row)
-      let res = await editUser({
+      await editUser({
         id: editItemData.value?.id,
         ...row,
-        password: row.phone
+        password: row.phone,
       })
-      console.log(res)
+      ElMessage.success('操作成功')
+      editVisible.value = false
+      handleSearch()
     }
 
     const detailVisible = ref(false)
@@ -173,6 +169,7 @@ export default {
         {
           label: '用户角色',
           prop: 'role',
+          slot: 'role',
         },
       ],
       formItems,
@@ -188,7 +185,7 @@ export default {
       editSubmit,
       handleAdd,
       detailVisible,
-      userTable
+      userTable,
     }
   },
 }

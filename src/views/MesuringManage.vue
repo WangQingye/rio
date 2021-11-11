@@ -28,9 +28,9 @@
             placeholder="状态"
             clearable
             class="handle-select mr10">
-            <el-option key="1"
+            <!-- <el-option key="1"
               label="在库房"
-              value="STORAGE"></el-option>
+              value="STORAGE"></el-option> -->
             <el-option key="2"
               label="在使用"
               value="USE"></el-option>

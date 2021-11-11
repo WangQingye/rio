@@ -42,18 +42,20 @@
         领用
       </el-button>
       <BaseTable :cols="lendingRecordsColumns"
-        :url="'/lendRecords'">
+        ref="lendRecordsTable"
+        :queryBase="{'measure':editItemData.id}"
+        :url="'/measures-manage/claims'">
         <template v-slot:operation="slotProps">
           <el-button type="text"
             icon="el-icon-download"
             class="color-success"
-            v-if="!slotProps.scopeData.returnTime"
+            v-if="!slotProps.scopeData.returnDate"
             @click="showReturnMesuring(slotProps.scopeData)">归还
           </el-button>
           <el-button type="text"
             icon="el-icon-delete"
             class="color-danger"
-            @click="handleDelete(slotProps.scopeData)">删除</el-button>
+            @click="handleLendRecordsDelete(slotProps.scopeData)">删除</el-button>
         </template>
       </BaseTable>
       <template #footer>
@@ -71,6 +73,7 @@
     <ProductAdd :visible="addLendVisible"
       @close="addLendVisible = false"
       :formItems="addLendFormItems"
+      key="lend-add"
       :propTitle="'领用量具'"
       @dialog-submit="addLendSubmit"></ProductAdd>
     <ProductAdd :visible="returnMesuringVisible"
@@ -86,7 +89,13 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import BaseTable from '../components/BaseTable.vue'
 import ProductAdd from './ProductAdd.vue'
-import { editMesure, delMesure } from '@/api/mesure'
+import {
+  editMesure,
+  delMesure,
+  lendMesure,
+  returnMesure,
+  delMesureLendRecords,
+} from '@/api/mesure'
 
 export default {
   components: {
@@ -98,22 +107,7 @@ export default {
       type: String,
     },
   },
-  name: 'product-manage',
   setup(props) {
-    // const serialNumOptions = ref([])
-    // const getSerialNumOptions = async () => {
-    //   let res = await getSerialNums({
-    //     pageNo: 1,
-    //     pageSize: 1000,
-    //   })
-    //   serialNumOptions.value = res.data.records.map((r) => {
-    //     console.log(r)
-    //     return { label: r.serial, value: r.serial }
-    //   })
-    // }
-    // onMounted(() => {
-    //   getSerialNumOptions()
-    // })
     const mesureTable = ref({})
     // 查询操作
     const handleSearch = (query) => {
@@ -148,7 +142,7 @@ export default {
       editItemData.value = null
     }
     const editSubmit = async (formData) => {
-      await editMesure({ id: editItemData.value?.id, ...formData })
+      await editMesure({ id: editItemData.value?.id, ...formData, availableNums: formData.numbers })
       ElMessage.success('操作成功')
       editVisible.value = false
       handleSearch()
@@ -161,36 +155,57 @@ export default {
     }
 
     // 领用记录相关
+    const lendRecordsTable = ref({})
     const lendingRecordsVisible = ref(false)
     const handleLendingRecords = (row) => {
-      lendingRecordsVisible.value = true
       editItemData.value = row
+      lendingRecordsVisible.value = true
     }
     // 添加领用记录
     const addLendVisible = ref(false)
-    const showAddLend = (row) => {
+    const showAddLend = () => {
       addLendVisible.value = true
     }
-    const addLendFormItems = [
-      { label: '领用人', key: 'lendUser', required: true },
-      { label: '领用数量', key: 'num', required: true, type: 'number' },
-      { label: '备注', key: 'remark', required: true, type: 'textarea' },
-    ]
-    const addLendSubmit = (formData) => {
-      console.log(formData)
+    const addLendSubmit = async (formData) => {
+      await lendMesure({
+        measure: editItemData.value.id,
+        ...formData,
+      })
+      ElMessage.success('操作成功')
+      addLendVisible.value = false
+      lendRecordsTable.value.refresh()
     }
     // 归还
     const returnMesuringVisible = ref(false)
     const editLendRecord = ref(null)
     const returnMesuringItems = [
-      { label: '归还数量', key: 'num', required: true, type: 'number' },
+      { label: '归还数量', key: 'nums', required: true, type: 'number' },
     ]
     const showReturnMesuring = (row) => {
       returnMesuringVisible.value = true
       editLendRecord.value = row
     }
-    const returnMesuringSubmit = (formData) => {
-      console.log(formData)
+    const returnMesuringSubmit = async (formData) => {
+      await returnMesure({
+        id: editLendRecord.value.id,
+        ...formData,
+      })
+      ElMessage.success('操作成功')
+      returnMesuringVisible.value = false
+      lendRecordsTable.value.refresh()
+    }
+    // 删除领用记录
+    const handleLendRecordsDelete = (row) => {
+      // 二次确认删除
+      ElMessageBox.confirm('确定要删除吗？', '提示', {
+        type: 'warning',
+      })
+        .then(async () => {
+          await delMesureLendRecords({ recordId: row.id })
+          ElMessage.success('删除成功')
+          lendRecordsTable.value.refresh()
+        })
+        .catch(() => {})
     }
 
     return {
@@ -214,6 +229,10 @@ export default {
         {
           label: '数量',
           prop: 'numbers',
+        },
+        {
+          label: '库房剩余数量',
+          prop: 'availableNums',
         },
         {
           label: '状态',
@@ -250,10 +269,10 @@ export default {
               label: '在使用',
               value: 'USE',
             },
-            {
-              label: '在库房',
-              value: 'STORAGE',
-            },
+            // {
+            //   label: '在库房',
+            //   value: 'STORAGE',
+            // },
             {
               label: '已归还',
               value: 'RETURN',
@@ -281,15 +300,15 @@ export default {
       lendingRecordsColumns: [
         {
           label: '领用人',
-          prop: 'lendUser',
+          prop: 'user',
         },
         {
           label: '领用日期',
-          prop: 'lendTime',
+          prop: 'created',
         },
         {
           label: '还回日期',
-          prop: 'returnTime',
+          prop: 'returnDate',
         },
         {
           label: '备注',
@@ -299,13 +318,19 @@ export default {
       lendingRecordsVisible,
       showAddLend,
       addLendVisible,
-      addLendFormItems,
+      addLendFormItems: [
+        { label: '领用人', key: 'user', required: true, type: 'user' },
+        { label: '领用数量', key: 'nums', required: true, type: 'number' },
+        { label: '备注', key: 'remark', required: true, type: 'textarea' },
+      ],
       addLendSubmit,
       showReturnMesuring,
       returnMesuringVisible,
       returnMesuringItems,
       returnMesuringSubmit,
       mesureTable,
+      lendRecordsTable,
+      handleLendRecordsDelete,
     }
   },
 }
