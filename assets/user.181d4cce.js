@@ -1,0 +1,1 @@
+import{s as a}from"./index.8da61348.js";const s=s=>a({url:`/tool-manage/login?username=${s.username}&password=${s.password}`,method:"post",data:s}),o=s=>a({url:"/rui_ao/users",method:"get",params:s}),r=s=>a({url:"/rui_ao/find/roles",method:"get",params:s}),e=s=>a({url:"/rui_ao/add_or_edit/user",method:"post",data:s});export{r as a,e,o as g,s as l};
