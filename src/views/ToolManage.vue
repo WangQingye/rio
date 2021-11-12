@@ -5,11 +5,11 @@
         :model="query"
         class="demo-form-inline">
         <el-form-item label="名称">
-          <el-input v-model="query.address"
+          <el-input v-model="query.name"
             placeholder="名称"></el-input>
         </el-form-item>
         <el-form-item label="规格型号">
-          <el-input v-model="query.address"
+          <el-input v-model="query.specification"
             placeholder="规格型号"></el-input>
         </el-form-item>
         <el-form-item>
@@ -20,14 +20,31 @@
       <el-button type="primary"
         icon="el-icon-plus"
         style="margin-bottom: 20px;"
-        @click="handleAdd">{{`添加${toolData.toolName}`}}</el-button>
+        @click="handleAdd">{{`添加${toolTypeInfo.name}`}}</el-button>
       <BaseTable :cols="columns"
-      :url="'/toolDetail'"
+        :url="'/tool-manage/tool/pages'"
+        ref="toolTable"
+        :queryBase="{'toolType': toolTypeId}"
         @edit="handleEdit">
-        <template v-slot:prop1="slotProps">
+        <template v-slot:purchaseUnit="slotProps">
           <el-link href="javascript:void(0)"
             type="primary"
-            @click="handBuyRecords(slotProps.scopeData)">{{slotProps.scopeData.prop1}}</el-link>
+            @click="handBuyRecords(slotProps.scopeData)">{{slotProps.scopeData.purchaseUnit}}</el-link>
+        </template>
+        <template v-slot:key0="slotProps">
+          <span>{{Object.entries(JSON.parse(slotProps.scopeData.specialField))[0][1]}}</span>
+        </template>
+        <template v-slot:key1="slotProps">
+          <span>{{Object.entries(JSON.parse(slotProps.scopeData.specialField))[1][1]}}</span>
+        </template>
+        <template v-slot:key2="slotProps">
+          <span>{{Object.entries(JSON.parse(slotProps.scopeData.specialField))[2][1]}}</span>
+        </template>
+        <template v-slot:key3="slotProps">
+          <span>{{Object.entries(JSON.parse(slotProps.scopeData.specialField))[3][1]}}</span>
+        </template>
+        <template v-slot:key4="slotProps">
+          <span>{{Object.entries(JSON.parse(slotProps.scopeData.specialField))[4][1]}}</span>
         </template>
         <template v-slot:operation="slotProps">
           <el-button type="text"
@@ -36,12 +53,13 @@
             @click="handleLendingRecords(slotProps.scopeData)">领用记录
           </el-button>
           <el-button type="text"
-            icon="el-icon-edit"
+            icon="el-icon-goods"
             style="margin-left:0"
-            @click="handleEdit(slotProps.scopeData)">编辑
+            @click="showAddBuy(slotProps.scopeData)">添加采购记录
           </el-button>
           <el-button type="text"
             icon="el-icon-delete"
+            style="margin-left:0"
             class="color-danger"
             @click="handleDelete(slotProps.scopeData)">删除</el-button>
         </template>
@@ -52,7 +70,12 @@
       :itemData="editItemData"
       :formItems="formItems"
       @dialog-submit="editSubmit"></ProductAdd>
-    <el-dialog :title="`领用记录 - ${editItemData && editItemData.prop2}` "
+    <ProductAdd :visible="addBuyVisible"
+      @close="addBuyVisible = false"
+      :formItems="addBuyFormItems"
+      :propTitle="'添加购买记录'"
+      @dialog-submit="addBuySubmit"></ProductAdd>
+    <el-dialog :title="`领用记录 - ${editItemData && editItemData.name}` "
       v-model="lendingRecordsVisible"
       :close-on-click-modal="false"
       :close-on-press-escape="false"
@@ -63,7 +86,8 @@
         @click="showAddLend">
         领用
       </el-button>
-      <BaseTable :cols="lendingRecordsColumns" :url="'/lendRecords'">
+      <BaseTable :cols="lendingRecordsColumns"
+        :url="'/lendRecords'">
         <template v-slot:operation="slotProps">
           <el-button type="text"
             icon="el-icon-download"
@@ -92,7 +116,7 @@
         :propTitle="'归还工具'"
         @dialog-submit="returnMesuringSubmit"></ProductAdd>
     </el-dialog>
-    <el-dialog :title="`采购记录 - ${editItemData && editItemData.prop1}` "
+    <el-dialog :title="`采购记录 - ${editItemData && editItemData.purchaseUnit}` "
       v-model="buyRecordsVisible"
       :close-on-click-modal="false"
       :close-on-press-escape="false"
@@ -101,11 +125,11 @@
         :model="buyQuery"
         class="demo-form-inline">
         <el-form-item label="工具名称">
-          <el-input v-model="buyQuery.knifeName"
+          <el-input v-model="buyQuery.name"
             placeholder="工具名称"></el-input>
         </el-form-item>
         <el-form-item label="规格型号">
-          <el-input v-model="buyQuery.knifeType"
+          <el-input v-model="buyQuery.specification"
             placeholder="规格型号"></el-input>
         </el-form-item>
         <el-form-item>
@@ -113,14 +137,10 @@
             @click="handleBuySearch">查询</el-button>
         </el-form-item>
       </el-form>
-      <el-button type="primary"
-        icon="el-icon-plus"
-        style="margin-bottom:20px"
-        @click="showAddBuy">
-        添加记录
-      </el-button>
       <BaseTable :cols="buyRecordsColumns"
-        :url="'/knifeBuyRecords'">
+      ref="buyRecordTable"
+        :queryBase="{'toolType': toolTypeId, 'companyName': editItemData.purchaseUnit}"
+        :url="'/tool-manage/buy/record/pages'">
         <template v-slot:operation="slotProps">
           <el-button type="text"
             icon="el-icon-download"
@@ -138,11 +158,6 @@
           <el-button @click="buyRecordsVisible = false">关 闭</el-button>
         </span>
       </template>
-      <ProductAdd :visible="addBuyVisible"
-        @close="addBuyVisible = false"
-        :formItems="addBuyFormItems"
-        :propTitle="'添加购买记录'"
-        @dialog-submit="addBuySubmit"></ProductAdd>
     </el-dialog>
   </div>
 </template>
@@ -155,6 +170,8 @@ import { fetchData } from '../api/index'
 import BaseTable from '../components/BaseTable.vue'
 import ProductAdd from './ProductAdd.vue'
 import ProductDetail from './ProductDetail.vue'
+import { useStore } from 'vuex'
+import { editTool, delTool, editToolBuyRecord } from '@/api/tool'
 
 export default {
   components: {
@@ -164,78 +181,66 @@ export default {
   },
   name: 'product-manage',
   setup() {
-    const toolData = ref({})
     const route = useRoute()
-    const columns = ref([])
-    const formItems = ref([])
-    const getToolData = () => {
-      fetchData('/toolTypes').then((res) => {
-        toolData.value = res['toolTypes'].find(t => {
-          return t.toolId == route.query.id
+    const store = useStore()
+    const toolTypeId = ref(null)
+    const columns = ref([
+      { label: '采购单位', prop: 'purchaseUnit', slot: 'purchaseUnit' },
+      { label: '名称', prop: 'name' },
+      { label: '规格型号', prop: 'specification' },
+      { label: '库房存放点', prop: 'locations' },
+      { label: '库房剩余数量', prop: 'availableNum' },
+      { label: '总购数量', prop: 'totalBuy' },
+    ])
+    const formItems = ref([
+      { label: '采购单位', key: 'purchaseUnit', required: true },
+      { label: '名称', key: 'name', required: true },
+      { label: '规格型号', key: 'specification', required: true },
+      { label: '库房存放点', key: 'locations', required: true },
+      { label: '库房剩余数量', key: 'availableNum', required: true },
+      { label: '总购数量', key: 'totalBuy', required: true },
+    ])
+    const toolTypeInfo = ref({})
+    toolTypeId.value = route.query.id
+    onBeforeMount(async () => {
+      toolTypeInfo.value = store.state.toolTypes.find(
+        (t) => t.id == route.query.id
+      )
+      if (toolTypeInfo.value.specField) {
+        toolTypeInfo.value.specField.split('|').forEach((f, index) => {
+          columns.value.push({
+            label: f,
+            prop: 'key' + index,
+            slot: 'key' + index,
+          })
+          formItems.value.push({
+            label: f,
+            key: 'key' + index,
+            required: false,
+          })
         })
-        toolData.value.toolProps.forEach(p => {
-          let col = {
-            label: p.label,
-            prop: p.key
-          }
-          let formItem = {
-            label: p.label,
-            key: p.key
-          }
-          if (p.label == '采购单位') col.slot = p.key
-          columns.value.push(col)
-          formItems.value.push(formItem)
-        })
-        // columns.value = toolData.value.toolProps.map(p => {
-        // })
-        // formItems.value = toolData.value.toolProps.map(p => {
-        //   let d = {
-        //     label: p.label,
-        //     key: p.key
-        //   }
-        //   return d
-        // })
-      })
-    }
-    onBeforeMount(() => {
-      getToolData()
+      }
     })
-    const toolId = computed(() => {
-      return route.query.id
-    })
-    watch(toolId, ()=>{
-      getToolData()
-    })
+    const toolTable = ref({})
     const query = reactive({
-      address: '',
       name: '',
-      pageIndex: 1,
-      pageSize: 10,
+      specification: '',
     })
-    const tableData = ref([])
-    const pageTotal = ref(0)
-    // 获取表格数据
-    const getData = () => {
-      fetchData(query).then((res) => {
-        tableData.value = res.list
-        pageTotal.value = res.pageTotal || 50
-      })
-    }
     // 查询操作
     const handleSearch = () => {
-      query.pageIndex = 1
-      getData()
+      toolTable.value.refresh(query)
     }
 
     // 删除操作
-    const handleDelete = (index) => {
+    const handleDelete = (row) => {
       // 二次确认删除
       ElMessageBox.confirm('确定要删除吗？', '提示', {
         type: 'warning',
       })
-        .then(() => {
+        .then(async () => {
+          await delTool({ toolId: row.id })
           ElMessage.success('删除成功')
-          tableData.value.splice(index, 1)
+          handleSearch()
         })
         .catch(() => {})
     }
@@ -252,8 +257,21 @@ export default {
       editVisible.value = true
       editItemData.value = null
     }
-    const editSubmit = (row) => {
-      console.log(row)
+    const editSubmit = async (formData) => {
+      let specialField = {}
+      toolTypeInfo.value.specField.split('|').forEach((f, index) => {
+        specialField[f] = formData['key' + index]
+        delete formData['key' + index]
+      })
+      await editTool({
+        toolType: toolTypeId.value,
+        id: editItemData.value?.id,
+        ...formData,
+        specialField: JSON.stringify(specialField),
+      })
+      ElMessage.success('添加成功')
+      editVisible.value = false
+      handleSearch()
     }
 
     const detailVisible = ref(false)
@@ -273,12 +291,16 @@ export default {
     const showAddLend = (row) => {
       addLendVisible.value = true
     }
-    const addLendFormItems = [
-      { label: '领用人', key: 'lendUser', required: true },
-      { label: '领用数量', key: 'num', required: true, type: 'number' },
-      { label: '备注', key: 'remark', required: true, type: 'textarea' },
-    ]
-    const addLendSubmit = (formData) => {
+    const addLendSubmit = async (formData) => {
+      await editTool({
+        toolType: toolTypeId.value,
+        id: editItemData.value?.id,
+        ...formData,
+        specialField: JSON.stringify(specialField),
+      })
+      ElMessage.success('添加成功')
+      editVisible.value = false
+      handleSearch()
       console.log(formData)
     }
     // 归还
@@ -294,7 +316,6 @@ export default {
     const returnMesuringSubmit = (formData) => {
       console.log(formData)
     }
-    
 
     // 购买记录相关
     const buyRecordsVisible = ref(false)
@@ -302,25 +323,36 @@ export default {
       buyRecordsVisible.value = true
       editItemData.value = row
     }
-    const buyQuery = ref({
-      knifeName: '',
-      knifeType: '',
+    const buyQuery = reactive({
+      name: '',
+      specification: '',
     })
-    const handleBuySearch = () => {}
+    const buyRecordTable = ref({})
+    const handleBuySearch = () => {
+      buyRecordTable.value.refresh(buyQuery)
+    }
     const addBuyVisible = ref(false)
     const showAddBuy = (row) => {
       addBuyVisible.value = true
     }
-    const addBuySubmit = () => {
-      console.log()
+    const addBuySubmit = async (formData) => {
+      console.log(formData)
+      return
+      await editToolBuyRecord({
+        tool: editItemData.value?.id,
+        ...formData
+      })
+      ElMessage.success('添加成功')
+      addBuyVisible.value = false
+      handleSearch()
     }
     return {
-      toolData,
+      toolTypeId,
+      toolTypeInfo,
       columns,
       formItems,
       query,
-      tableData,
-      pageTotal,
+      toolTable,
       editVisible,
       handleSearch,
       handleDelete,
@@ -356,12 +388,15 @@ export default {
           label: '备注',
           prop: 'remark',
         },
-
       ],
       lendingRecordsVisible,
       showAddLend,
       addLendVisible,
-      addLendFormItems,
+      addLendFormItems: [
+        { label: '领用人', key: 'user', required: true, type: 'user' },
+        { label: '领用数量', key: 'num', required: true, type: 'number' },
+        { label: '备注', key: 'remark', required: true, type: 'textarea' },
+      ],
       addLendSubmit,
       showReturnMesuring,
       returnMesuringVisible,
@@ -370,6 +405,7 @@ export default {
       handBuyRecords,
       handBuyRecords,
       buyQuery,
+      buyRecordTable,
       handleBuySearch,
       addBuyVisible,
       showAddBuy,
@@ -378,23 +414,23 @@ export default {
       buyRecordsColumns: [
         {
           label: '采购单位',
-          prop: 'company',
+          prop: 'makeCompany',
         },
         {
           label: '名称',
-          prop: 'toolName',
+          prop: 'name',
         },
         {
           label: '规格型号',
-          prop: 'type',
+          prop: 'specification',
         },
         {
           label: '采购时间',
-          prop: 'buyTime',
+          prop: 'buyDate',
         },
         {
           label: '采购数量',
-          prop: 'buyNum',
+          prop: 'nums',
         },
         {
           label: '采购单价',
@@ -402,32 +438,19 @@ export default {
         },
         {
           label: '回厂时间',
-          prop: 'backTime',
-        }
+          prop: 'returnDate',
+        },
       ],
       addBuyFormItems: [
         {
-          label: '采购单位',
-          key: 'company',
-          required: true,
-        },
-        {
-          label: '刀具名称',
-          key: 'toolName',
-          required: true,
-        },
-        {
-          label: '规格型号',
-          key: 'type',
-        },
-        {
           label: '采购时间',
-          key: 'buyTime',
+          key: 'buyDate',
           required: true,
+          type: 'date'
         },
         {
           label: '采购数量',
-          key: 'buyNum',
+          key: 'nums',
           required: true,
         },
         {
@@ -437,9 +460,11 @@ export default {
         },
         {
           label: '回厂时间',
-          key: 'backTime',
+          key: 'returnDate',
           required: true,
-        },]
+          type: 'date'
+        },
+      ],
     }
   },
 }

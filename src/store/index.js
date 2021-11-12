@@ -4,7 +4,8 @@ const store = createStore({
     state: {
         tagsList: [],
         collapse: false,
-        userInfo: null
+        userInfo: null,
+        toolTypes: []
     },
     mutations: {
         delTagsItem(state, data) {
@@ -58,6 +59,9 @@ const store = createStore({
         // 
         removeUserInfo(state, data) {
             state.userInfo = null;
+        },
+        setToolTypes(state, data) {
+            state.toolTypes = data
         }
     },
     actions: {},

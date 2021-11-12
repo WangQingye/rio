@@ -376,7 +376,7 @@ export default {
       })
       ElMessage.success('操作成功')
       addBuyVisible.value = false
-      handleBuySearch()
+      handleSearch()
     }
     const handleDeleteBuyRecord = (row) => {
       // 二次确认删除

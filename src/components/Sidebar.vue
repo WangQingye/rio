@@ -51,6 +51,7 @@ import { onBeforeMount, computed, watch, ref } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute, useRouter } from 'vue-router'
 import { fetchData } from '../api/index'
+import { getToolType } from '@/api/tool'
 export default {
   setup() {
     const toolSubs = ref([])
@@ -58,15 +59,19 @@ export default {
     const route = useRoute()
     const store = useStore()
     const router = useRouter()
-    onBeforeMount(() => {
-      // fetchData('/toolTypes').then((res) => {
-      //   toolSubs.value = res['toolTypes'].map(t => {
-      //     return {
-      //       index: `/tool?id=${t.toolId}`,
-      //       title: t.toolName,
-      //     }
-      //   })
-      // })
+    onBeforeMount(async () => {
+      let res = await getToolType({
+        pageNo: 1,
+        pageSize: 100
+      })
+      console.log(res)
+      toolSubs.value = res.data.records.map(t => {
+        return {
+          index: `/tool?id=${t.id}`,
+          title: t.name,
+        }
+      })
+      store.commit("setToolTypes", res.data.records);
       if (store.state.userInfo.authorities[0].authority === 'SYS_ADMIN') {
         items.value = [
           {
@@ -88,12 +93,12 @@ export default {
             icon: 'el-icon-lx-file',
             title: '工具管理',
             subs: [
-              ...toolSubs.value,
               {
                 icon: 'el-icon-lx-file',
                 index: '/tool-add',
                 title: '添加工具种类',
               },
+              ...toolSubs.value,
             ],
           },
           {

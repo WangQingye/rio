@@ -5,7 +5,7 @@
         :model="query"
         class="demo-form-inline">
         <el-form-item label="工具类名称">
-          <el-input v-model="query.address"
+          <el-input v-model="query.name"
             placeholder="工具类名称"></el-input>
         </el-form-item>
         <el-form-item>
@@ -18,9 +18,10 @@
         style="margin-bottom: 20px;"
         @click="handleAdd">添加工具种类</el-button>
       <BaseTable :cols="columns"
-      :url="'/toolTypes'">
-        <template v-slot:toolProps="slotProps">
-          <span>{{slotProps.scopeData.toolProps.map(p => p.label).join(' | ')}}</span>
+        ref="toolTypeTable"
+        :url="'/tool-manage/tool/list'">
+        <template v-slot:stableField="slotProps">
+          <span>采购单位 | 名称 | 规格型号 | 库房存放点 | 库房剩余数量 | 总购数量</span>
         </template>
         <template v-slot:operation="slotProps">
           <el-button type="text"
@@ -50,6 +51,7 @@ import { fetchData } from '../api/index'
 import BaseTable from '../components/BaseTable.vue'
 import ProductAdd from './ProductAdd.vue'
 import ProductDetail from './ProductDetail.vue'
+import { addToolType, delToolType } from '@/api/tool'
 
 export default {
   components: {
@@ -57,28 +59,29 @@ export default {
     ProductAdd,
     ProductDetail,
   },
-  name: 'product-manage',
+  name: 'tool-add-manage',
   setup() {
     const query = reactive({
-      address: '',
       name: '',
-      pageIndex: 1,
-      pageSize: 10,
     })
+    const toolTypeTable = ref({})
     // 查询操作
     const handleSearch = () => {
-      query.pageIndex = 1
+      toolTypeTable.value.refresh(query)
     }
 
     // 删除操作
-    const handleDelete = (index) => {
+    const handleDelete = (row) => {
       // 二次确认删除
       ElMessageBox.confirm('确定要删除吗？', '提示', {
         type: 'warning',
       })
-        .then(() => {
+        .then(async () => {
+          await delToolType({
+            toolId: row.id
+          })
           ElMessage.success('删除成功')
-          tableData.value.splice(index, 1)
+          handleSearch()
         })
         .catch(() => {})
     }
@@ -89,72 +92,49 @@ export default {
     const handleEdit = (row) => {
       editVisible.value = true
       editItemData.value = JSON.parse(JSON.stringify(row))
-      editItemData.value.toolProps = editItemData.value.toolProps.map(p => p.label).join('|')
+      editItemData.value.toolProps = editItemData.value.toolProps
+        .map((p) => p.label)
+        .join('|')
     }
 
     const handleAdd = () => {
       editVisible.value = true
       editItemData.value = null
     }
-    const editSubmit = (row) => {
-      console.log(row)
+    const editSubmit = async (formData) => {
+      await addToolType({ id: editItemData.value?.id, ...formData })
+      ElMessage.success('添加成功')
+      editVisible.value = false
+      handleSearch()
     }
 
-    const detailVisible = ref(false)
-    const showDetail = (row) => {
-      editItemData.value = row
-      detailVisible.value = true
-    }
-
-    // 借出记录相关
-    const lendingRecordsVisible = ref(false)
-    const handleLendingRecords = (row) => {
-      lendingRecordsVisible.value = true
-      editItemData.value = row
-    }
-    // 添加借出记录
-    const addLendVisible = ref(false)
-    const showAddLend = (row) => {
-      addLendVisible.value = true
-    }
-    const addLendFormItems = [
-      { label: '出借人', key: 'lendUser', required: true },
-        { label: '出借数量', key: 'num', required: true, type: 'number' },
-        { label: '备注', key: 'remark', required: true, type: 'textarea' },
-    ]
-    const addLendSubmit = (formData) => {
-      console.log(formData)
-    }
-    // 归还
-    const returnMesuringVisible = ref(false)
-    const editLendRecord = ref(null)
-    const returnMesuringItems = [
-      { label: '归还数量', key: 'num', required: true, type: 'number' },
-    ]
-    const showReturnMesuring = (row) => {
-      returnMesuringVisible.value = true
-      editLendRecord.value = row
-    }
-    const returnMesuringSubmit = (formData) => {
-      console.log(formData)
-    }
-    
     return {
       columns: [
         {
           label: '工具名称',
-          prop: 'toolName',
+          prop: 'name',
         },
         {
-          label: '展示字段',
-          prop: 'toolProps',
-          slot: 'toolProps'
-        }
+          label: '固定展示字段',
+          prop: 'stableField',
+          slot: 'stableField',
+        },
+        {
+          label: '特殊展示字段',
+          prop: 'specField',
+        },
       ],
       formItems: [
-        { label: '工具类名称', key: 'toolName', required: true, width:'100%' },
-        { label: '展示字段', key: 'toolProps', required: true, placeholder: '英文逗号隔开', width:'100%'}
+        { label: '工具类名称', key: 'name', required: true, width: '100%' },
+        {
+          label: '特殊展示字段',
+          key: 'specField',
+          required: true,
+          placeholder: '多个字段使用|隔开',
+          width: '100%',
+        },
       ],
+      toolTypeTable,
       query,
       editVisible,
       handleSearch,
@@ -163,40 +143,6 @@ export default {
       editItemData,
       editSubmit,
       handleAdd,
-      detailVisible,
-      handleLendingRecords,
-      lendingRecordsColumns: [
-        {
-          label: '出借人',
-          prop: 'lendUser',
-        },
-        {
-          label: '出借时间',
-          prop: 'lendTime',
-        },
-        {
-          label: '出借数量',
-          prop: 'lendnum',
-        },
-        {
-          label: '当前状态',
-          prop: 'status',
-        },
-        {
-          label: '备注',
-          prop: 'remark',
-        },
-
-      ],
-      lendingRecordsVisible,
-      showAddLend,
-      addLendVisible,
-      addLendFormItems,
-      addLendSubmit,
-      showReturnMesuring,
-      returnMesuringVisible,
-      returnMesuringItems,
-      returnMesuringSubmit
     }
   },
 }
