@@ -55,7 +55,7 @@ export default {
       await fillSerialPrice({
         productId: props.pricesData.id,
         ...formData,
-        id: props.pricesData.workingPriceId || undefined
+        id: props.pricesData.workingPriceId || undefined,
       })
       ElMessage.success('填报成功')
       priceEditVisible.value = false

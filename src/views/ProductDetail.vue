@@ -12,11 +12,14 @@
       <el-tab-pane label="生产过程"
         name="process">
         <ProcessPriceTag :pricesData="pricesData"
-          :isInIndex="true" @refresh="getProcessDetail"></ProcessPriceTag>
-        <BaseTable :cols="stepColumns" :tableRealData="processesList" :key="serial">
-        <template v-slot:status="slotProps">
-          <el-tag :type="slotProps.scopeData.status === 'NORMAL'? 'warning': slotProps.scopeData.status === 'RUNNING'? 'primary': 'success'">{{ {'NORMAL':'未开工', 'RUNNING': '已开工', 'CLOSED': '已完工'}[slotProps.scopeData.status] }}</el-tag>
-        </template>
+          :isInIndex="true"
+          @refresh="getProcessDetail"></ProcessPriceTag>
+        <BaseTable :cols="stepColumns"
+          :tableRealData="processesList"
+          :key="serial">
+          <template v-slot:status="slotProps">
+            <el-tag :type="slotProps.scopeData.status === 'NORMAL'? 'warning': slotProps.scopeData.status === 'RUNNING'? 'primary': 'success'">{{ {'NORMAL':'未开工', 'RUNNING': '已开工', 'CLOSED': '已完工'}[slotProps.scopeData.status] }}</el-tag>
+          </template>
           <template v-slot:operation="slotProps">
             <el-button type="text"
               icon="el-icon-edit"
@@ -75,12 +78,17 @@
 </template>
 
 <script>
-import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 import BaseTable from '@/components/BaseTable.vue'
 import MesuringTable from './MesuringTable.vue'
 import ProcessPriceTag from './ProcessPriceTag.vue'
 import ProductAdd from './ProductAdd.vue'
-import { getProcessDetailList, editPartStep, delPartStep, editWorkingStep } from '@/api/product'
+import {
+  getProcessDetailList,
+  editPartStep,
+  delPartStep,
+  editWorkingStep,
+} from '@/api/product'
 import { ElMessage, ElMessageBox } from 'element-plus'
 export default {
   components: { BaseTable, MesuringTable, ProcessPriceTag, ProductAdd },
@@ -134,9 +142,10 @@ export default {
     const stepEditSubmit = async (formData) => {
       await editWorkingStep({
         id: stepEditItem.value.id,
-        ...formData
+        ...formData,
       })
       ElMessage.success('操作成功')
+      stepEditVisible.value = false
       getProcessDetail()
     }
 
@@ -161,10 +170,11 @@ export default {
       })
         .then(async () => {
           await delPartStep({
-            stepId: row.id
+            stepId: row.id,
           })
           ElMessage.success('删除成功')
           stepTable.value.refresh()
+          getProcessDetail()
         })
         .catch(() => {})
     }
@@ -178,8 +188,80 @@ export default {
       ElMessage.success('操作成功')
       stepTable.value.refresh()
       partStepEditVisible.value = false
+      getProcessDetail()
     }
-
+    const stepItems = computed(() => {
+      return [
+        {
+          label: '工序',
+          key: 'workingName',
+          disabled: true,
+        },
+        {
+          label: '操作者',
+          key: 'user',
+          type: 'user',
+          disabled: stepEditItem.value?.status !== 'NORMAL',
+        },
+        // {
+        //   label: '当前状态',
+        //   key: 'status',
+        //   disabled: true,
+        // },
+        // {
+        //   label: '操作设备',
+        //   key: 'equipment',
+        //   disabled: true,
+        // },
+        // {
+        //   label: '开工时间',
+        //   key: 'startTime',
+        //   disabled: true,
+        // },
+        {
+          label: '要求完工时间',
+          key: 'needFinalDate',
+          type: 'date',
+        },
+        // {
+        //   label: '实际完工时间',
+        //   key: 'finishTime',
+        //   disabled: true,
+        // },
+        {
+          label: '运行时间',
+          key: 'runningDate',
+        },
+        {
+          label: '最高记录',
+          key: 'highRecord',
+        },
+        {
+          label: '工序单价（元）',
+          key: 'price',
+        },
+        {
+          label: '备注',
+          key: 'remark',
+          type: 'textarea',
+        },
+        {
+          label: '接受产品数量',
+          key: 'acceptAmt',
+          placeholder: '分配时无需填写，由员工填写',
+          required: false,
+        },
+        {
+          label: '合格产品数量',
+          key: 'qualAmt',
+          placeholder: '分配时无需填写，由员工填写',
+          required: false,
+        },
+      ]
+    })
+    // watch(editPartStepItemData, (val) => {
+    //   stepItems.value =
+    // })
     return {
       stepColumns: [
         {
@@ -188,12 +270,12 @@ export default {
         },
         {
           label: '操作者',
-          prop: 'user',
+          prop: 'userName',
         },
         {
           label: '当前状态',
           prop: 'status',
-          slot: 'status'
+          slot: 'status',
         },
         {
           label: '操作设备',
@@ -236,68 +318,7 @@ export default {
           prop: 'remark',
         },
       ],
-      stepItems: [
-        {
-          label: '工序',
-          key: 'workingName',
-          disabled: true,
-        },
-        {
-          label: '操作者',
-          key: 'user',
-          type: 'user',
-        },
-        // {
-        //   label: '当前状态',
-        //   key: 'status',
-        //   disabled: true,
-        // },
-        // {
-        //   label: '操作设备',
-        //   key: 'equipment',
-        //   disabled: true,
-        // },
-        {
-          label: '接受产品数量',
-          key: 'acceptAmt',
-        },
-        // {
-        //   label: '开工时间',
-        //   key: 'startTime',
-        //   disabled: true,
-        // },
-        {
-          label: '要求完工时间',
-          key: 'needFinalDate',
-          type: 'date',
-        },
-        // {
-        //   label: '实际完工时间',
-        //   key: 'finishTime',
-        //   disabled: true,
-        // },
-        {
-          label: '合格产品数量',
-          key: 'qualAmt',
-        },
-        {
-          label: '运行时间',
-          key: 'runningDate',
-        },
-        {
-          label: '最高记录',
-          key: 'highRecord',
-        },
-        {
-          label: '工序单价（元）',
-          key: 'price',
-        },
-        {
-          label: '备注',
-          key: 'remark',
-          type: 'textarea',
-        },
-      ],
+      stepItems,
       meusringColumns: [
         {
           label: '量具名称',
@@ -355,7 +376,7 @@ export default {
           prop: 'deviceName',
         },
         {
-          label: '工序单价',
+          label: '工序单价（元）',
           prop: 'price',
         },
       ],
@@ -374,11 +395,12 @@ export default {
           label: '工序单价',
           key: 'price',
           required: true,
+          type: 'number',
         },
       ],
       processesList,
       pricesData,
-      getProcessDetail
+      getProcessDetail,
     }
   },
 }

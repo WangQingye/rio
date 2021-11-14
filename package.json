@@ -6,8 +6,8 @@
     "dev": "vite",
     "build": "vite build",
     "serve": "vite preview",
-    "predeploy":"npm run build",
-    "deploy":"gh-pages -d build"
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "dependencies": {
     "axios": "^0.21.1",

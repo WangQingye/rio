@@ -129,7 +129,7 @@ export default {
         {
           label: '特殊展示字段',
           key: 'specField',
-          required: true,
+          required: false,
           placeholder: '多个字段使用|隔开',
           width: '100%',
         },

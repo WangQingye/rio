@@ -9,7 +9,7 @@ export const editProduct = query => {
 };
 export const delProduct = query => {
     return request({
-        url: `/products-manage/remove/workings/${query.stepId}`,
+        url: `/products-manage/remove/product/${query.id}`,
         method: 'delete',
         data: query
     });
@@ -65,5 +65,3 @@ export const getSerialNums = query => {
         params: query
     });
 };
-
-

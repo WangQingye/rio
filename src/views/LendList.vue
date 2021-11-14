@@ -5,7 +5,7 @@
         :model="query"
         class="demo-form-inline">
         <el-form-item label="物品名称">
-          <el-input v-model="query.address"
+          <el-input v-model="query.name"
             placeholder="物品名称"></el-input>
         </el-form-item>
         <el-form-item>
@@ -13,9 +13,10 @@
             @click="handleSearch">查询</el-button>
         </el-form-item>
       </el-form>
-      <BaseTable :cols="columns" 
-      :needOperation="false"
-      :url="'/lendlist'">
+      <BaseTable :cols="columns"
+        ref="lendTable"
+        :needOperation="false"
+        :url="'/claim-list-manage/claim/pages'">
       </BaseTable>
     </div>
   </div>
@@ -38,58 +39,42 @@ export default {
   name: 'product-manage',
   setup() {
     const query = reactive({
-      address: '',
       name: '',
-      pageIndex: 1,
-      pageSize: 10,
     })
-    // 查询操作
+    const lendTable = ref({})
     const handleSearch = () => {
-      query.pageIndex = 1
+      lendTable.value.refresh(query)
     }
-
-    // 删除操作
-    const handleDelete = (index) => {
-      // 二次确认删除
-      ElMessageBox.confirm('确定要删除吗？', '提示', {
-        type: 'warning',
-      })
-        .then(() => {
-          ElMessage.success('删除成功')
-          tableData.value.splice(index, 1)
-        })
-        .catch(() => {})
-    }
-    
     return {
       columns: [
         {
           label: '物品名称',
-          prop: 'toolName',
+          prop: 'name',
         },
         {
           label: '规格型号',
-          prop: 'type',
+          prop: 'specification',
         },
         {
           label: '领用时间',
-          prop: 'lendTime',
+          prop: 'created',
         },
         {
           label: '领用数量',
-          prop: 'lendNum',
+          prop: 'num',
         },
         {
           label: '归还数量',
-          prop: 'returnNum',
+          prop: 'retNum',
         },
         {
-          label: '归还时间',
-          prop: 'returnTime',
-        }
+          label: '最近归还时间',
+          prop: 'retDate',
+        },
       ],
       query,
-      handleDelete
+      lendTable,
+      handleSearch,
     }
   },
 }

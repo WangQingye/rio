@@ -64,7 +64,7 @@ import { fetchData } from '../api/index'
 import BaseTable from '../components/BaseTable.vue'
 import ProductAdd from './ProductAdd.vue'
 import ProductDetail from './ProductDetail.vue'
-import { editUser, getRoleList } from '@/api/user'
+import { editUser, getRoleList, delUser } from '@/api/user'
 
 export default {
   components: {
@@ -88,14 +88,15 @@ export default {
     }
 
     // 删除操作
-    const handleDelete = (index) => {
+    const handleDelete = (row) => {
       // 二次确认删除
       ElMessageBox.confirm('确定要删除吗？', '提示', {
         type: 'warning',
       })
-        .then(() => {
+        .then(async () => {
+          await delUser({ userId: row.id})
           ElMessage.success('删除成功')
-          tableData.value.splice(index, 1)
+          handleSearch()
         })
         .catch(() => {})
     }
@@ -106,6 +107,7 @@ export default {
     const handleEdit = (row) => {
       editVisible.value = true
       editItemData.value = row
+      editItemData.value.role = row.roles[0].id
     }
     const handleAdd = () => {
       editVisible.value = true

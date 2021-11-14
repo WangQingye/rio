@@ -1,11 +1,14 @@
 import axios from 'axios';
-import { ElLoading, ElMessage } from 'element-plus'
+import {
+    ElLoading,
+    ElMessage
+} from 'element-plus'
 
 const service = axios.create({
     // process.env.NODE_ENV === 'development' 来判断是否开发环境
     // easy-mock服务挂了，暂时不使用了
     // baseURL: 'http://162.14.79.68/',
-    baseURL: '/api',
+    baseURL: '/serverBackend',
     timeout: 10000
 });
 
@@ -13,7 +16,9 @@ let loadingInstance = null
 service.interceptors.request.use(
     config => {
         loadingInstance && loadingInstance.close()
-        loadingInstance = ElLoading.service({background: 'rgba(0,0,0,0.1)'})
+        loadingInstance = ElLoading.service({
+            background: 'rgba(0,0,0,0.1)'
+        })
         return config;
     },
     error => {
@@ -28,11 +33,19 @@ service.interceptors.response.use(
         loadingInstance.close()
         if (response.status === 200) {
             if (typeof response.data === 'string') {
-                return JSON.parse(response.data);
+                let jsonData = JSON.parse(response.data)
+                if (jsonData.status === 'FAIL') {
+                    ElMessage.error(jsonData.msg)
+                    localStorage.removeItem('ruiao_user')
+                    window.location.reload()
+                    return false
+                }
+                return jsonData
             } else {
                 if (response.data.status == 'FAIL') {
-                    ElMessage.error(response.data.msg)
-                    throw new Error(response.data.msg)
+                    ElMessage.error(response.data.msg || '服务器错误')
+                    throw new Error(response.data.msg || '服务器错误')
+                    return false
                     Promise.reject();
                 } else {
                     return response.data;

@@ -7,6 +7,13 @@ export const login = query => {
         data: query
     });
 };
+export const logOut = query => {
+    return request({
+        url: `/tool-manage/logout`,
+        method: 'post',
+        data: query
+    });
+};
 export const getUserList = query => {
     return request({
         url: '/rui_ao/users',
@@ -29,3 +36,11 @@ export const editUser = query => {
     });
 };
 
+// 删除用户
+export const delUser = query => {
+    return request({
+        url: `/rui_ao/users/${query.userId}`,
+        method: 'delete',
+        params: query
+    });
+};

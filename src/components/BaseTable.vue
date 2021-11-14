@@ -20,6 +20,7 @@
       <el-table-column v-for="col in cols"
         :key="col.prop"
         :prop="col.prop"
+        :width="col.width || ''"
         :label="col.label">
         <template #default="scope">
           <slot :name="col.slot"
@@ -64,7 +65,7 @@ export default {
       type: String,
     },
     tableRealData: {
-      type: Array
+      type: Array,
     },
     needOperation: {
       type: Boolean,
@@ -80,7 +81,7 @@ export default {
     },
     queryBase: {
       type: Object,
-      default: () => {}
+      default: () => {},
     },
   },
   setup(props, context) {
@@ -93,7 +94,7 @@ export default {
     // 获取表格数据
     const getData = () => {
       if (props.url) {
-        getList(props.url, {...query, ...props.queryBase}).then((res) => {
+        getList(props.url, { ...query, ...props.queryBase }).then((res) => {
           tableData.value = res.data.records
           pageTotal.value = res.data.total || 0
         })
@@ -134,7 +135,6 @@ export default {
       context.emit('edit', row)
     }
     const refresh = (searchData) => {
-      console.log(searchData)
       query.pageNo = 1
       for (const key in searchData) {
         // if (searchData[key] !== '') {

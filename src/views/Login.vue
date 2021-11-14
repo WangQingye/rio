@@ -67,26 +67,28 @@ export default {
         if (valid) {
           let res = await api.login({
             username: param.username,
-            password: param.password
+            password: param.password,
           })
-          console.log(res)
-          ElMessage.success('登录成功')
-          store.commit('setUserInfo', res)
-          if (res.authorities[0].authority === 'SYS_ADMIN') {
-            console.log('aaa')
-            router.push('/')
+          if (!res.status) {
+            ElMessage.success('登录成功')
+            store.commit('setUserInfo', res)
+            localStorage.setItem('ruiao_user', JSON.stringify(res))
+            if (res.authorities[0].authority === 'SYS_ADMIN') {
+              router.push('/')
+            } else {
+              router.push('/work-list')
+            }
           } else {
-            router.push('/work-list')
+            ElMessage.error(res.msg)
+            return false
           }
         } else {
-          ElMessage.error('登录成功')
+          ElMessage.error('请完善表格')
           return false
         }
       })
     }
-
     store.commit('clearTags')
-
     return {
       param,
       rules,

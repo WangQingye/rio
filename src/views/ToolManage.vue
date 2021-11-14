@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :key="toolTypeId">
     <div class="container">
       <el-form :inline="true"
         :model="query"
@@ -77,6 +77,7 @@
       @dialog-submit="addBuySubmit"></ProductAdd>
     <el-dialog :title="`领用记录 - ${editItemData && editItemData.name}` "
       v-model="lendingRecordsVisible"
+      :destroy-on-close="true"
       :close-on-click-modal="false"
       :close-on-press-escape="false"
       width="60%">
@@ -87,17 +88,20 @@
         领用
       </el-button>
       <BaseTable :cols="lendingRecordsColumns"
-        :url="'/lendRecords'">
+        ref="lendRecordTable"
+        :queryBase="{'tool': editItemData.id}"
+        :url="'/tool-manage/claims/page'">
         <template v-slot:operation="slotProps">
           <el-button type="text"
             icon="el-icon-download"
             class="color-success"
+            v-if="!slotProps.scopeData.retNum || (slotProps.scopeData.useNumber > slotProps.scopeData.retNum)"
             @click="showReturnMesuring(slotProps.scopeData)">归还
           </el-button>
           <el-button type="text"
             icon="el-icon-delete"
             class="color-danger"
-            @click="handleDelete(slotProps.scopeData)">删除</el-button>
+            @click="handleLendRecordDelete(slotProps.scopeData)">删除</el-button>
         </template>
       </BaseTable>
       <template #footer>
@@ -118,6 +122,7 @@
     </el-dialog>
     <el-dialog :title="`采购记录 - ${editItemData && editItemData.purchaseUnit}` "
       v-model="buyRecordsVisible"
+      :destroy-on-close="true"
       :close-on-click-modal="false"
       :close-on-press-escape="false"
       width="80%">
@@ -138,19 +143,19 @@
         </el-form-item>
       </el-form>
       <BaseTable :cols="buyRecordsColumns"
-      ref="buyRecordTable"
+        ref="buyRecordTable"
         :queryBase="{'toolType': toolTypeId, 'companyName': editItemData.purchaseUnit}"
         :url="'/tool-manage/buy/record/pages'">
         <template v-slot:operation="slotProps">
-          <el-button type="text"
+          <!-- <el-button type="text"
             icon="el-icon-download"
             class="color-success"
             @click="showReturnMesuring(slotProps.scopeData)">编辑
-          </el-button>
+          </el-button> -->
           <el-button type="text"
             icon="el-icon-delete"
             class="color-danger"
-            @click="handleDelete(slotProps.scopeData)">删除</el-button>
+            @click="handleBuyRecordDelete(slotProps.scopeData)">删除</el-button>
         </template>
       </BaseTable>
       <template #footer>
@@ -171,7 +176,15 @@ import BaseTable from '../components/BaseTable.vue'
 import ProductAdd from './ProductAdd.vue'
 import ProductDetail from './ProductDetail.vue'
 import { useStore } from 'vuex'
-import { editTool, delTool, editToolBuyRecord } from '@/api/tool'
+import {
+  editTool,
+  delTool,
+  editToolBuyRecord,
+  lendTool,
+  returnTool,
+  delToolLendRecords,
+  delToolBuyRecord,
+} from '@/api/tool'
 
 export default {
   components: {
@@ -282,6 +295,7 @@ export default {
 
     // 领用记录相关
     const lendingRecordsVisible = ref(false)
+    const lendRecordTable = ref({})
     const handleLendingRecords = (row) => {
       lendingRecordsVisible.value = true
       editItemData.value = row
@@ -292,29 +306,45 @@ export default {
       addLendVisible.value = true
     }
     const addLendSubmit = async (formData) => {
-      await editTool({
-        toolType: toolTypeId.value,
-        id: editItemData.value?.id,
+      await lendTool({
+        tool: editItemData.value?.id,
         ...formData,
-        specialField: JSON.stringify(specialField),
       })
-      ElMessage.success('添加成功')
-      editVisible.value = false
-      handleSearch()
-      console.log(formData)
+      ElMessage.success('领用成功')
+      addLendVisible.value = false
+      lendRecordTable.value.refresh()
     }
     // 归还
     const returnMesuringVisible = ref(false)
     const editLendRecord = ref(null)
     const returnMesuringItems = [
-      { label: '归还数量', key: 'num', required: true, type: 'number' },
+      { label: '归还数量', key: 'nums', required: true, type: 'number' },
     ]
     const showReturnMesuring = (row) => {
       returnMesuringVisible.value = true
       editLendRecord.value = row
     }
-    const returnMesuringSubmit = (formData) => {
-      console.log(formData)
+    const returnMesuringSubmit = async (formData) => {
+      await returnTool({
+        id: editLendRecord.value?.id,
+        ...formData,
+      })
+      ElMessage.success('归还成功')
+      returnMesuringVisible.value = false
+      lendRecordTable.value.refresh()
+    }
+    // 删除领用记录
+    const handleLendRecordDelete = (row) => {
+      // 二次确认删除
+      ElMessageBox.confirm('确定要删除吗？', '提示', {
+        type: 'warning',
+      })
+        .then(async () => {
+          await delToolLendRecords({ recordId: row.id })
+          ElMessage.success('删除成功')
+          lendRecordTable.value.refresh()
+        })
+        .catch(() => {})
     }
 
     // 购买记录相关
@@ -334,17 +364,31 @@ export default {
     const addBuyVisible = ref(false)
     const showAddBuy = (row) => {
       addBuyVisible.value = true
+      editItemData.value = row
     }
     const addBuySubmit = async (formData) => {
-      console.log(formData)
-      return
+      // return
       await editToolBuyRecord({
         tool: editItemData.value?.id,
-        ...formData
+        ...formData,
       })
       ElMessage.success('添加成功')
       addBuyVisible.value = false
       handleSearch()
+    }
+    // 删除领用记录
+    const handleBuyRecordDelete = (row) => {
+      // 二次确认删除
+      ElMessageBox.confirm('确定要删除吗？', '提示', {
+        type: 'warning',
+      })
+        .then(async () => {
+          await delToolBuyRecord({ recordId: row.id })
+          ElMessage.success('删除成功')
+          handleBuySearch()
+          handleSearch()
+        })
+        .catch(() => {})
     }
     return {
       toolTypeId,
@@ -366,23 +410,23 @@ export default {
       lendingRecordsColumns: [
         {
           label: '领用人',
-          prop: 'lendUser',
+          prop: 'userName',
         },
         {
           label: '领用日期',
-          prop: 'lendTime',
+          prop: 'created',
         },
         {
           label: '领用数量',
-          prop: 'lendnum',
+          prop: 'useNumber',
         },
         {
           label: '归还数量',
-          prop: 'returnNum',
+          prop: 'retNum',
         },
         {
           label: '归还时间',
-          prop: 'returnTime',
+          prop: 'retTime',
         },
         {
           label: '备注',
@@ -392,9 +436,10 @@ export default {
       lendingRecordsVisible,
       showAddLend,
       addLendVisible,
+      lendRecordTable,
       addLendFormItems: [
         { label: '领用人', key: 'user', required: true, type: 'user' },
-        { label: '领用数量', key: 'num', required: true, type: 'number' },
+        { label: '领用数量', key: 'number', required: true, type: 'number' },
         { label: '备注', key: 'remark', required: true, type: 'textarea' },
       ],
       addLendSubmit,
@@ -402,6 +447,7 @@ export default {
       returnMesuringVisible,
       returnMesuringItems,
       returnMesuringSubmit,
+      handleLendRecordDelete,
       handBuyRecords,
       handBuyRecords,
       buyQuery,
@@ -411,6 +457,7 @@ export default {
       showAddBuy,
       addBuySubmit,
       buyRecordsVisible,
+      handleBuyRecordDelete,
       buyRecordsColumns: [
         {
           label: '采购单位',
@@ -418,7 +465,7 @@ export default {
         },
         {
           label: '名称',
-          prop: 'name',
+          prop: 'cutterName',
         },
         {
           label: '规格型号',
@@ -446,7 +493,7 @@ export default {
           label: '采购时间',
           key: 'buyDate',
           required: true,
-          type: 'date'
+          type: 'date',
         },
         {
           label: '采购数量',
@@ -462,7 +509,7 @@ export default {
           label: '回厂时间',
           key: 'returnDate',
           required: true,
-          type: 'date'
+          type: 'date',
         },
       ],
     }

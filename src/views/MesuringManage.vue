@@ -24,20 +24,20 @@
           placeholder="数量"></el-input>
       </el-form-item>
       <el-form-item label="状态">
-          <el-select v-model="query.status"
-            placeholder="状态"
-            clearable
-            class="handle-select mr10">
-            <!-- <el-option key="1"
+        <el-select v-model="query.status"
+          placeholder="状态"
+          clearable
+          class="handle-select mr10">
+          <!-- <el-option key="1"
               label="在库房"
               value="STORAGE"></el-option> -->
-            <el-option key="2"
-              label="在使用"
-              value="USE"></el-option>
-            <el-option key="3"
-              label="已归还"
-              value="RETURN"></el-option>
-          </el-select>
+          <el-option key="2"
+            label="在使用"
+            value="USE"></el-option>
+          <el-option key="3"
+            label="已归还"
+            value="RETURN"></el-option>
+        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button type="primary"
@@ -48,7 +48,7 @@
       icon="el-icon-plus"
       style="margin-bottom: 20px;"
       @click="handleAdd">添加量具</el-button>
-      <MesuringTable ref="mesuringTable"></MesuringTable>
+    <MesuringTable ref="mesuringTable"></MesuringTable>
   </div>
 </template>
 
@@ -83,7 +83,7 @@ export default {
       query,
       handleSearch,
       mesuringTable,
-      handleAdd
+      handleAdd,
     }
   },
 }

@@ -128,6 +128,7 @@
       @dialog-submit="returnMesuringSubmit"></ProductAdd>
     <el-dialog :title="`采购记录 - ${editItemData && editItemData.purchaseUnit}` "
       v-model="buyRecordsVisible"
+      :destroy-on-close="true"
       :close-on-click-modal="false"
       :close-on-press-escape="false"
       width="80%">
@@ -191,7 +192,7 @@ import {
   delCutterBuyRecord,
   lendCutter,
   returnCutter,
-  delCutterLendRecords
+  delCutterLendRecords,
 } from '@/api/cutter'
 
 export default {
@@ -199,7 +200,7 @@ export default {
     BaseTable,
     ProductAdd,
     ProductDetail,
-    UserSelect
+    UserSelect,
   },
   name: 'product-manage',
   setup() {
@@ -312,7 +313,7 @@ export default {
         label: '归还后可二次使用数量',
         key: 'availableNum',
         required: true,
-        type: 'number'
+        type: 'number',
       },
       { label: '废品数量', key: 'badNum', required: true, type: 'number' },
     ]

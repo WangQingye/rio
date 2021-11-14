@@ -5,15 +5,15 @@
         :model="query"
         class="demo-form-inline">
         <el-form-item label="产品代号">
-          <el-input v-model="query.address"
+          <el-input v-model="query.productCode"
             placeholder="产品代号"></el-input>
         </el-form-item>
         <el-form-item label="零件代号">
-          <el-input v-model="query.address"
+          <el-input v-model="query.partCode"
             placeholder="零件代号"></el-input>
         </el-form-item>
         <el-form-item label="零件名称">
-          <el-input v-model="query.address"
+          <el-input v-model="query.partName"
             placeholder="零件名称"></el-input>
         </el-form-item>
         <el-form-item>
@@ -22,31 +22,42 @@
         </el-form-item>
       </el-form>
       <BaseTable :cols="columns"
-      :url="'/worklist'">
+        ref="worklistTable"
+        :url="'/work-shop-manage/work/pages'">
         <template v-slot:status="slotProps">
-          <span>{{slotProps.scopeData.status}}</span>
+          <el-tag :type="slotProps.scopeData.status === 'NORMAL'? 'warning': slotProps.scopeData.status === 'RUNNING'? 'primary': 'success'">{{ {'NORMAL':'未开工', 'RUNNING': '已开工', 'CLOSED': '已完工'}[slotProps.scopeData.status] }}</el-tag>
         </template>
         <template v-slot:operation="slotProps">
           <el-button type="primary"
             icon="el-icon-video-play"
             style="margin-left:0"
-            v-if="slotProps.scopeData.status == '未开始'"
+            v-if="slotProps.scopeData.status == 'NORMAL'"
             @click="handleWorkStatus(slotProps.scopeData, 'start')">开工
           </el-button>
           <el-button type="success"
             icon="el-icon-finished"
-            v-if="slotProps.scopeData.status == '进行中'"
+            v-if="slotProps.scopeData.status == 'RUNNING'"
             @click="handleWorkStatus(slotProps.scopeData, 'finish')">完成</el-button>
         </template>
       </BaseTable>
     </div>
+    <ProductAdd :visible="finishStartVisible"
+      @close="finishStartVisible = false"
+      :title="'开工填报'"
+      :formItems="[{
+        label: '接受产品数量',
+        key: 'acceptAmt',
+        required: false
+      }]"
+      key="product-edit"
+      @dialog-submit="finishStartSubmit"></ProductAdd>
     <ProductAdd :visible="finishEditVisible"
       @close="finishEditVisible = false"
       :title="'完工填报'"
       :formItems="[{
         label: '合格产品数量',
-        key: 'qualifiedNum',
-        required: true
+        key: 'qualAmt',
+        required: false
       }]"
       key="product-edit"
       @dialog-submit="finishEditSubmit"></ProductAdd>
@@ -56,10 +67,10 @@
 <script>
 import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { fetchData } from '../api/index'
 import BaseTable from '../components/BaseTable.vue'
 import ProductAdd from './ProductAdd.vue'
 import ProductDetail from './ProductDetail.vue'
+import { finishWork, startWork } from '@/api/worklist'
 
 export default {
   components: {
@@ -70,42 +81,49 @@ export default {
   name: 'product-manage',
   setup() {
     const query = reactive({
-      address: '',
-      name: '',
-      pageIndex: 1,
-      pageSize: 10,
+      partName: '',
+      productCode: '',
+      partCode: '',
     })
     // 查询操作
+    const worklistTable = ref({})
     const handleSearch = () => {
-      query.pageIndex = 1
+      worklistTable.value.refresh(query)
     }
 
     // 删除操作
     const editItemData = ref(null)
     const finishEditVisible = ref(false)
+    const finishStartVisible = ref(false)
     const handleWorkStatus = (row, status) => {
       editItemData.value = row
       if (status === 'start') {
-        ElMessageBox.confirm('确定开始本工序吗？', '提示')
-        .then(() => {
-          ElMessage.success('操作成功')
-        })
+        finishStartVisible.value = true
       } else if (status === 'finish') {
         finishEditVisible.value = true
       }
     }
-    const finishEditSubmit = (formData) => {
-      console.log(formData)
+    const finishStartSubmit = async (formData) => {
+      await startWork({ workId: editItemData.value.id, ...formData })
+      ElMessage.success('操作成功')
+      finishStartVisible.value = false
+      handleSearch()
+    }
+    const finishEditSubmit = async (formData) => {
+      await finishWork({ workId: editItemData.value.id, ...formData })
+      ElMessage.success('操作成功')
+      finishEditVisible.value = false
+      handleSearch()
     }
     return {
       columns: [
         {
           label: '产品代号',
-          prop: 'productId',
+          prop: 'productCode',
         },
         {
           label: '零件代号',
-          prop: 'partId',
+          prop: 'partCode',
         },
         {
           label: '零件名称',
@@ -113,11 +131,11 @@ export default {
         },
         {
           label: '工序',
-          prop: 'stepName',
+          prop: 'workingName',
         },
         {
           label: '操作设备',
-          prop: 'equipment',
+          prop: 'deviceName',
         },
         {
           label: '状态',
@@ -126,33 +144,37 @@ export default {
         },
         {
           label: '要求完工时间',
-          prop: 'planFinishTime'
+          prop: 'needFinalDate',
         },
         {
           label: '开工时间',
-          prop: 'startTime'
+          prop: 'startDate',
         },
         {
           label: '完工时间',
-          prop: 'endTime'
+          prop: 'finalDate',
         },
         {
           label: '接受产品数量',
-          prop: 'receiveNum'
+          prop: 'acceptAmt',
         },
         {
           label: '合格产品数量',
-          prop: 'qualifiedNum'
+          prop: 'qualAmt',
         },
         {
           label: '工序单价（元）',
-          prop: 'stepPrice'
+          prop: 'price',
         },
       ],
       query,
+      handleSearch,
       handleWorkStatus,
+      worklistTable,
       finishEditVisible,
-      finishEditSubmit
+      finishEditSubmit,
+      finishStartVisible,
+      finishStartSubmit,
     }
   },
 }

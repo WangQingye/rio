@@ -3,10 +3,10 @@
     <BaseTable :cols="columns"
       ref="mesureTable"
       :url="'/measures-manage/list'"
-      :queryBase="{'serialNum':serialNum}"
+      :queryBase="serialNum? {'serialNum':serialNum} : {}"
       @edit="handleEdit">
       <template v-slot:status="slotProps">
-        <el-tag :type="{'USE':'danger', 'STORAGE': 'primary', 'RETURN':'success'}[slotProps.scopeData.status]">{{ {'USE':'在使用', 'STORAGE': '在库房', 'RETURN':'已归还'}[slotProps.scopeData.status] }}</el-tag>
+        <el-tag :type="{'USE':'danger', 'STORAGE': 'primary', 'RETURN':'success'}[slotProps.scopeData.status]">{{ {'USE':'在厂使用', 'STORAGE': '在库房', 'RETURN':'已归还甲方'}[slotProps.scopeData.status] }}</el-tag>
       </template>
       <template v-slot:taskId="slotProps">
         <el-link href="javascript:void(0)"
@@ -43,7 +43,7 @@
       </el-button>
       <BaseTable :cols="lendingRecordsColumns"
         ref="lendRecordsTable"
-        :queryBase="{'measure':editItemData.id}"
+        :queryBase="{'measure':editItemData?.id}"
         :url="'/measures-manage/claims'">
         <template v-slot:operation="slotProps">
           <el-button type="text"
@@ -142,7 +142,11 @@ export default {
       editItemData.value = null
     }
     const editSubmit = async (formData) => {
-      await editMesure({ id: editItemData.value?.id, ...formData, availableNums: formData.numbers })
+      await editMesure({
+        id: editItemData.value?.id,
+        ...formData,
+        availableNums: formData.numbers,
+      })
       ElMessage.success('操作成功')
       editVisible.value = false
       handleSearch()
@@ -266,7 +270,7 @@ export default {
           type: 'select',
           options: [
             {
-              label: '在使用',
+              label: '在厂使用',
               value: 'USE',
             },
             // {
@@ -274,7 +278,7 @@ export default {
             //   value: 'STORAGE',
             // },
             {
-              label: '已归还',
+              label: '已归还甲方',
               value: 'RETURN',
             },
           ],
@@ -284,7 +288,7 @@ export default {
           label: '归还时间',
           key: 'returnDate',
           type: 'date',
-          required: true,
+          required: false,
         },
       ],
       editVisible,
@@ -300,7 +304,7 @@ export default {
       lendingRecordsColumns: [
         {
           label: '领用人',
-          prop: 'user',
+          prop: 'userName',
         },
         {
           label: '领用日期',

@@ -41,6 +41,8 @@
         </el-select>
         <UserSelect v-else-if="item.type=='user'"
           v-model:userData="form[item.key]"
+          :userName="itemData?.userName"
+          :disabled="item.disabled || (itemData && item.editDisabled)"
           style="width: 100%">
         </UserSelect>
         <el-input v-else
@@ -141,7 +143,7 @@ export default {
       form,
       ruleForm,
     }
-  }
+  },
 }
 </script>
 

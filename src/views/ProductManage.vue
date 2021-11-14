@@ -33,17 +33,13 @@
             placeholder="状态"
             clearable
             class="handle-select mr10">
-            <el-option
-              label="未开工"
+            <el-option label="未开工"
               value="NOT_STARTED"></el-option>
-            <el-option
-              label="生产中"
+            <el-option label="生产中"
               value="PROCESSING"></el-option>
-            <el-option
-              label="已完工"
+            <el-option label="已完工"
               value="COMPLETED"></el-option>
-            <el-option
-              label="已完结"
+            <el-option label="已完结"
               value="CLOSED"></el-option>
           </el-select>
         </el-form-item>
@@ -57,10 +53,17 @@
         style="margin-bottom: 20px;"
         @click="handleAdd">添加批次</el-button>
       <BaseTable :cols="columns"
-        ref="userTable"
+        ref="productTable"
         :url="'/products-manage/product/list'">
         <template v-slot:status="slotProps">
-          <el-tag :type="slotProps.scopeData.status === '成功'? 'success': slotProps.scopeData.status === '失败'? 'danger': ''">{{ {'NOT_STARTED':'未开工', 'PROCESSING': '生产中', 'COMPLETED': '已完工', 'CLOSED': '已完结'}[slotProps.scopeData.status] }}</el-tag>
+          <el-tag :type="slotProps.scopeData.status === 'COMPLETED'? 'success': slotProps.scopeData.status === 'NOT_STARTED'? 'danger': ''">{{ {'NOT_STARTED':'未开工', 'PROCESSING': '生产中', 'COMPLETED': '已完工', 'CLOSED': '已完结'}[slotProps.scopeData.status] }}</el-tag>
+        </template>
+        <template v-slot:factoryProcess="slotProps">
+          <el-link href="javascript:void(0)"
+            style="display: block"
+            v-for="work in slotProps.scopeData.workings"
+            :key="work.id"
+            :type="{'NORMAL': 'danger', 'RUNNING':'success', 'CLOSED': 'primary'}[work.status]">{{`${work.workingName}-${{'NORMAL': '未开工', 'RUNNING':'进行中', 'CLOSED': '已完工'}[work.status]}`}}</el-link>
         </template>
         <template v-slot:serial="slotProps">
           <el-link href="javascript:void(0)"
@@ -110,10 +113,11 @@ import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { fetchData } from '../api/index'
 import BaseTable from '@/components/BaseTable.vue'
+// import MyButton from '@/components/MyButton.vue'
 import ProductAdd from './ProductAdd.vue'
 import ProductDetail from './ProductDetail.vue'
 import PartDetail from './PartDetail.vue'
-import { editProduct } from '@/api/product'
+import { editProduct, delProduct } from '@/api/product'
 
 export default {
   components: {
@@ -121,6 +125,7 @@ export default {
     ProductAdd,
     ProductDetail,
     PartDetail,
+    // MyButton,
   },
   name: 'product-manage',
   setup() {
@@ -135,19 +140,21 @@ export default {
     })
 
     // 查询操作
-    const userTable = ref()
+    const productTable = ref()
     const handleSearch = () => {
-      userTable.value.refresh(query)
+      productTable.value.refresh(query)
     }
 
     // 删除操作
-    const handleDelete = (index) => {
+    const handleDelete = (row) => {
       // 二次确认删除
       ElMessageBox.confirm('确定要删除吗？', '提示', {
         type: 'warning',
       })
-        .then(() => {
+        .then(async () => {
+          await delProduct({ id: row.id })
           ElMessage.success('删除成功')
+          handleSearch()
         })
         .catch(() => {})
     }
@@ -214,6 +221,8 @@ export default {
         {
           label: '本厂实际工序',
           prop: 'factoryProcess',
+          width: '130',
+          slot: 'factoryProcess',
         },
         {
           label: '回厂数量',
@@ -294,19 +303,24 @@ export default {
           key: 'status',
           required: true,
           type: 'select',
-          options: [{
-            label: '未开工',
-            value: 'NOT_STARTED'
-          },{
-            label: '生产中',
-            value: 'PROCESSING'
-          },{
-            label: '已完工',
-            value: 'COMPLETED'
-          },{
-            label: '已完结',
-            value: 'CLOSED'
-          }],
+          options: [
+            {
+              label: '未开工',
+              value: 'NOT_STARTED',
+            },
+            {
+              label: '生产中',
+              value: 'PROCESSING',
+            },
+            {
+              label: '已完工',
+              value: 'COMPLETED',
+            },
+            {
+              label: '已完结',
+              value: 'CLOSED',
+            },
+          ],
         },
         { label: '上账备注', key: 'remark1', required: false },
         { label: '出厂数量', key: 'exQuantity', required: false },
@@ -334,7 +348,7 @@ export default {
       detailVisible,
       partDetailVisible,
       showPartDetail,
-      userTable,
+      productTable,
     }
   },
 }

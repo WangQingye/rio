@@ -56,34 +56,34 @@ export const editToolBuyRecord = query => {
 
 
 // 删除采购记录
-export const delCutterBuyRecord = query => {
+export const delToolBuyRecord = query => {
   return request({
-    url: `/cutter-manage/record/remove/${query.recordId}`,
+    url: `/tool-manage/record/remove/${query.recordId}`,
     method: 'delete',
     data: query
   });
 };
 
 // 领用量具
-export const lendCutter = query => {
+export const lendTool = query => {
   return request({
-    url: '/cutter-manage/claims/add',
+    url: '/tool-manage/tool/record/add',
     method: 'post',
     data: query
   });
 };
 // 归还量具
-export const returnCutter = query => {
+export const returnTool = query => {
   return request({
-    url: `/cutter-manage/claims/ret`,
+    url: `/tool-manage/tool/claim/ret`,
     method: 'put',
-    data: query
+    params: query
   });
 };
 // 删除领用记录
-export const delCutterLendRecords = query => {
+export const delToolLendRecords = query => {
   return request({
-    url: `/cutter-manage/claims/remove/${query.recordId}`,
+    url: `/tool-manage/tool/record/${query.recordId}`,
     method: 'delete',
     data: query
   });

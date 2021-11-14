@@ -32,7 +32,7 @@
           <BaseTable noBorder
             noPager
             :cols="stepColumns"
-            :tableRealData="p.workings" 
+            :tableRealData="p.workings"
             :key="p.id"
             :needOperation="false">
             <template v-slot:status="slotProps">
@@ -130,12 +130,12 @@ export default {
         },
         {
           label: '操作者',
-          prop: 'user'
+          prop: 'userName',
         },
         {
           label: '当前状态',
           prop: 'status',
-          slot: 'status'
+          slot: 'status',
         },
         {
           label: '操作设备',
@@ -163,7 +163,7 @@ export default {
         },
         {
           label: '运行时间',
-          prop: 'runningDate'
+          prop: 'runningDate',
         },
         {
           label: '最高记录',

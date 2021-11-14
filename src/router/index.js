@@ -3,7 +3,9 @@ import {
     createWebHashHistory
 } from "vue-router";
 import Home from "../views/Home.vue";
-import {myStore} from '../store'
+import {
+    myStore
+} from '../store'
 const routes = [{
     path: '/',
     redirect: '/product'
@@ -83,19 +85,19 @@ const router = createRouter({
 });
 
 const store = myStore();
-router.beforeEach((to, from, next) => {
-    document.title = `${to.meta.title} | 瑞奥机械`;
-    const role = store.state.userInfo;
-    if (!role && to.path !== '/login') {
-        next('/login');
-    } else if (to.meta.permission) {
-        // 如果是管理员权限则可进入，这里只是简单的模拟管理员权限而已
-        role === 'admin' ?
-            next() :
-            next('/403');
-    } else {
-        next();
-    }
-});
+// router.beforeEach((to, from, next) => {
+//     document.title = `${to.meta.title} | 瑞奥机械`;
+//     const role = store.state.userInfo;
+//     if (!role && to.path !== '/login') {
+//         next('/login');
+//     } else if (to.meta.permission) {
+//         // 如果是管理员权限则可进入，这里只是简单的模拟管理员权限而已
+//         role === 'admin' ?
+//             next() :
+//             next('/403');
+//     } else {
+//         next();
+//     }
+// });
 
 export default router;
