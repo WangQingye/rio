@@ -69,7 +69,7 @@ export default {
             username: param.username,
             password: param.password,
           })
-          if (!res.status) {
+          if (!res.status && res) {
             ElMessage.success('登录成功')
             store.commit('setUserInfo', res)
             localStorage.setItem('ruiao_user', JSON.stringify(res))

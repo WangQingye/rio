@@ -35,7 +35,7 @@ const routes = [{
         },
         component: () => import( /* webpackChunkName: "knife" */ "../views/KnifeManage.vue")
     }, {
-        path: "/tool",
+        path: "/tool/:id",
         name: "tool",
         meta: {
             title: '工具管理'

@@ -93,22 +93,22 @@ export default {
     }
     // 归还
     const passwordItems = [
-      { label: '旧密码', key: 'old' },
-      { label: '新密码', key: 'new' },
+      { label: '旧密码', key: 'oldPassword' },
+      { label: '新密码', key: 'newPassword' },
       { label: '确认新密码', key: 'renew' },
     ]
     const editPasswordSubmit = async (formData) => {
-      if (formData.new.length < 6) {
+      if (formData.newPassword.length < 6) {
         ElMessage.error('密码不能少于6位')
         return
       }
-      if (formData.new !== formData.renew) {
+      if (formData.newPassword !== formData.renew) {
         ElMessage.error('确认密码有误')
         return
       }
-      await returnCutter({
-        id: editLendRecord.value?.id,
-        ...formData,
+      await api.editPassword({
+        userName: store.state.userInfo.user.userName,
+        ...formData
       })
       ElMessage.success('操作成功')
       editPasswordVisible.value = false

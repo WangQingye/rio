@@ -235,6 +235,10 @@ export default {
           prop: 'numbers',
         },
         {
+          label: '库房存放点',
+          prop: 'locations',
+        },
+        {
           label: '库房剩余数量',
           prop: 'availableNums',
         },
@@ -284,6 +288,7 @@ export default {
           ],
         },
         { label: '入库时间', key: 'putDate', type: 'date', required: true },
+        { label: '库房存放点', key: 'locations' },
         {
           label: '归还时间',
           key: 'returnDate',

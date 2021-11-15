@@ -1,5 +1,6 @@
 <template>
-  <div :key="toolTypeId">
+  <div :key="toolTypeId"
+    v-if="toolTypeInfo.name">
     <div class="container">
       <el-form :inline="true"
         :model="query"
@@ -168,7 +169,7 @@
 </template>
 
 <script>
-import { onBeforeMount, watch, computed, ref, reactive } from 'vue'
+import { onMounted, watch, computed, ref, reactive } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { fetchData } from '../api/index'
@@ -193,47 +194,59 @@ export default {
     ProductDetail,
   },
   name: 'product-manage',
+  beforeRouteUpdate(to, from, next) {
+    if (to.name == 'tool') {
+      this.toolTypeId = to.query.id
+      this.initToolInfo()
+    }
+    next()
+  },
   setup() {
     const route = useRoute()
     const store = useStore()
+    const columns = ref()
+    const formItems = ref()
     const toolTypeId = ref(null)
-    const columns = ref([
-      { label: '采购单位', prop: 'purchaseUnit', slot: 'purchaseUnit' },
-      { label: '名称', prop: 'name' },
-      { label: '规格型号', prop: 'specification' },
-      { label: '库房存放点', prop: 'locations' },
-      { label: '库房剩余数量', prop: 'availableNum' },
-      { label: '总购数量', prop: 'totalBuy' },
-    ])
-    const formItems = ref([
-      { label: '采购单位', key: 'purchaseUnit', required: true },
-      { label: '名称', key: 'name', required: true },
-      { label: '规格型号', key: 'specification', required: true },
-      { label: '库房存放点', key: 'locations', required: true },
-      { label: '库房剩余数量', key: 'availableNum', required: true },
-      { label: '总购数量', key: 'totalBuy', required: true },
-    ])
     const toolTypeInfo = ref({})
-    toolTypeId.value = route.query.id
-    onBeforeMount(async () => {
-      toolTypeInfo.value = store.state.toolTypes.find(
-        (t) => t.id == route.query.id
-      )
-      if (toolTypeInfo.value.specField) {
-        toolTypeInfo.value.specField.split('|').forEach((f, index) => {
-          columns.value.push({
-            label: f,
-            prop: 'key' + index,
-            slot: 'key' + index,
+    const initToolInfo = () => {
+      if (!toolTypeId.value) toolTypeId.value = route.query.id
+      columns.value = [
+        { label: '采购单位', prop: 'purchaseUnit', slot: 'purchaseUnit' },
+        { label: '名称', prop: 'name' },
+        { label: '规格型号', prop: 'specification' },
+        { label: '库房存放点', prop: 'locations' },
+        { label: '库房剩余数量', prop: 'availableNum' },
+        { label: '总购数量', prop: 'totalBuy' },
+      ]
+      formItems.value = [
+        { label: '采购单位', key: 'purchaseUnit', required: true },
+        { label: '名称', key: 'name', required: true },
+        { label: '规格型号', key: 'specification', required: true },
+        { label: '库房存放点', key: 'locations', required: true },
+        { label: '库房剩余数量', key: 'availableNum', required: true },
+        { label: '总购数量', key: 'totalBuy', required: true },
+      ]
+      setTimeout(() => {
+        toolTypeInfo.value = store.state.toolTypes.find(
+          (t) => t.id == route.query.id
+        )
+        if (toolTypeInfo.value?.specField) {
+          toolTypeInfo.value.specField.split('|').forEach((f, index) => {
+            columns.value.push({
+              label: f,
+              prop: 'key' + index,
+              slot: 'key' + index,
+            })
+            formItems.value.push({
+              label: f,
+              key: 'key' + index,
+              required: false,
+            })
           })
-          formItems.value.push({
-            label: f,
-            key: 'key' + index,
-            required: false,
-          })
-        })
-      }
-    })
+        }
+      }, 500)
+    }
+    initToolInfo()
     const toolTable = ref({})
     const query = reactive({
       name: '',
@@ -512,6 +525,7 @@ export default {
           type: 'date',
         },
       ],
+      initToolInfo,
     }
   },
 }

@@ -81,6 +81,7 @@ export default {
             toolId: row.id
           })
           ElMessage.success('删除成功')
+          window.location.reload()
           handleSearch()
         })
         .catch(() => {})
@@ -104,6 +105,7 @@ export default {
     const editSubmit = async (formData) => {
       await addToolType({ id: editItemData.value?.id, ...formData })
       ElMessage.success('添加成功')
+      window.location.reload()
       editVisible.value = false
       handleSearch()
     }

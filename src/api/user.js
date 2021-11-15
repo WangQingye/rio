@@ -44,3 +44,10 @@ export const delUser = query => {
         params: query
     });
 };
+export const editPassword = query => {
+    return request({
+        url: '/rui_ao/user/pwd',
+        method: 'put',
+        data: query
+    });
+};

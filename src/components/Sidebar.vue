@@ -67,7 +67,7 @@ export default {
       console.log(res)
       toolSubs.value = res.data.records.map(t => {
         return {
-          index: `/tool?id=${t.id}`,
+          index: `/tool/${t.id}?id=${t.id}`,
           title: t.name,
         }
       })
