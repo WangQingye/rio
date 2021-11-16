@@ -50,7 +50,6 @@
 import { onBeforeMount, computed, watch, ref } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute, useRouter } from 'vue-router'
-import { fetchData } from '../api/index'
 import { getToolType } from '@/api/tool'
 export default {
   setup() {

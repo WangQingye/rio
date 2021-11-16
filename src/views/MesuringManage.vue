@@ -32,10 +32,10 @@
               label="在库房"
               value="STORAGE"></el-option> -->
           <el-option key="2"
-            label="在使用"
+            label="在厂使用"
             value="USE"></el-option>
           <el-option key="3"
-            label="已归还"
+            label="已归还甲方"
             value="RETURN"></el-option>
         </el-select>
       </el-form-item>

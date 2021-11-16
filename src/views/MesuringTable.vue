@@ -2,6 +2,7 @@
   <div>
     <BaseTable :cols="columns"
       ref="mesureTable"
+      needExport
       :url="'/measures-manage/list'"
       :queryBase="serialNum? {'serialNum':serialNum} : {}"
       @edit="handleEdit">
@@ -236,7 +237,7 @@ export default {
         },
         {
           label: '库房存放点',
-          prop: 'locations',
+          prop: 'storage',
         },
         {
           label: '库房剩余数量',
@@ -259,7 +260,7 @@ export default {
       formItems: [
         { label: '量具名称', key: 'name', required: true },
         { label: '量具规格', key: 'specification', required: true },
-        { label: '量具编号', key: 'code', required: true },
+        { label: '量具编号', key: 'code', required: false },
         {
           label: '归属序号',
           key: 'serialNum',
@@ -288,7 +289,7 @@ export default {
           ],
         },
         { label: '入库时间', key: 'putDate', type: 'date', required: true },
-        { label: '库房存放点', key: 'locations' },
+        { label: '库房存放点', key: 'storage', required: false },
         {
           label: '归还时间',
           key: 'returnDate',

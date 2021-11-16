@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="container">
+    <div :class="[!userId ? 'container' : '']">
       <el-form :inline="true"
         :model="query"
         class="demo-form-inline">
@@ -23,6 +23,8 @@
       </el-form>
       <BaseTable :cols="columns"
         ref="worklistTable"
+        :needOperation="!userId"
+        :queryBase="userId ? {'user': userId } : {}"
         :url="'/work-shop-manage/work/pages'">
         <template v-slot:status="slotProps">
           <el-tag :type="slotProps.scopeData.status === 'NORMAL'? 'warning': slotProps.scopeData.status === 'RUNNING'? 'primary': 'success'">{{ {'NORMAL':'未开工', 'RUNNING': '已开工', 'CLOSED': '已完工'}[slotProps.scopeData.status] }}</el-tag>
@@ -78,7 +80,13 @@ export default {
     ProductAdd,
     ProductDetail,
   },
-  name: 'product-manage',
+  name: 'work-list',
+  props: {
+    userId: {
+      type: String,
+      default: undefined
+    }
+  },
   setup() {
     const query = reactive({
       partName: '',

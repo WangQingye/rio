@@ -26,6 +26,7 @@
         style="margin-bottom: 20px;"
         @click="handleAdd">添加刀具</el-button>
       <BaseTable :cols="columns"
+        needExport
         ref="cutterTable"
         :url="'/cutter-manage/pages'">
         <template v-slot:specification="slotProps">
@@ -181,7 +182,6 @@
 <script>
 import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { fetchData } from '../api/index'
 import BaseTable from '../components/BaseTable.vue'
 import ProductAdd from './ProductAdd.vue'
 import UserSelect from '@/components/UserSelect.vue'
@@ -290,10 +290,10 @@ export default {
       {
         label: '归属序号',
         key: 'serial',
-        required: true,
+        required: false,
         placeholder: '用于加工哪个序号',
       },
-      { label: '备注', key: 'remark', required: true, type: 'textarea' },
+      { label: '备注', key: 'remark', required: false, type: 'textarea' },
     ]
     const addLendSubmit = async (formData) => {
       await lendCutter({
@@ -467,6 +467,10 @@ export default {
       handleLendRecordDelete,
       lendingRecordsColumns: [
         {
+          label: '采购单位',
+          prop: 'purchaseUnit',
+        },
+        {
           label: '领用人',
           prop: 'userName',
         },
@@ -506,10 +510,10 @@ export default {
           label: '零件名称',
           prop: 'partName',
         },
-        {
-          label: '采购单价',
-          prop: 'price',
-        },
+        // {
+        //   label: '采购单价',
+        //   prop: 'price',
+        // },
         {
           label: '备注',
           prop: 'remark',

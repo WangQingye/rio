@@ -20,7 +20,6 @@
 
 <script>
 import { ref, reactive, onMounted } from 'vue'
-import { fetchData } from '../api/index'
 import { getUserList } from '@/api/user'
 export default {
   name: 'user-select',

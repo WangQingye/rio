@@ -31,6 +31,11 @@
       <BaseTable :cols="columns"
         ref="userTable"
         :url="'/rui_ao/users'">
+        <template v-slot:realName="slotProps">
+          <el-link href="javascript:void(0)"
+            type="primary"
+            @click="showUserDetail(slotProps.scopeData)">{{slotProps.scopeData.realName}}</el-link>
+        </template>
         <template v-slot:role="slotProps">
           <span>{{ {'SYS_ADMIN':'系统管理员', 'SYS_EMPLOYEE':'普通员工', 'SYS_CONTACT': '外协联络员', 'SYS_PRODUCT': '生产管理员', 'SYS_STORE': '仓库管理员'}[slotProps.scopeData.roles[0].roleCode] }}</span>
         </template>
@@ -54,16 +59,43 @@
     <ProductDetail :visible="detailVisible"
       @close="detailVisible = false"
       :itemData="editItemData"></ProductDetail>
+
+    <!-- 用户详情 -->
+    <el-dialog :append-to-body="true"
+      :title="`用户详情 - ${userDetailInfo.realName}` "
+      v-model="userDetailVisible"
+      :destroy-on-close="true"
+      :show-close="false"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      width="80%">
+      <el-tabs v-model="detailActive">
+        <el-tab-pane label="工作列表"
+          name="worklist">
+          <WorkList :userId="userDetailInfo.id"></WorkList>
+        </el-tab-pane>
+        <el-tab-pane label="领用清单"
+          name="lendlist">
+          <LendList :userId="userDetailInfo.id"></LendList>
+        </el-tab-pane>
+      </el-tabs>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="userDetailVisible = false">关 闭</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { fetchData } from '../api/index'
 import BaseTable from '../components/BaseTable.vue'
 import ProductAdd from './ProductAdd.vue'
 import ProductDetail from './ProductDetail.vue'
+import WorkList from './WorkList.vue'
+import LendList from './LendList.vue'
 import { editUser, getRoleList, delUser } from '@/api/user'
 
 export default {
@@ -71,6 +103,8 @@ export default {
     BaseTable,
     ProductAdd,
     ProductDetail,
+    LendList,
+    WorkList
   },
   name: 'product-manage',
   setup() {
@@ -94,7 +128,7 @@ export default {
         type: 'warning',
       })
         .then(async () => {
-          await delUser({ userId: row.id})
+          await delUser({ userId: row.id })
           ElMessage.success('删除成功')
           handleSearch()
         })
@@ -157,12 +191,20 @@ export default {
         },
       ]
     })
+    const userDetailVisible = ref(false)
+    const userDetailInfo = ref({})
+    const showUserDetail = (row) => {
+      userDetailInfo.value = row
+      userDetailVisible.value = true
+    }
+    const detailActive = ref('worklist')
     return {
       roleList,
       columns: [
         {
           label: '用户姓名',
           prop: 'realName',
+          slot: 'realName',
         },
         {
           label: '手机号',
@@ -188,6 +230,10 @@ export default {
       handleAdd,
       detailVisible,
       userTable,
+      userDetailVisible,
+      userDetailInfo,
+      showUserDetail,
+      detailActive
     }
   },
 }

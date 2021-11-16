@@ -12,7 +12,7 @@
       ref="ruleForm"
       :model="form"
       inline>
-      <el-form-item :style="item.width ? `width:${item.width}` : 'width: 48%'"
+      <el-form-item :style="(item.width ? `width:${item.width}` : 'width: 48%') + ';' + ((!itemData && item.hideOnAdd) ? `display:none` : '')"
         v-for="item in formItems"
         :key="item.key"
         :label="item.label"

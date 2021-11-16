@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-dropdown style="float:right;margin-bottom:10px">
+    <!-- <el-dropdown style="float:right;margin-bottom:10px" v-if="needExport">
       <el-button type="primary"
         size="small">
         导出表格<i class="el-icon-arrow-down el-icon--right"></i>
@@ -11,7 +11,11 @@
           <el-dropdown-item>导出全部</el-dropdown-item>
         </el-dropdown-menu>
       </template>
-    </el-dropdown>
+    </el-dropdown> -->
+    <el-button type="primary" v-if="needExport" style="float:right;margin-bottom:10px"
+      size="small" @click="exportTable">
+      导出表格
+    </el-button>
     <el-table :data="url ? tableData : tableRealData"
       :border="!noBorder"
       class="table"
@@ -52,7 +56,7 @@
 
 <script>
 import { ref, reactive } from 'vue'
-import { fetchData, getList } from '../api/index'
+import { getExcel, getList } from '../api/index'
 
 export default {
   name: 'basetable',
@@ -76,6 +80,10 @@ export default {
       default: false,
     },
     noPager: {
+      type: Boolean,
+      default: false,
+    },
+    needExport: {
       type: Boolean,
       default: false,
     },
@@ -143,6 +151,9 @@ export default {
       }
       getData()
     }
+    const exportTable = () => {
+      getExcel(props.url, { ...query, ...props.queryBase })
+    }
     return {
       query,
       tableData,
@@ -154,6 +165,7 @@ export default {
       handleDelete,
       handleEdit,
       refresh,
+      exportTable
     }
   },
 }

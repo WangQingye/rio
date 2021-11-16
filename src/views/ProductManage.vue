@@ -53,6 +53,7 @@
         style="margin-bottom: 20px;"
         @click="handleAdd">添加批次</el-button>
       <BaseTable :cols="columns"
+        needExport
         ref="productTable"
         :url="'/products-manage/product/list'">
         <template v-slot:status="slotProps">
@@ -111,7 +112,6 @@
 <script>
 import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { fetchData } from '../api/index'
 import BaseTable from '@/components/BaseTable.vue'
 // import MyButton from '@/components/MyButton.vue'
 import ProductAdd from './ProductAdd.vue'
@@ -171,7 +171,20 @@ export default {
       editItemData.value = row
     }
     const editSubmit = async (formData) => {
-      console.log(formData)
+      // 添加时设置默认状态
+      if (!editItemData.value) {
+        formData.status = 'NOT_STARTED'
+      } else {
+        if (
+          !(
+            editItemData.value.status === 'COMPLETED' &&
+            formData.status === 'CLOSED'
+          )
+        ) {
+          ElMessage.error('状态只能由已完工修改为已完结')
+          return
+        }
+      }
       await editProduct({ id: editItemData.value?.id, ...formData })
       ElMessage.success('添加成功')
       editVisible.value = false
@@ -225,6 +238,10 @@ export default {
           slot: 'factoryProcess',
         },
         {
+          label: '原材料存放点',
+          prop: 'materialStorage',
+        },
+        {
           label: '回厂数量',
           prop: 'returnQuantity',
         },
@@ -264,12 +281,11 @@ export default {
       ],
       formItems: [
         { label: '序号', key: 'serial', required: true, editDisabled: true },
-        { label: '任务号', key: 'code', required: true, editDisabled: true },
+        { label: '任务号', key: 'code', required: true },
         {
           label: '产品代号',
           key: 'productCode',
           required: true,
-          editDisabled: true,
         },
         {
           label: '零件代号',
@@ -281,7 +297,6 @@ export default {
           label: '零件名称',
           key: 'partName',
           required: true,
-          editDisabled: true,
         },
         { label: '图纸工序', key: 'processes', required: false },
         { label: '回厂数量', key: 'returnQuantity', required: false },
@@ -291,18 +306,25 @@ export default {
           required: false,
           type: 'date',
         },
-        { label: '调度备注', key: 'remark', required: false },
+        {
+          label: '原材料存放点',
+          key: 'materialStorage',
+          required: false,
+        },
+        { label: '调度备注', key: 'remark', hideOnAdd: true, required: false },
         {
           label: '甲方要求回厂时间',
           key: 'requiredReturnDate',
           required: false,
+          hideOnAdd: true,
           type: 'date',
         },
         {
           label: '状态',
           key: 'status',
-          required: true,
+          required: false,
           type: 'select',
+          hideOnAdd: true,
           options: [
             {
               label: '未开工',
@@ -322,17 +344,29 @@ export default {
             },
           ],
         },
-        { label: '上账备注', key: 'remark1', required: false },
-        { label: '出厂数量', key: 'exQuantity', required: false },
+        {
+          label: '上账备注',
+          key: 'remark1',
+          required: false,
+          hideOnAdd: true,
+        },
+        {
+          label: '出厂数量',
+          key: 'exQuantity',
+          required: false,
+          hideOnAdd: true,
+        },
         {
           label: '出厂时间',
           key: 'deliveryTime',
           required: false,
+          hideOnAdd: true,
           type: 'date',
         },
         {
           label: '最终甲方检验合格数',
           key: 'requiredQualified',
+          hideOnAdd: true,
           required: false,
         },
       ],

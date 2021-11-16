@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="container">
+    <div :class="[!userId ? 'container' : '']">
       <el-form :inline="true"
         :model="query"
         class="demo-form-inline">
@@ -15,6 +15,7 @@
       </el-form>
       <BaseTable :cols="columns"
         ref="lendTable"
+        :queryBase="userId ? {'user': userId } : {}"
         :needOperation="false"
         :url="'/claim-list-manage/claim/pages'">
       </BaseTable>
@@ -25,7 +26,6 @@
 <script>
 import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { fetchData } from '../api/index'
 import BaseTable from '../components/BaseTable.vue'
 import ProductAdd from './ProductAdd.vue'
 import ProductDetail from './ProductDetail.vue'
@@ -36,7 +36,13 @@ export default {
     ProductAdd,
     ProductDetail,
   },
-  name: 'product-manage',
+  name: 'lend-list',
+  props: {
+    userId: {
+      type: String,
+      default: undefined
+    }
+  },
   setup() {
     const query = reactive({
       name: '',
