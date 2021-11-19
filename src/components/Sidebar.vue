@@ -58,81 +58,101 @@ export default {
     const route = useRoute()
     const store = useStore()
     const router = useRouter()
+    const userType = store.state.userInfo.authorities[0].authority
     onBeforeMount(async () => {
       let res = await getToolType({
         pageNo: 1,
-        pageSize: 100
+        pageSize: 100,
       })
       console.log(res)
-      toolSubs.value = res.data.records.map(t => {
+      toolSubs.value = res.data.records.map((t) => {
         return {
           index: `/tool/${t.id}?id=${t.id}`,
           title: t.name,
         }
       })
-      store.commit("setToolTypes", res.data.records);
-      if (store.state.userInfo.authorities[0].authority === 'SYS_ADMIN') {
-        items.value = [
-          {
-            icon: 'el-icon-lx-cascades',
-            index: '/product',
-            title: '产品管理',
-          },
-          {
-            icon: 'el-icon-lx-filter',
-            index: '/mesuring',
-            title: '量具管理',
-          },
-          {
-            icon: 'el-icon-lx-tag',
-            index: '/knife',
-            title: '刀具管理',
-          },
-          {
-            icon: 'el-icon-lx-file',
-            title: '工具管理',
-            subs: [
-              {
-                icon: 'el-icon-lx-file',
-                index: '/tool-add',
-                title: '添加工具种类',
-              },
-              ...toolSubs.value,
-            ],
-          },
-          {
-            icon: 'el-icon-lx-friendadd',
-            index: '/user',
-            title: '员工管理',
-          },
-          {
-            icon: 'el-icon-date',
-            index: '/work-list',
-            title: '工作列表',
-          },
-          {
-            icon: 'el-icon-document',
-            index: '/lend-list',
-            title: '领用清单',
-          },
-        ]
-      } else {
-        items.value = [
-          {
-            icon: 'el-icon-date',
-            index: '/work-list',
-            title: '工作列表',
-          },
-          {
-            icon: 'el-icon-document',
-            index: '/lend-list',
-            title: '领用清单',
-          },
-        ]
-        router.push('/work-list')
+      store.commit('setToolTypes', res.data.records)
+      // 三个角色可以看到产品管理
+      if (
+        userType === 'SYS_ADMIN' ||
+        userType === 'SYS_CONTACT' ||
+        userType === 'SYS_PRODUCT'
+      ) {
+        items.value.push({
+          icon: 'el-icon-lx-cascades',
+          index: '/product',
+          title: '产品管理',
+        })
       }
+      // 四个角色可以看到仓库相关
+      if (
+        userType === 'SYS_ADMIN' ||
+        userType === 'SYS_CONTACT' ||
+        userType === 'SYS_PRODUCT' ||
+        userType === 'SYS_STORE'
+      ) {
+        items.value.push(
+          ...[
+            {
+              icon: 'el-icon-lx-filter',
+              index: '/mesuring',
+              title: '量具管理',
+            },
+            {
+              icon: 'el-icon-lx-tag',
+              index: '/knife',
+              title: '刀具管理',
+            },
+            {
+              icon: 'el-icon-lx-file',
+              title: '工具管理',
+              subs: [
+                {
+                  icon: 'el-icon-lx-file',
+                  index: '/tool-add',
+                  title: '添加工具种类',
+                },
+                ...toolSubs.value,
+              ],
+            },
+          ]
+        )
+      }
+      // 只有管理员可以看员工管理
+      if (userType === 'SYS_ADMIN') {
+        items.value.push({
+          icon: 'el-icon-lx-friendadd',
+          index: '/user',
+          title: '员工管理',
+        })
+      }
+      // 管理员跟财务管理员可以看工资结算
+      if (userType === 'SYS_FINANCIAL' || userType === 'SYS_ADMIN') {
+        items.value.push({
+          icon: 'el-icon-money',
+          index: '/work-pay',
+          title: '工资结算',
+        })
+      }
+      // 所有人都可以看工作列表和领用清单
+      items.value.push(
+        ...[
+          {
+            icon: 'el-icon-date',
+            index: '/work-list',
+            title: '工作列表',
+          },
+          {
+            icon: 'el-icon-document',
+            index: '/lend-list',
+            title: '领用清单',
+          },
+        ]
+      )
+      if (userType === 'SYS_STORE') router.push('/mesuring')
+      if (userType === 'SYS_FINANCIAL') router.push('/work-pay')
+      if (userType === 'SYS_EMPLOYEE') router.push('/work-list')
     })
-
 
     const onRoutes = computed(() => {
       return route.path

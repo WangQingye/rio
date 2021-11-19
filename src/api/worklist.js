@@ -16,3 +16,11 @@ export const startWork = query => {
         params: query
     });
 };
+// 结账
+export const payWork = query => {
+    return request({
+        url: `/work-shop-manage/wage/${query.workId}`,
+        method: 'put',
+        params: query
+    });
+};

@@ -55,7 +55,7 @@
 </template>
 
 <script>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { getExcel, getList } from '../api/index'
 
 export default {
@@ -97,12 +97,24 @@ export default {
       pageNo: 1,
       pageSize: 10,
     })
+    const searchObj = computed(() => {
+      let obj = { ...query, ...props.queryBase }
+      for (const key in obj) {
+        if (Object.hasOwnProperty.call(obj, key)) {
+          const element = obj[key];
+          if (element === '') {
+            obj[key] = undefined
+          }
+        }
+      }
+      return obj
+    })
     const tableData = ref([])
     const pageTotal = ref(0)
     // 获取表格数据
     const getData = () => {
       if (props.url) {
-        getList(props.url, { ...query, ...props.queryBase }).then((res) => {
+        getList(props.url, searchObj.value).then((res) => {
           tableData.value = res.data.records
           pageTotal.value = res.data.total || 0
         })
@@ -152,7 +164,7 @@ export default {
       getData()
     }
     const exportTable = () => {
-      getExcel(props.url, { ...query, ...props.queryBase })
+      getExcel(props.url, searchObj.value)
     }
     return {
       query,

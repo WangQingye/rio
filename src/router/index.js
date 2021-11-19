@@ -56,6 +56,13 @@ const routes = [{
         },
         component: () => import( /* webpackChunkName: "user" */ "../views/UserManage.vue")
     }, {
+        path: "/work-pay",
+        name: "work-pay",
+        meta: {
+            title: '工资结算'
+        },
+        component: () => import( /* webpackChunkName: "work-pay" */ "../views/WorkPay.vue")
+    }, {
         path: "/work-list",
         name: "work-list",
         meta: {

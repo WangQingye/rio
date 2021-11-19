@@ -37,7 +37,7 @@
             @click="showUserDetail(slotProps.scopeData)">{{slotProps.scopeData.realName}}</el-link>
         </template>
         <template v-slot:role="slotProps">
-          <span>{{ {'SYS_ADMIN':'系统管理员', 'SYS_EMPLOYEE':'普通员工', 'SYS_CONTACT': '外协联络员', 'SYS_PRODUCT': '生产管理员', 'SYS_STORE': '仓库管理员'}[slotProps.scopeData.roles[0].roleCode] }}</span>
+          <span>{{ {'SYS_ADMIN':'系统管理员', 'SYS_EMPLOYEE':'普通员工', 'SYS_CONTACT': '外协联络员', 'SYS_PRODUCT': '生产管理员', 'SYS_STORE': '仓库管理员', 'SYS_FINANCIAL': '财务管理员', 'SYS_QUALITY': '质量管理员'}[slotProps.scopeData.roles[0].roleCode] }}</span>
         </template>
         <template v-slot:operation="slotProps">
           <el-button type="text"

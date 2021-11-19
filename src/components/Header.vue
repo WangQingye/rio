@@ -32,7 +32,7 @@
           trigger="click"
           @command="handleCommand">
           <span class="el-dropdown-link">
-            {{username}}
+            {{username}} | {{{'SYS_ADMIN':'系统管理员', 'SYS_EMPLOYEE':'普通员工', 'SYS_CONTACT': '外协联络员', 'SYS_PRODUCT': '生产管理员', 'SYS_STORE': '仓库管理员', 'SYS_FINANCIAL': '财务管理员', 'SYS_QUALITY': '质量管理员'}[userType]}}
             <i class="el-icon-caret-bottom"></i>
           </span>
           <template #dropdown>
@@ -65,6 +65,7 @@ export default {
   setup() {
     const store = useStore()
     const username = store.state.userInfo.user.realName
+    const userType = store.state.userInfo.authorities[0].authority
     const message = 2
 
     const collapse = computed(() => store.state.collapse)
@@ -116,6 +117,7 @@ export default {
 
     return {
       username,
+      userType,
       message,
       collapse,
       collapseChage,

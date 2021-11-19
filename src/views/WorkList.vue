@@ -24,8 +24,15 @@
       <BaseTable :cols="columns"
         ref="worklistTable"
         :needOperation="!userId"
-        :queryBase="userId ? {'user': userId } : {}"
+        :queryBase="searchUserId ? {'user': searchUserId } : {}"
         :url="'/work-shop-manage/work/pages'">
+        <template v-slot:serial="slotProps">
+          <el-link href="javascript:void(0)"
+            v-if="clickSerial"
+            type="primary"
+            @click="showSerialDetail(slotProps.scopeData)">{{slotProps.scopeData.serial}}</el-link>
+          <span v-else>{{slotProps.scopeData.serial}}</span>
+        </template>
         <template v-slot:status="slotProps">
           <el-tag :type="slotProps.scopeData.status === 'NORMAL'? 'warning': slotProps.scopeData.status === 'RUNNING'? 'primary': 'success'">{{ {'NORMAL':'未开工', 'RUNNING': '已开工', 'CLOSED': '已完工'}[slotProps.scopeData.status] }}</el-tag>
         </template>
@@ -53,25 +60,22 @@
       }]"
       key="product-edit"
       @dialog-submit="finishStartSubmit"></ProductAdd>
-    <ProductAdd :visible="finishEditVisible"
-      @close="finishEditVisible = false"
-      :title="'完工填报'"
-      :formItems="[{
-        label: '合格产品数量',
-        key: 'qualAmt',
-        required: false
-      }]"
-      key="product-edit"
-      @dialog-submit="finishEditSubmit"></ProductAdd>
+    <ProductDetail :visible="serialDetailVisible"
+      @close="serialDetailVisible = false"
+      key="detail"
+      v-if="editItemData?.serial"
+      :serialId="editItemData?.id"
+      :serial="editItemData?.serial"></ProductDetail>
   </div>
 </template>
 
 <script>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import BaseTable from '../components/BaseTable.vue'
 import ProductAdd from './ProductAdd.vue'
 import ProductDetail from './ProductDetail.vue'
+import { useStore } from 'vuex'
 import { finishWork, startWork } from '@/api/worklist'
 
 export default {
@@ -84,10 +88,10 @@ export default {
   props: {
     userId: {
       type: String,
-      default: undefined
-    }
+      default: undefined,
+    },
   },
-  setup() {
+  setup(props) {
     const query = reactive({
       partName: '',
       productCode: '',
@@ -101,14 +105,22 @@ export default {
 
     // 删除操作
     const editItemData = ref(null)
-    const finishEditVisible = ref(false)
     const finishStartVisible = ref(false)
     const handleWorkStatus = (row, status) => {
       editItemData.value = row
       if (status === 'start') {
         finishStartVisible.value = true
       } else if (status === 'finish') {
-        finishEditVisible.value = true
+        // 二次确认删除
+        ElMessageBox.confirm('确定完工吗？', '提示', {
+          type: 'warning',
+        })
+          .then(async () => {
+            await finishWork({ workId: editItemData.value.id, ...formData })
+            ElMessage.success('操作成功')
+            handleSearch()
+          })
+          .catch(() => {})
       }
     }
     const finishStartSubmit = async (formData) => {
@@ -117,72 +129,104 @@ export default {
       finishStartVisible.value = false
       handleSearch()
     }
-    const finishEditSubmit = async (formData) => {
-      await finishWork({ workId: editItemData.value.id, ...formData })
-      ElMessage.success('操作成功')
-      finishEditVisible.value = false
-      handleSearch()
+    const store = useStore()
+    const searchUserId = computed(() => {
+      return props.userId || store.state.userInfo.user.id || ''
+    })
+    // 质量管理员和超级管理员才能点序号去填报
+    const clickSerial = computed(() => {
+      let userType = store.state.userInfo.authorities[0].authority
+      return userType === 'SYS_QUALITY' || userType === 'SYS_ADMIN'
+    })
+    const serialDetailVisible = ref(false)
+    const showSerialDetail = (row) => {
+      editItemData.value = row
+      serialDetailVisible.value = true
     }
+    const columns = ref([
+      {
+        label: '产品代号',
+        prop: 'productCode',
+      },
+      {
+        label: '零件代号',
+        prop: 'partCode',
+      },
+      {
+        label: '零件名称',
+        prop: 'partName',
+      },
+      {
+        label: '工序',
+        prop: 'workingName',
+      },
+      {
+        label: '操作设备',
+        prop: 'deviceName',
+      },
+      {
+        label: '状态',
+        prop: 'status',
+        slot: 'status',
+      },
+      {
+        label: '要求完工时间',
+        prop: 'needFinalDate',
+      },
+      {
+        label: '开工时间',
+        prop: 'startDate',
+      },
+      {
+        label: '完工时间',
+        prop: 'finalDate',
+      },
+      {
+        label: '接受产品数量',
+        prop: 'acceptAmt',
+      },
+      {
+        label: '合格产品数量',
+        prop: 'qualAmt',
+      },
+      {
+        label: '工序单价（元）',
+        prop: 'price',
+      },
+      {
+        label: '预计工资',
+        prop: 'checkWages',
+      },
+      {
+        label: '结账状态',
+        prop: 'checkStatus',
+      },
+      {
+        label: '结账时间',
+        prop: 'checkDate',
+      },
+    ])
+    onMounted(() => {
+      if (clickSerial.value) {
+        columns.value.unshift({
+          label: '序号',
+          prop: 'serial',
+          slot: 'serial',
+        })
+      }
+    })
     return {
-      columns: [
-        {
-          label: '产品代号',
-          prop: 'productCode',
-        },
-        {
-          label: '零件代号',
-          prop: 'partCode',
-        },
-        {
-          label: '零件名称',
-          prop: 'partName',
-        },
-        {
-          label: '工序',
-          prop: 'workingName',
-        },
-        {
-          label: '操作设备',
-          prop: 'deviceName',
-        },
-        {
-          label: '状态',
-          prop: 'status',
-          slot: 'status',
-        },
-        {
-          label: '要求完工时间',
-          prop: 'needFinalDate',
-        },
-        {
-          label: '开工时间',
-          prop: 'startDate',
-        },
-        {
-          label: '完工时间',
-          prop: 'finalDate',
-        },
-        {
-          label: '接受产品数量',
-          prop: 'acceptAmt',
-        },
-        {
-          label: '合格产品数量',
-          prop: 'qualAmt',
-        },
-        {
-          label: '工序单价（元）',
-          prop: 'price',
-        },
-      ],
+      columns,
       query,
       handleSearch,
       handleWorkStatus,
       worklistTable,
-      finishEditVisible,
-      finishEditSubmit,
       finishStartVisible,
       finishStartSubmit,
+      searchUserId,
+      clickSerial,
+      showSerialDetail,
+      serialDetailVisible
     }
   },
 }
