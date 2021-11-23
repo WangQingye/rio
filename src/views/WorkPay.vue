@@ -54,12 +54,12 @@
           <el-tag :type="slotProps.scopeData.status === 'NORMAL'? 'warning': slotProps.scopeData.status === 'RUNNING'? 'primary': 'success'">{{ {'NORMAL':'未开工', 'RUNNING': '已开工', 'CLOSED': '已完工'}[slotProps.scopeData.status] }}</el-tag>
         </template>
         <template v-slot:checkStatus="slotProps">
-          <el-tag :type="slotProps.scopeData.checkStatus === 'CHECK'? 'warning': 'success'">{{ {'CHECK':'未结账', 'CHECKED': '已结账'}[slotProps.scopeData.checkStatus] }}</el-tag>
+          <el-tag :type="slotProps.scopeData.checkStatus === '未结账'? 'warning': 'success'">{{ slotProps.scopeData.checkStatus }}</el-tag>
         </template>
         <template v-slot:operation="slotProps">
           <el-button type="success"
             icon="el-icon-coin"
-            v-if="slotProps.scopeData.status == 'CLOSED'"
+            v-if="slotProps.scopeData.status == 'CLOSED' && slotProps.scopeData.checkStatus === '未结账'"
             @click="handlePay(slotProps.scopeData)">结账</el-button>
         </template>
       </BaseTable>
@@ -97,13 +97,14 @@ export default {
       productCode: '',
       partCode: '',
       user: '',
-      timeRange: '',
+      timeRange: [],
       checkStatus: '',
     })
     // 查询操作
     const worklistTable = ref({})
     const handleSearch = () => {
-      worklistTable.value.refresh(query)
+      const queryObj = {...query, timeRange: undefined, checkDateStart: (query.timeRange && query.timeRange[0]) || undefined, checkDateEnd: (query.timeRange && query.timeRange[1]) || undefined}
+      worklistTable.value.refresh(queryObj)
     }
 
     const handlePay = (row) => {
@@ -111,7 +112,7 @@ export default {
         type: 'warning',
       })
         .then(async () => {
-          await payWork({ workId: editItemData.value.id })
+          await payWork({ workId: row.id })
           ElMessage.success('操作成功')
           handleSearch()
         })
@@ -134,6 +135,10 @@ export default {
         {
           label: '工序',
           prop: 'workingName',
+        },
+        {
+          label: '操作者',
+          prop: 'username',
         },
         {
           label: '操作设备',

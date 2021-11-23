@@ -9,6 +9,7 @@
         class="el-icon-s-unfold"></i>
     </div>
     <div class="logo">瑞奥机械</div>
+    <img class="logo-img" src="@/assets/img/logo.jpg"/>
     <div class="header-right">
       <div class="header-user-con">
         <!-- 消息中心 -->
@@ -137,6 +138,10 @@ export default {
   height: 70px;
   font-size: 22px;
   color: #fff;
+}
+.logo-img {
+  height: 50px;
+  margin-top: 10px;
 }
 .collapse-btn {
   float: left;

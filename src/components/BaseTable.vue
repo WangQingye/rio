@@ -21,7 +21,7 @@
       class="table"
       ref="multipleTable"
       header-cell-class-name="table-header">
-      <el-table-column v-for="col in cols"
+      <el-table-column v-for="col in showCols"
         :key="col.prop"
         :prop="col.prop"
         :width="col.width || ''"
@@ -166,6 +166,12 @@ export default {
     const exportTable = () => {
       getExcel(props.url, searchObj.value)
     }
+    
+    const showCols = computed(() => {
+      return props.cols.filter(col => {
+        return !col.noVisible
+      })
+    })
     return {
       query,
       tableData,
@@ -177,7 +183,8 @@ export default {
       handleDelete,
       handleEdit,
       refresh,
-      exportTable
+      exportTable,
+      showCols
     }
   },
 }

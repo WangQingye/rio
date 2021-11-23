@@ -149,6 +149,7 @@ export default {
           },
         ]
       )
+      if (userType === 'SYS_ADMIN' || userType === 'SYS_CONTACT' || userType === 'SYS_PRODUCT') router.push('/product')
       if (userType === 'SYS_STORE') router.push('/mesuring')
       if (userType === 'SYS_FINANCIAL') router.push('/work-pay')
       if (userType === 'SYS_EMPLOYEE') router.push('/work-list')

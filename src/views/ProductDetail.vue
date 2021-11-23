@@ -13,6 +13,7 @@
         name="process">
         <ProcessPriceTag :pricesData="pricesData"
           :isInIndex="true"
+          v-if="!isZhiliang && userType !== 'SYS_PRODUCT'"
           @refresh="getProcessDetail"></ProcessPriceTag>
         <BaseTable :cols="stepColumns"
           :tableRealData="processesList"
@@ -23,7 +24,13 @@
           <template v-slot:operation="slotProps">
             <el-button type="text"
               icon="el-icon-edit"
+              v-if="!isZhiliang"
               @click="handleStepEdit(slotProps.scopeData)">信息填报
+            </el-button>
+            <el-button type="text"
+              icon="el-icon-edit"
+              v-else-if="isZhiliang"
+              @click="handleZhiliangEdit(slotProps.scopeData)">合格数填报
             </el-button>
           </template>
         </BaseTable>
@@ -34,12 +41,21 @@
           key="product-edit"
           :itemData="stepEditItem"
           @dialog-submit="stepEditSubmit"></ProductAdd>
+        <ProductAdd :visible="zhiliangEditVisible"
+          @close="zhiliangEditVisible = false"
+          :title="'合格数填报'"
+          :formItems="zhiliangFormItems"
+          key="product-edit"
+          :itemData="zhiliangEditItem"
+          @dialog-submit="zhiliangEditSubmit"></ProductAdd>
       </el-tab-pane>
       <el-tab-pane label="量具情况"
+        v-if="!isZhiliang"
         name="mesuring">
         <MesuringTable :serialNum="serial"></MesuringTable>
       </el-tab-pane>
       <el-tab-pane label="工序设置"
+        v-if="!isZhiliang && userType != 'SYS_CONTACT'"
         name="step">
         <el-button type="primary"
           icon="el-icon-plus"
@@ -83,6 +99,7 @@ import BaseTable from '@/components/BaseTable.vue'
 import MesuringTable from './MesuringTable.vue'
 import ProcessPriceTag from './ProcessPriceTag.vue'
 import ProductAdd from './ProductAdd.vue'
+import { useStore } from 'vuex'
 import {
   getProcessDetailList,
   editPartStep,
@@ -93,6 +110,10 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 export default {
   components: { BaseTable, MesuringTable, ProcessPriceTag, ProductAdd },
   props: {
+    isZhiliang: {
+      type: Boolean,
+      default: false,
+    },
     visible: {
       type: Boolean,
       required: true,
@@ -190,6 +211,25 @@ export default {
       partStepEditVisible.value = false
       getProcessDetail()
     }
+
+    // 合格数填报
+    const zhiliangEditVisible = ref(false)
+    const zhiliangEditItem = ref({})
+    const handleZhiliangEdit = (row) => {
+      zhiliangEditVisible.value = true
+      zhiliangEditItem.value = row
+    }
+    const zhiliangEditSubmit = async (formData) => {
+      await editWorkingStep({
+        id: zhiliangEditItem.value.id,
+        ...formData,
+      })
+      ElMessage.success('操作成功')
+      zhiliangEditVisible.value = false
+      getProcessDetail()
+    }
+    const store = useStore()
+    const userType = store.state.userInfo.authorities[0].authority
     const stepItems = computed(() => {
       return [
         {
@@ -229,21 +269,31 @@ export default {
         //   disabled: true,
         // },
         {
+          label: '操作设备',
+          key: 'deviceName',
+          noVisible: userType == 'SYS_CONTACT',
+          required: false,
+        },
+        {
           label: '运行时间',
           key: 'runningDate',
+          noVisible: userType == 'SYS_CONTACT',
         },
         {
           label: '最高记录',
           key: 'highRecord',
+          noVisible: userType == 'SYS_CONTACT',
         },
         {
           label: '工序单价（元）',
           key: 'price',
+          noVisible: userType == 'SYS_CONTACT',
         },
         {
           label: '备注',
           key: 'remark',
           type: 'textarea',
+          required: false,
         },
         {
           label: '接受产品数量',
@@ -259,11 +309,8 @@ export default {
         },
       ]
     })
-    // watch(editPartStepItemData, (val) => {
-    //   stepItems.value =
-    // })
-    return {
-      stepColumns: [
+    const stepColumns = computed(() => {
+      return [
         {
           label: '工序',
           prop: 'workingName',
@@ -304,20 +351,29 @@ export default {
         {
           label: '运行时间',
           prop: 'runningDate',
+          noVisible: userType == 'SYS_CONTACT',
         },
         {
           label: '最高记录',
           prop: 'highRecord',
+          noVisible: userType == 'SYS_CONTACT',
         },
         {
           label: '工序单价（元）',
           prop: 'price',
+          noVisible: userType == 'SYS_CONTACT',
         },
         {
           label: '备注',
           prop: 'remark',
         },
-      ],
+      ]
+    })
+    // watch(editPartStepItemData, (val) => {
+    //   stepItems.value =
+    // })
+    return {
+      stepColumns,
       stepItems,
       meusringColumns: [
         {
@@ -371,10 +427,10 @@ export default {
           label: '工序',
           prop: 'workingName',
         },
-        {
-          label: '操作设备',
-          prop: 'deviceName',
-        },
+        // {
+        //   label: '操作设备',
+        //   prop: 'deviceName',
+        // },
         {
           label: '工序单价（元）',
           prop: 'price',
@@ -386,21 +442,38 @@ export default {
           key: 'workingName',
           required: true,
         },
-        {
-          label: '操作设备',
-          key: 'deviceName',
-          required: true,
-        },
+        // {
+        //   label: '操作设备',
+        //   key: 'deviceName',
+        //   required: true,
+        // },
         {
           label: '工序单价',
           key: 'price',
-          required: true,
+          required: false,
           type: 'number',
         },
       ],
       processesList,
       pricesData,
       getProcessDetail,
+      zhiliangEditVisible,
+      zhiliangEditItem,
+      handleZhiliangEdit,
+      zhiliangEditSubmit,
+      zhiliangFormItems: [
+        {
+          label: '合格产品数量',
+          key: 'qualAmt'
+        },
+        {
+          label: '备注',
+          key: 'remark',
+          type: 'textarea',
+          required: false,
+        },
+      ],
+      userType,
     }
   },
 }

@@ -23,7 +23,7 @@
       </el-form>
       <BaseTable :cols="columns"
         ref="worklistTable"
-        :needOperation="!userId"
+        needOperation
         :queryBase="searchUserId ? {'user': searchUserId } : {}"
         :url="'/work-shop-manage/work/pages'">
         <template v-slot:serial="slotProps">
@@ -63,6 +63,7 @@
     <ProductDetail :visible="serialDetailVisible"
       @close="serialDetailVisible = false"
       key="detail"
+      :isZhiliang="true"
       v-if="editItemData?.serial"
       :serialId="editItemData?.id"
       :serial="editItemData?.serial"></ProductDetail>
@@ -116,7 +117,7 @@ export default {
           type: 'warning',
         })
           .then(async () => {
-            await finishWork({ workId: editItemData.value.id, ...formData })
+            await finishWork({ workId: editItemData.value.id })
             ElMessage.success('操作成功')
             handleSearch()
           })
@@ -131,7 +132,7 @@ export default {
     }
     const store = useStore()
     const searchUserId = computed(() => {
-      return props.userId || store.state.userInfo.user.id || ''
+      return props.userId || store.state.userInfo?.user.id || ''
     })
     // 质量管理员和超级管理员才能点序号去填报
     const clickSerial = computed(() => {
@@ -140,6 +141,7 @@ export default {
     })
     const serialDetailVisible = ref(false)
     const showSerialDetail = (row) => {
+      console.log(row)
       editItemData.value = row
       serialDetailVisible.value = true
     }
@@ -220,6 +222,7 @@ export default {
       query,
       handleSearch,
       handleWorkStatus,
+      editItemData,
       worklistTable,
       finishStartVisible,
       finishStartSubmit,

@@ -47,6 +47,7 @@
           <el-button type="text"
             icon="el-icon-delete"
             class="red"
+            v-if="slotProps.scopeData.realName !== '超级管理员'"
             @click="handleDelete(slotProps.scopeData)">删除</el-button>
         </template>
       </BaseTable>

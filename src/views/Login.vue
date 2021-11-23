@@ -1,7 +1,9 @@
 <template>
   <div class="login-wrap">
     <div class="ms-login">
-      <div class="ms-title">瑞奥机械</div>
+      <!-- <div class="ms-title">瑞奥机械</div> -->
+      <img class="logo-img"
+        src="@/assets/img/logo.jpg" />
       <el-form :model="param"
         :rules="rules"
         ref="login"
@@ -106,6 +108,12 @@ export default {
   height: 100%;
   background-image: url(../assets/img/login-bg.jpg);
   background-size: 100%;
+}
+.logo-img {
+  height: 50px;
+  display: block;
+  margin: 20px auto;
+  margin-bottom: 0;
 }
 .ms-title {
   width: 100%;
