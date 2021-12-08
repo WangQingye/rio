@@ -33,6 +33,9 @@
           v-model="form[item.key]"
           type="date"
           :disabled="item.disabled || (itemData && item.editDisabled)"
+          :allow-create="item.allowCreate"
+          :filterable="item.allowCreate"
+          @change="onSelectChange($event, item.key, item.watchChange)"
           style="width: 100%">
           <el-option v-for="op in item.options"
             :key="op.value"
@@ -87,21 +90,6 @@ export default {
   emits: ['close', 'dialog-submit'],
   name: 'product-add',
   setup(props, { emit }) {
-    // const formRulesObj = {}
-    // onMounted(() => {
-    //   props.formItems.forEach((item) => {
-    //     if (item.required !== false) {
-    //       formRulesObj[item.key] = [
-    //         {
-    //           required: true,
-    //           message: `请填写${item.label}`,
-    //           trigger: 'blur',
-    //         },
-    //       ]
-    //     }
-    //   })
-    // })
-    // const formRules = reactive(formRulesObj)
     const form = reactive({})
     const dialogVisible = computed(() => {
       return props.visible
@@ -115,7 +103,11 @@ export default {
           title.value = '添加'
         }
         props.formItems.map((item) => {
-          form[item.key] = (props.itemData && props.itemData[item.key]) || ''
+          if (props.itemData && props.itemData[item.key] !== null) {
+            form[item.key] = props.itemData[item.key]
+          } else {
+            form[item.key] = ''
+          }
         })
       } else {
         Object.keys(form).map((key) => {
@@ -136,12 +128,29 @@ export default {
         }
       })
     }
+    const onSelectChange = (val, key, watchChange) => {
+      if (watchChange) {
+        if (key === 'name') {
+          form.specification = {
+            '光面塞规': 'φ',
+            '空心光面塞规': 'φ',
+            '卡规': 'φ',
+            '螺纹塞规': 'M',
+            '螺纹环规': 'M',
+            '同轴度塞规': '6033-',
+            '航空螺纹塞规': 'MJ',
+            '航空螺纹环规': 'MJ',
+          }[val]
+        }
+      }
+    }
     return {
       title,
       close,
       saveEdit,
       form,
       ruleForm,
+      onSelectChange,
     }
   },
 }

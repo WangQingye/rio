@@ -1,1 +1,0 @@
-import{s as a}from"./index.b3e4d661.js";const o=o=>a({url:`/work-shop-manage/close/${o.workId}`,method:"put",params:o}),r=o=>a({url:`/work-shop-manage/start/${o.workId}`,method:"put",params:o}),s=o=>a({url:`/work-shop-manage/wage/${o.workId}`,method:"put",params:o});export{o as f,s as p,r as s};

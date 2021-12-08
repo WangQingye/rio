@@ -176,16 +176,24 @@ export default {
         formData.status = 'NOT_STARTED'
       } else {
         if (
-          !(
-            editItemData.value.status === 'COMPLETED' &&
-            formData.status === 'CLOSED'
-          )
+          editItemData.value.status === 'COMPLETED' &&
+          formData.status !== 'CLOSED'
         ) {
-          ElMessage.error('状态只能由已完工修改为已完结')
+          ElMessage.error('完工状态只能修改为已完结')
           return
         }
       }
-      await editProduct({ id: editItemData.value?.id, ...formData })
+      // 生成一个序号排序数字
+      let arr = formData.serial.split('-')
+      if (arr[2].length < 3) {
+        let str = ''
+        for (let i = 0; i < 3 - arr[2].length; i++) {
+          str += '0'          
+        }
+        arr[2] = str + arr[2]
+      }
+      let serialSort = Number(arr.join(''))
+      await editProduct({ id: editItemData.value?.id, ...formData, serialSort })
       ElMessage.success('添加成功')
       editVisible.value = false
       handleSearch()

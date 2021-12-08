@@ -52,7 +52,11 @@
       <el-tab-pane label="量具情况"
         v-if="!isZhiliang"
         name="mesuring">
-        <MesuringTable :serialNum="serial"></MesuringTable>
+        <el-button style="margin-bottom: 10px"
+          type="primary"
+          @click="returnAllMesuring">批量归还</el-button>
+        <MesuringTable ref="mesureTable"
+          :serialNum="serial"></MesuringTable>
       </el-tab-pane>
       <el-tab-pane label="工序设置"
         v-if="!isZhiliang && userType != 'SYS_CONTACT'"
@@ -106,6 +110,7 @@ import {
   delPartStep,
   editWorkingStep,
 } from '@/api/product'
+import { returnSerialMesure } from '@/api/mesure'
 import { ElMessage, ElMessageBox } from 'element-plus'
 export default {
   components: { BaseTable, MesuringTable, ProcessPriceTag, ProductAdd },
@@ -262,6 +267,7 @@ export default {
           label: '要求完工时间',
           key: 'needFinalDate',
           type: 'date',
+          required: false,
         },
         // {
         //   label: '实际完工时间',
@@ -278,16 +284,19 @@ export default {
           label: '运行时间',
           key: 'runningDate',
           noVisible: userType == 'SYS_CONTACT',
+          required: false,
         },
         {
           label: '最高记录',
           key: 'highRecord',
           noVisible: userType == 'SYS_CONTACT',
+          required: false,
         },
         {
           label: '工序单价（元）',
           key: 'price',
           noVisible: userType == 'SYS_CONTACT',
+          required: false,
         },
         {
           label: '备注',
@@ -372,6 +381,24 @@ export default {
     // watch(editPartStepItemData, (val) => {
     //   stepItems.value =
     // })
+    const mesureTable = ref({})
+    const returnAllMesuring = () => {
+      ElMessageBox.confirm(
+        '该操作将修改本序号所有量具状态为已归还甲方，是否确认？',
+        '提示',
+        {
+          type: 'warning',
+        }
+      )
+        .then(async () => {
+          await returnSerialMesure({
+            serial: props.serial,
+          })
+          ElMessage.success('操作成功')
+          mesureTable.value.handleSearch()
+        })
+        .catch(() => {})
+    }
     return {
       stepColumns,
       stepItems,
@@ -464,7 +491,7 @@ export default {
       zhiliangFormItems: [
         {
           label: '合格产品数量',
-          key: 'qualAmt'
+          key: 'qualAmt',
         },
         {
           label: '备注',
@@ -474,6 +501,8 @@ export default {
         },
       ],
       userType,
+      mesureTable,
+      returnAllMesuring,
     }
   },
 }

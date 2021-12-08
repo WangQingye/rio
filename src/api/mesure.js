@@ -40,4 +40,12 @@ export const delMesureLendRecords = query => {
     });
 };
 
+// 批量归还一个序号的所有量具给甲方
+export const returnSerialMesure = query => {
+    return request({
+        url: `/measures-manage/party/ret/${query.serial}`,
+        method: 'put',
+        params: query
+    });
+};
 

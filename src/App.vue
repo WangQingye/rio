@@ -8,6 +8,7 @@ import { useStore } from 'vuex'
 // import { onCreated } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import axios from 'axios';
 export default {
   setup() {
     const router = useRouter()

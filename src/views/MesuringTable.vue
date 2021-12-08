@@ -90,6 +90,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import BaseTable from '../components/BaseTable.vue'
 import ProductAdd from './ProductAdd.vue'
+import { useStore } from 'vuex'
 import {
   editMesure,
   delMesure,
@@ -109,6 +110,7 @@ export default {
     },
   },
   setup(props) {
+    const store = useStore()
     const mesureTable = ref({})
     // 查询操作
     const handleSearch = (query) => {
@@ -135,12 +137,12 @@ export default {
     const handleEdit = (row) => {
       editVisible.value = true
       editItemData.value = row
+      console.log(editItemData.value)
     }
 
     const handleAdd = () => {
-      console.log(111)
       editVisible.value = true
-      editItemData.value = null
+      editItemData.value = store.state.lastMesureData || {}
     }
     const editSubmit = async (formData) => {
       await editMesure({
@@ -148,6 +150,10 @@ export default {
         ...formData,
         availableNums: formData.numbers,
       })
+      // 如果是添加，那么记录一下这次添加的数据，方便下次输入
+      if (!editItemData.value.id) {
+        store.commit('setLastMesureData', JSON.parse(JSON.stringify(formData)))
+      }
       ElMessage.success('操作成功')
       editVisible.value = false
       handleSearch()
@@ -258,7 +264,20 @@ export default {
         },
       ],
       formItems: [
-        { label: '量具名称', key: 'name', required: true },
+        {
+          label: '量具名称',
+          key: 'name',
+          required: true,
+          type: 'select',
+          options: ['光面塞规', '空心光面塞规', '卡规', '螺纹塞规', '螺纹环规', '同轴度塞规', '航空螺纹塞规', '航空螺纹环规'].map((s) => {
+            return {
+              label: s,
+              value: s
+            }
+          }),
+          allowCreate: true,
+          watchChange: true
+        },
         { label: '量具规格', key: 'specification', required: true },
         { label: '量具编号', key: 'code', required: false },
         {
@@ -267,7 +286,7 @@ export default {
           required: true,
           placeholder: '请关联已存在的序号',
         },
-        { label: '数量', type: 'number', key: 'numbers', required: true },
+        { label: '数量', type: 'number', key: 'numbers', required: false },
         {
           label: '状态',
           key: 'status',
@@ -288,7 +307,7 @@ export default {
             },
           ],
         },
-        { label: '入库时间', key: 'putDate', type: 'date', required: true },
+        { label: '入库时间', key: 'putDate', type: 'date', required: false },
         { label: '库房存放点', key: 'storage', required: false },
         {
           label: '归还时间',
