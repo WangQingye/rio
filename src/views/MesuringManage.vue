@@ -19,6 +19,10 @@
         <el-input v-model="query.serialNum"
           placeholder="归属序号"></el-input>
       </el-form-item>
+      <el-form-item label="库房存放点">
+        <el-input v-model="query.storage"
+          placeholder="库房存放点"></el-input>
+      </el-form-item>
       <el-form-item label="数量">
         <el-input v-model="query.numbers"
           placeholder="数量"></el-input>
@@ -69,6 +73,7 @@ export default {
       serialNum: '',
       numbers: '',
       status: '',
+      storage: '',
     })
     // 查询操作
     let mesuringTable = ref(null)

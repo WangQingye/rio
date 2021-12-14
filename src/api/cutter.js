@@ -9,6 +9,14 @@ export const addCutter = query => {
   });
 };
 
+// 删除刀具
+export const delCutter = query => {
+  return request({
+    url: `/cutter-manage/remove/${query.cutterId}`,
+    method: 'delete',
+    data: query
+  });
+};
 
 // 采购记录编辑添加
 export const editCutterBuyRecord = query => {

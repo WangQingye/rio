@@ -55,11 +55,13 @@
             icon="el-icon-edit"
             style="margin-left:0"
             @click="handleEdit(slotProps.scopeData)">编辑
-          </el-button>
+          </el-button> -->
           <el-button type="text"
             icon="el-icon-delete"
             class="color-danger"
-            @click="handleDelete(slotProps.scopeData)">删除</el-button> -->
+            style="margin-left:0"
+            v-if="canDelete"
+            @click="handleDelete(slotProps.scopeData)">删除</el-button>
         </template>
       </BaseTable>
     </div>
@@ -180,7 +182,8 @@
 </template>
 
 <script>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
+import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import BaseTable from '../components/BaseTable.vue'
 import ProductAdd from './ProductAdd.vue'
@@ -193,6 +196,7 @@ import {
   lendCutter,
   returnCutter,
   delCutterLendRecords,
+  delCutter
 } from '@/api/cutter'
 
 export default {
@@ -217,13 +221,21 @@ export default {
       cutterTable.value.refresh(query)
     }
     // 删除操作
-    const handleDelete = (index) => {
+    const store = useStore()
+    // 质量管理员和超级管理员才能点序号去填报
+    const canDelete = computed(() => {
+      let userType = store.state.userInfo.authorities[0].authority
+      return userType === 'SYS_STORE' || userType === 'SYS_ADMIN'
+    })
+    const handleDelete = (row) => {
       // 二次确认删除
       ElMessageBox.confirm('确定要删除吗？', '提示', {
         type: 'warning',
       })
-        .then(() => {
+        .then(async () => {
+          await delCutter({ cutterId: row.id })
           ElMessage.success('删除成功')
+          handleSearch()
         })
         .catch(() => {})
     }
@@ -457,6 +469,7 @@ export default {
       editVisible,
       handleSearch,
       handleDelete,
+      canDelete,
       handleEdit,
       showDetail,
       editItemData,

@@ -139,11 +139,11 @@ export default {
       let res = await getProcessDetailList({
         serial: props.serial,
         pageNo: 1,
-        pageSize: 10,
+        pageSize: 1000,
       })
-      console.log(res.data.records[0]?.workings)
-      pricesData.value = res.data.records[0]
-      processesList.value = res.data.records[0]?.workings
+      let record = res.data.records.find(r => r.serial == props.serial)
+      pricesData.value = record
+      processesList.value = record?.workings
     }
     if (props.serial) getProcessDetail()
     const activeName = ref('process')
