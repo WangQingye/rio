@@ -81,7 +81,7 @@ export default {
               router.push('/work-list')
             }
           } else {
-            ElMessage.error(res.msg)
+            ElMessage.error('登录失败')
             return false
           }
         } else {

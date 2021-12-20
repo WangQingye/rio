@@ -181,6 +181,7 @@ export default {
       await lendMesure({
         measure: editItemData.value.id,
         ...formData,
+        nums: 1,
       })
       ElMessage.success('操作成功')
       addLendVisible.value = false
@@ -192,18 +193,43 @@ export default {
     const returnMesuringItems = [
       { label: '归还数量', key: 'nums', required: true, type: 'number' },
     ]
-    const showReturnMesuring = (row) => {
-      returnMesuringVisible.value = true
+    const showReturnMesuring = async (row) => {
+      // returnMesuringVisible.value = true      
       editLendRecord.value = row
+      // 二次确认归还
+      ElMessageBox.confirm('确定归还吗？', '提示', {
+        type: 'warning',
+      })
+      .then(async () => {
+        console.log(111)
+        await returnMesure({
+          id: editLendRecord.value.id,
+          // ...formData,
+          nums: 1,
+        })
+        ElMessage.success('操作成功')
+        returnMesuringVisible.value = false
+        lendRecordsTable.value.refresh()
+        handleSearch()
+      })
     }
     const returnMesuringSubmit = async (formData) => {
-      await returnMesure({
-        id: editLendRecord.value.id,
-        ...formData,
+      // 二次确认归还
+      ElMessageBox.confirm('确定归还吗？', '提示', {
+        type: 'warning',
       })
-      ElMessage.success('操作成功')
-      returnMesuringVisible.value = false
-      lendRecordsTable.value.refresh()
+        .then(async () => {
+          await returnMesure({
+            id: editLendRecord.value.id,
+            ...formData,
+            nums: 1,
+          })
+          ElMessage.success('操作成功')
+          returnMesuringVisible.value = false
+          lendRecordsTable.value.refresh()
+          handleSearch()
+        })
+        .catch(() => {})
     }
     // 删除领用记录
     const handleLendRecordsDelete = (row) => {
@@ -269,14 +295,23 @@ export default {
           key: 'name',
           required: true,
           type: 'select',
-          options: ['光面塞规', '空心光面塞规', '卡规', '螺纹塞规', '螺纹环规', '同轴度塞规', '航空螺纹塞规', '航空螺纹环规'].map((s) => {
+          options: [
+            '光面塞规',
+            '空心光面塞规',
+            '卡规',
+            '螺纹塞规',
+            '螺纹环规',
+            '同轴度塞规',
+            '航空螺纹塞规',
+            '航空螺纹环规',
+          ].map((s) => {
             return {
               label: s,
-              value: s
+              value: s,
             }
           }),
           allowCreate: true,
-          watchChange: true
+          watchChange: true,
         },
         { label: '量具规格', key: 'specification', required: true },
         { label: '量具编号', key: 'code', required: false },
@@ -349,7 +384,7 @@ export default {
       addLendVisible,
       addLendFormItems: [
         { label: '领用人', key: 'user', required: true, type: 'user' },
-        { label: '领用数量', key: 'nums', required: true, type: 'number' },
+        // { label: '领用数量', key: 'nums', required: true, type: 'number' },
         { label: '备注', key: 'remark', required: true, type: 'textarea' },
       ],
       addLendSubmit,

@@ -16,6 +16,10 @@
           <el-input v-model="query.specification"
             placeholder="规格型号"></el-input>
         </el-form-item>
+        <el-form-item label="库房存放点">
+          <el-input v-model="query.locations"
+            placeholder="库房存放点"></el-input>
+        </el-form-item>
         <el-form-item>
           <el-button type="primary"
             @click="handleSearch">查询</el-button>
@@ -105,6 +109,7 @@
           <el-button type="text"
             icon="el-icon-download"
             class="color-success"
+            v-if="slotProps.scopeData.retNum < slotProps.scopeData.useNumber"
             @click="showReturnMesuring(slotProps.scopeData)">归还
           </el-button>
           <el-button type="text"
@@ -212,6 +217,7 @@ export default {
       purchaseUnit: '',
       name: '',
       specification: '',
+      locations: '',
       pageIndex: 1,
       pageSize: 10,
     })
@@ -334,6 +340,14 @@ export default {
       editLendRecord.value = row
     }
     const returnMesuringSubmit = async (formData) => {
+      if ((Number(formData.retNum) + Number(editLendRecord.value.retNum)) > Number(editLendRecord.value.useNumber) ) {
+         ElMessage.error('归还总数大于领用数量')
+         return
+      }
+      if ((Number(formData.availableNum) + Number(formData.badNum)) != Number(formData.retNum) ) {
+         ElMessage.error('归还数量必须等于二次可使用数量加上报废数量')
+         return
+      }
       await returnCutter({
         id: editLendRecord.value?.id,
         ...formData,
@@ -341,6 +355,7 @@ export default {
       ElMessage.success('操作成功')
       returnMesuringVisible.value = false
       handleLendSearch()
+      handleSearch()
     }
     const handleLendRecordDelete = (row) => {
       // 二次确认删除
