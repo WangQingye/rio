@@ -31,8 +31,9 @@
           @click="handleDelete(slotProps.scopeData)">删除</el-button>
       </template>
     </BaseTable>
-    <el-dialog :title="`领用记录 - ${editItemData && editItemData.name}` "
+    <el-dialog :title="`领用记录 - ${editItemData && editItemData.name} - ${editItemData && editItemData.code}` "
       v-model="lendingRecordsVisible"
+      :destroy-on-close="true"
       :close-on-click-modal="false"
       :close-on-press-escape="false"
       width="60%">
@@ -186,6 +187,7 @@ export default {
       ElMessage.success('操作成功')
       addLendVisible.value = false
       lendRecordsTable.value.refresh()
+      handleSearch()
     }
     // 归还
     const returnMesuringVisible = ref(false)

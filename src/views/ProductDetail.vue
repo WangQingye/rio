@@ -173,6 +173,7 @@ export default {
       ElMessage.success('操作成功')
       stepEditVisible.value = false
       getProcessDetail()
+      emit('refresh')
     }
 
     // 工序设置
@@ -200,12 +201,12 @@ export default {
           })
           ElMessage.success('删除成功')
           stepTable.value.refresh()
+          emit('refresh')
           getProcessDetail()
         })
         .catch(() => {})
     }
     const editPartStepSubmit = async (formData) => {
-      console.log(formData)
       await editPartStep({
         id: editPartStepItemData.value?.id,
         ...formData,
@@ -213,6 +214,7 @@ export default {
       })
       ElMessage.success('操作成功')
       stepTable.value.refresh()
+      emit('refresh')
       partStepEditVisible.value = false
       getProcessDetail()
     }

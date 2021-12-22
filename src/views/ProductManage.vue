@@ -97,6 +97,7 @@
     <ProductDetail :visible="detailVisible"
       @close="detailVisible = false"
       key="detail"
+      @refresh="handleSearch"
       v-if="editItemData?.id"
       :serialId="editItemData?.id"
       :serial="editItemData?.serial"></ProductDetail>
