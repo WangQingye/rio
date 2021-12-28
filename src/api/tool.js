@@ -1,6 +1,15 @@
 import request from '../utils/request';
 
 // 获取工具种类
+export const getAllToolType = query => {
+  return request({
+    url: '/work-shop-manage/allType',
+    method: 'get',
+    params: query
+  });
+};
+
+// 获取工具种类-分页
 export const getToolType = query => {
   return request({
     url: '/tool-manage/tool/list',

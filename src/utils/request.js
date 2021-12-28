@@ -19,6 +19,14 @@ service.interceptors.request.use(
         loadingInstance = ElLoading.service({
             background: 'rgba(0,0,0,0.1)'
         })
+        for (const key in config.params) {
+          if (Object.hasOwnProperty.call(config.params, key)) {
+            const element = config.params[key];
+            if (element === '') {
+              config.params[key] = undefined
+            }
+          }
+        }
         return config;
     },
     error => {

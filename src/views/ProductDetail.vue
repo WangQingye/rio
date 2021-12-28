@@ -141,7 +141,7 @@ export default {
         pageNo: 1,
         pageSize: 1000,
       })
-      let record = res.data.records.find(r => r.serial == props.serial)
+      let record = res.data.records.find((r) => r.serial == props.serial)
       pricesData.value = record
       processesList.value = record?.workings
     }

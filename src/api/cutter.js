@@ -59,3 +59,11 @@ export const delCutterLendRecords = query => {
     data: query
   });
 };
+// 计算领用的刀具的价值
+export const calcPrice = query => {
+  return request({
+    url: `/work-shop-manage/cal-cost`,
+    method: 'get',
+    params: query
+  });
+};

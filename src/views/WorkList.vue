@@ -4,6 +4,10 @@
       <el-form :inline="true"
         :model="query"
         class="demo-form-inline">
+        <el-form-item label="序号">
+          <el-input v-model="query.serial"
+            placeholder="序号"></el-input>
+        </el-form-item>
         <el-form-item label="产品代号">
           <el-input v-model="query.productCode"
             placeholder="产品代号"></el-input>
@@ -94,6 +98,7 @@ export default {
   },
   setup(props) {
     const query = reactive({
+      serial: '',
       partName: '',
       productCode: '',
       partCode: '',
@@ -146,6 +151,11 @@ export default {
       serialDetailVisible.value = true
     }
     const columns = ref([
+      {
+        label: '序号',
+        prop: 'serial',
+        slot: 'serial',
+      },
       {
         label: '产品代号',
         prop: 'productCode',
@@ -208,15 +218,15 @@ export default {
         prop: 'checkDate',
       },
     ])
-    onMounted(() => {
-      if (clickSerial.value) {
-        columns.value.unshift({
-          label: '序号',
-          prop: 'serial',
-          slot: 'serial',
-        })
-      }
-    })
+    // onMounted(() => {
+    //   if (clickSerial.value) {
+    //     columns.value.unshift({
+    //       label: '序号',
+    //       prop: 'serial',
+    //       slot: 'serial',
+    //     })
+    //   }
+    // })
     return {
       columns,
       query,
@@ -229,7 +239,7 @@ export default {
       searchUserId,
       clickSerial,
       showSerialDetail,
-      serialDetailVisible
+      serialDetailVisible,
     }
   },
 }

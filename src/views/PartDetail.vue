@@ -61,13 +61,12 @@
 <script>
 import { ref, reactive, computed, watch } from 'vue'
 import BaseTable from '@/components/BaseTable.vue'
-import MesuringTable from './MesuringTable.vue'
 import ProcessPriceTag from './ProcessPriceTag.vue'
 import ProductAdd from './ProductAdd.vue'
 import { ElMessage } from 'element-plus'
 import { getProcessDetailList, editPartStep } from '@/api/product'
 export default {
-  components: { BaseTable, MesuringTable, ProcessPriceTag, ProductAdd },
+  components: { BaseTable, ProcessPriceTag, ProductAdd },
   props: {
     visible: {
       type: Boolean,

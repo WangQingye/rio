@@ -2,7 +2,7 @@
   <div>
     <BaseTable :cols="columns"
       ref="mesureTable"
-      :needExport="!serialNum"
+      :needExport="true"
       :url="'/measures-manage/list'"
       :queryBase="serialNum? {'serialNum':serialNum} : {}"
       @edit="handleEdit">
