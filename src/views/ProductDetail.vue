@@ -313,6 +313,12 @@ export default {
           required: false,
         },
         {
+          label: '完成产品数量',
+          key: 'completeAmt',
+          placeholder: '分配时无需填写，由员工填写',
+          required: false,
+        },
+        {
           label: '合格产品数量',
           key: 'qualAmt',
           placeholder: '分配时无需填写，由员工填写',
@@ -354,6 +360,10 @@ export default {
         {
           label: '实际完工时间',
           prop: 'finalDate',
+        },
+        {
+          label: '完成产品数量',
+          prop: 'completeAmt',
         },
         {
           label: '合格产品数量',

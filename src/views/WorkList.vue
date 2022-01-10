@@ -54,8 +54,8 @@
         </template>
       </BaseTable>
     </div>
-    <ProductAdd :visible="finishStartVisible"
-      @close="finishStartVisible = false"
+    <ProductAdd :visible="startWorkVisible"
+      @close="startWorkVisible = false"
       :title="'开工填报'"
       :formItems="[{
         label: '接受产品数量',
@@ -63,7 +63,17 @@
         required: false
       }]"
       key="product-edit"
-      @dialog-submit="finishStartSubmit"></ProductAdd>
+      @dialog-submit="startWorkSubmit"></ProductAdd>
+    <ProductAdd :visible="finishWorkVisible"
+      @close="finishWorkVisible = false"
+      :title="'完工填报'"
+      :formItems="[{
+        label: '完成产品数量',
+        key: 'completeAmt',
+        required: true
+      }]"
+      key="product-edit"
+      @dialog-submit="finishWorkSubmit"></ProductAdd>
     <ProductDetail :visible="serialDetailVisible"
       @close="serialDetailVisible = false"
       key="detail"
@@ -109,32 +119,40 @@ export default {
       worklistTable.value.refresh(query)
     }
 
-    // 删除操作
+    // 开工完工操作
     const editItemData = ref(null)
-    const finishStartVisible = ref(false)
+    const startWorkVisible = ref(false)
+    const finishWorkVisible = ref(false)
     const handleWorkStatus = (row, status) => {
       editItemData.value = row
       if (status === 'start') {
-        finishStartVisible.value = true
+        startWorkVisible.value = true
       } else if (status === 'finish') {
-        // 二次确认删除
-        ElMessageBox.confirm('确定完工吗？', '提示', {
-          type: 'warning',
-        })
-          .then(async () => {
-            await finishWork({ workId: editItemData.value.id })
-            ElMessage.success('操作成功')
-            handleSearch()
-          })
-          .catch(() => {})
+        finishWorkVisible.value = true
+        // ElMessageBox.confirm('确定完工吗？', '提示', {
+        //   type: 'warning',
+        // })
+        //   .then(async () => {
+        //     await finishWork({ workId: editItemData.value.id })
+        //     ElMessage.success('操作成功')
+        //     handleSearch()
+        //   })
+        //   .catch(() => {})
       }
     }
-    const finishStartSubmit = async (formData) => {
+    const startWorkSubmit = async (formData) => {
       await startWork({ workId: editItemData.value.id, ...formData })
       ElMessage.success('操作成功')
-      finishStartVisible.value = false
+      startWorkVisible.value = false
       handleSearch()
     }
+    const finishWorkSubmit = async (formData) => {
+      await finishWork({ workId: editItemData.value.id, ...formData })
+      ElMessage.success('操作成功')
+      finishWorkVisible.value = false
+      handleSearch()
+    }
+
     const store = useStore()
     const searchUserId = computed(() => {
       return props.userId || store.state.userInfo?.user.id || ''
@@ -155,6 +173,10 @@ export default {
         label: '序号',
         prop: 'serial',
         slot: 'serial',
+      },
+      {
+        label: '任务号',
+        prop: 'code',
       },
       {
         label: '产品代号',
@@ -198,6 +220,10 @@ export default {
         prop: 'acceptAmt',
       },
       {
+        label: '完成产品数量',
+        prop: 'completeAmt',
+      },
+      {
         label: '合格产品数量',
         prop: 'qualAmt',
       },
@@ -208,6 +234,14 @@ export default {
       {
         label: '预计工资',
         prop: 'checkWages',
+      },
+      {
+        label: '已预支件数',
+        prop: 'advanceAmt',
+      },
+      {
+        label: '已预支工资',
+        prop: 'advanceWages',
       },
       {
         label: '结账状态',
@@ -234,8 +268,10 @@ export default {
       handleWorkStatus,
       editItemData,
       worklistTable,
-      finishStartVisible,
-      finishStartSubmit,
+      startWorkVisible,
+      startWorkSubmit,
+      finishWorkVisible,
+      finishWorkSubmit,
       searchUserId,
       clickSerial,
       showSerialDetail,

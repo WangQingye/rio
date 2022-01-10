@@ -3,9 +3,9 @@ import request from '../utils/request';
 // 完工
 export const finishWork = query => {
     return request({
-        url: `/work-shop-manage/close/${query.workId}`,
+        url: `/work-shop-manage/close`,
         method: 'put',
-        params: query
+        data: query
     });
 };
 // 开工
@@ -19,8 +19,16 @@ export const startWork = query => {
 // 结账
 export const payWork = query => {
     return request({
-        url: `/work-shop-manage/wage/${query.workId}`,
+        url: `/work-shop-manage/wage`,
         method: 'put',
-        params: query
+        data: query
+    });
+};
+// 预支工资
+export const prePayWork = query => {
+    return request({
+        url: `/work-shop-manage/advance`,
+        method: 'put',
+        data: query
     });
 };

@@ -29,18 +29,27 @@
               value="CHECKED"></el-option>
           </el-select>
         </el-form-item>
-        <!-- <el-form-item label="产品代号">
-          <el-input v-model="query.productCode"
-            placeholder="产品代号"></el-input>
+        <el-form-item label="工作状态">
+          <el-select v-model="query.status"
+            placeholder="工作状态"
+            clearable
+            class="handle-select mr10">
+            <el-option label="未开工"
+              value="NORMAL"></el-option>
+            <el-option label="已开工"
+              value="RUNNING"></el-option>
+            <el-option label="已完工"
+              value="CLOSED"></el-option>
+          </el-select>
         </el-form-item>
-        <el-form-item label="零件代号">
-          <el-input v-model="query.partCode"
-            placeholder="零件代号"></el-input>
+        <el-form-item label="序号">
+          <el-input v-model="query.serial"
+            placeholder="序号"></el-input>
         </el-form-item>
-        <el-form-item label="零件名称">
-          <el-input v-model="query.partName"
-            placeholder="零件名称"></el-input>
-        </el-form-item> -->
+        <el-form-item label="任务号">
+          <el-input v-model="query.code"
+            placeholder="任务号"></el-input>
+        </el-form-item>
         <el-form-item>
           <el-button type="primary"
             @click="handleSearch">查询</el-button>
@@ -57,13 +66,35 @@
           <el-tag :type="slotProps.scopeData.checkStatus === '未结账'? 'warning': 'success'">{{ slotProps.scopeData.checkStatus }}</el-tag>
         </template>
         <template v-slot:operation="slotProps">
-          <el-button type="success"
+          <el-dropdown trigger="click" @command="handleCommand($event, slotProps.scopeData)">
+            <el-button type="text" size="small">
+              结账状态<i class="el-icon-arrow-down el-icon--right"></i>
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="CHECKED">已结账</el-dropdown-item>
+                <el-dropdown-item command="CHECK">未结账</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+          <!-- 预支按钮展示条件：未结账，有完成数量，有单件价格 -->
+          <el-button type="text" size="small"
             icon="el-icon-coin"
-            v-if="slotProps.scopeData.status == 'CLOSED' && slotProps.scopeData.checkStatus === '未结账'"
-            @click="handlePay(slotProps.scopeData)">结账</el-button>
+            v-if="slotProps.scopeData.completeAmt && slotProps.scopeData.checkStatus === '未结账' && slotProps.scopeData.price"
+            @click="prePay(slotProps.scopeData)">预支</el-button>
         </template>
       </BaseTable>
     </div>
+    <ProductAdd :visible="prePayVisible"
+      @close="prePayVisible = false"
+      :title="'预支件数填报'"
+      :formItems="[{
+        label: '此次预支件数',
+        key: 'advanceNum',
+        required: true
+      }]"
+      key="product-edit"
+      @dialog-submit="prePaySubmit"></ProductAdd>
   </div>
 </template>
 
@@ -75,7 +106,7 @@ import ProductAdd from './ProductAdd.vue'
 import ProductDetail from './ProductDetail.vue'
 import { useStore } from 'vuex'
 import UserSelect from '@/components/UserSelect.vue'
-import { payWork } from '@/api/worklist'
+import { payWork, prePayWork } from '@/api/worklist'
 
 export default {
   components: {
@@ -99,27 +130,55 @@ export default {
       user: '',
       timeRange: [],
       checkStatus: '',
+      serial: '',
+      status: '',
+      code: '',
     })
     // 查询操作
     const worklistTable = ref({})
     const handleSearch = () => {
-      const queryObj = {...query, timeRange: undefined, checkDateStart: (query.timeRange && query.timeRange[0]) || undefined, checkDateEnd: (query.timeRange && query.timeRange[1]) || undefined}
+      const queryObj = {
+        ...query,
+        timeRange: undefined,
+        checkDateStart: (query.timeRange && query.timeRange[0]) || undefined,
+        checkDateEnd: (query.timeRange && query.timeRange[1]) || undefined,
+      }
       worklistTable.value.refresh(queryObj)
     }
 
-    const handlePay = (row) => {
-      ElMessageBox.confirm('确定结账完成吗？', '提示', {
+    const editItemData = ref(null)
+    const handleCommand = (command, row) => {
+      ElMessageBox.confirm('确定修改结账状态吗？', '提示', {
         type: 'warning',
       })
         .then(async () => {
-          await payWork({ workId: row.id })
+          await payWork({ workingId: row.id, checkStatus: command })
           ElMessage.success('操作成功')
           handleSearch()
         })
         .catch(() => {})
     }
+    const prePayVisible = ref(false)
+    const prePay = async (row) => {
+      editItemData.value = row
+      prePayVisible.value = true
+    }
+    const prePaySubmit = async (formData) => {
+      await prePayWork({ workId: editItemData.value.id, ...formData })
+      ElMessage.success('操作成功')
+      prePayVisible.value = false
+      handleSearch()
+    }
     return {
       columns: [
+        {
+          label: '序号',
+          prop: 'serial',
+        },
+        {
+          label: '任务号',
+          prop: 'code',
+        },
         {
           label: '产品代号',
           prop: 'productCode',
@@ -166,6 +225,10 @@ export default {
           prop: 'acceptAmt',
         },
         {
+          label: '完成产品数量',
+          prop: 'completeAmt',
+        },
+        {
           label: '合格产品数量',
           prop: 'qualAmt',
         },
@@ -178,6 +241,14 @@ export default {
           prop: 'checkWages',
         },
         {
+          label: '已预支件数',
+          prop: 'advanceAmt',
+        },
+        {
+          label: '已预支工资',
+          prop: 'advanceWages',
+        },
+        {
           label: '结账状态',
           prop: 'checkStatus',
           slot: 'checkStatus',
@@ -188,9 +259,12 @@ export default {
         },
       ],
       query,
-      handlePay,
       handleSearch,
+      prePay,
+      prePayVisible,
+      prePaySubmit,
       worklistTable,
+      handleCommand
     }
   },
 }
