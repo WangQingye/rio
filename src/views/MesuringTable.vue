@@ -114,8 +114,8 @@ export default {
     const store = useStore()
     const mesureTable = ref({})
     // 查询操作
-    const handleSearch = (query) => {
-      mesureTable.value.refresh(query)
+    const handleSearch = (query, keepNowPage) => {
+      mesureTable.value.refresh(query, keepNowPage)
     }
 
     // 删除操作
@@ -157,7 +157,7 @@ export default {
       }
       ElMessage.success('操作成功')
       editVisible.value = false
-      handleSearch()
+      handleSearch(true)
     }
 
     const detailVisible = ref(false)
@@ -186,8 +186,8 @@ export default {
       })
       ElMessage.success('操作成功')
       addLendVisible.value = false
-      lendRecordsTable.value.refresh()
-      handleSearch()
+      lendRecordsTable.value.refresh({}, true)
+      handleSearch(true)
     }
     // 归还
     const returnMesuringVisible = ref(false)
@@ -211,8 +211,8 @@ export default {
         })
         ElMessage.success('操作成功')
         returnMesuringVisible.value = false
-        lendRecordsTable.value.refresh()
-        handleSearch()
+        lendRecordsTable.value.refresh({}, true)
+        handleSearch(true)
       })
     }
     const returnMesuringSubmit = async (formData) => {
@@ -228,8 +228,8 @@ export default {
           })
           ElMessage.success('操作成功')
           returnMesuringVisible.value = false
-          lendRecordsTable.value.refresh()
-          handleSearch()
+          lendRecordsTable.value.refresh({}, true)
+          handleSearch(true)
         })
         .catch(() => {})
     }

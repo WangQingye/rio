@@ -83,6 +83,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    autoInitData: {
+      type: Boolean,
+      default: true,
+    },
     needExport: {
       type: Boolean,
       default: false,
@@ -98,7 +102,7 @@ export default {
       pageSize: 10,
     })
     const searchObj = computed(() => {
-      let obj = { ...query, ...props.queryBase }
+      let obj = { ...props.queryBase , ...query }
       for (const key in obj) {
         if (Object.hasOwnProperty.call(obj, key)) {
           const element = obj[key];
@@ -120,10 +124,12 @@ export default {
         })
       }
     }
-    getData()
+    if (props.autoInitData) getData()
     // 查询操作
-    const handleSearch = () => {
-      query.pageNo = 1
+    const handleSearch = (keepNowPage) => {
+      if (!keepNowPage) {
+        query.pageNo = 1
+      }
       getData()
     }
     // 分页导航
@@ -154,8 +160,10 @@ export default {
     const handleEdit = (row) => {
       context.emit('edit', row)
     }
-    const refresh = (searchData) => {
-      query.pageNo = 1
+    const refresh = (searchData, keepNowPage) => {
+      if (!keepNowPage) {
+        query.pageNo = 1
+      }
       for (const key in searchData) {
         // if (searchData[key] !== '') {
         query[key] = searchData[key]

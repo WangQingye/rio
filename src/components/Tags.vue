@@ -51,7 +51,12 @@ export default {
             if (item) {
                 delItem.path === route.fullPath && router.push(item.path);
             } else {
-                router.push("/");
+                const userType = store.state.userInfo.authorities[0].authority
+                if (userType === 'SYS_ADMIN' || userType === 'SYS_CONTACT' || userType === 'SYS_PRODUCT') router.push('/product-unfinish')
+                if (userType === 'SYS_STORE') router.push('/mesuring')
+                if (userType === 'SYS_FINANCIAL') router.push('/work-pay')
+                if (userType === 'SYS_EMPLOYEE') router.push('/work-list')
+                // router.push("/");
             }
         };
 

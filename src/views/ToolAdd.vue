@@ -65,8 +65,8 @@ export default {
     })
     const toolTypeTable = ref({})
     // 查询操作
-    const handleSearch = () => {
-      toolTypeTable.value.refresh(query)
+    const handleSearch = (keepNowPage) => {
+      toolTypeTable.value.refresh(query, keepNowPage)
     }
 
     // 删除操作
@@ -106,7 +106,7 @@ export default {
       ElMessage.success('添加成功')
       window.location.reload()
       editVisible.value = false
-      handleSearch()
+      handleSearch(true)
     }
 
     return {

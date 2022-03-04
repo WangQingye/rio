@@ -13,6 +13,15 @@ export default {
   setup() {
     const router = useRouter()
     const store = useStore()
+    axios.post("/serverBackend/api/v2/base/feishu/account/login/getToken",{
+          feiShuId: '4e3873gc'
+        })
+        .then(res => {
+        
+        })
+        .catch((err) => {
+            console.error(err)
+        })
     // onMounted(() => {
     let user = localStorage.getItem('ruiao_user')
     console.log(user)

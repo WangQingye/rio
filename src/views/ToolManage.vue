@@ -1,6 +1,5 @@
-<template>
-  <div :key="toolTypeId"
-    v-if="toolTypeInfo.name">
+<template v-if="toolTypeInfo">
+  <div :key="toolTypeId">
     <div class="container">
       <el-form :inline="true"
         :model="query"
@@ -21,8 +20,8 @@
       <el-button type="primary"
         icon="el-icon-plus"
         style="margin-bottom: 20px;"
-        @click="handleAdd">{{`添加${toolTypeInfo.name}`}}</el-button>
-      <BaseTable :cols="columns"
+        @click="handleAdd">{{`添加${toolTypeInfo?.name}`}}</el-button>
+      <!-- <BaseTable :cols="columns"
         :url="'/tool-manage/tool/pages'"
         ref="toolTable"
         :queryBase="{'toolType': toolTypeId}"
@@ -32,20 +31,10 @@
             type="primary"
             @click="handBuyRecords(slotProps.scopeData)">{{slotProps.scopeData.purchaseUnit}}</el-link>
         </template>
-        <template v-slot:key0="slotProps">
-          <span>{{Object.entries(JSON.parse(slotProps.scopeData.specialField))[0][1]}}</span>
-        </template>
-        <template v-slot:key1="slotProps">
-          <span>{{Object.entries(JSON.parse(slotProps.scopeData.specialField))[1][1]}}</span>
-        </template>
-        <template v-slot:key2="slotProps">
-          <span>{{Object.entries(JSON.parse(slotProps.scopeData.specialField))[2][1]}}</span>
-        </template>
-        <template v-slot:key3="slotProps">
-          <span>{{Object.entries(JSON.parse(slotProps.scopeData.specialField))[3][1]}}</span>
-        </template>
-        <template v-slot:key4="slotProps">
-          <span>{{Object.entries(JSON.parse(slotProps.scopeData.specialField))[4][1]}}</span>
+        <template v-for="(specialF,index) in specialFields"
+          :key="index"
+          v-slot:[specialF.slot]="slotProps">
+          {{getSpecialFieldData(slotProps.scopeData.specialField, specialF.label)}}
         </template>
         <template v-slot:operation="slotProps">
           <el-button type="text"
@@ -64,7 +53,65 @@
             class="color-danger"
             @click="handleDelete(slotProps.scopeData)">删除</el-button>
         </template>
-      </BaseTable>
+      </BaseTable> -->
+      
+    <el-table :data="tableData" border
+      class="table">
+      <el-table-column prop="purchaseUnit" label="采购单位">
+        <template #default="scope">
+          <el-link href="javascript:void(0)"
+            type="primary"
+            @click="handBuyRecords(scope.row)">{{scope.row.purchaseUnit}}</el-link>
+        </template>
+      </el-table-column>
+      <el-table-column prop="name" label="名称"></el-table-column>
+      <el-table-column prop="specification" label="规格型号"></el-table-column>
+      <el-table-column prop="locations" label="库房存放点"></el-table-column>
+      <el-table-column prop="availableNum" label="库房剩余数量"></el-table-column>
+      <el-table-column prop="totalBuy" label="总购数量"></el-table-column>
+      <el-table-column prop="waste" label="报废数量"></el-table-column>
+      <el-table-column v-for="col in specialFields"
+        :key="col.prop"
+        :prop="col.prop"
+        :label="col.label">
+        <template #default="scope">
+          {{getSpecialFieldData(scope.row.specialField, col.label)}}
+          <!-- <span>111</span> -->
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="操作"
+        width="140">
+        <template #default="scope">
+          <el-button type="text"
+            icon="el-icon-document"
+            class="color-success"
+            @click="handleLendingRecords(scope.row)">领用记录
+          </el-button>
+          <el-button type="text"
+            icon="el-icon-goods"
+            style="margin-left:0"
+            @click="showAddBuy(scope.row)">添加采购记录
+          </el-button>
+          <el-button type="text"
+            icon="el-icon-edit"
+            style="margin-left:0; margin-right:10px"
+            @click="handleEdit(scope.row)">编辑</el-button>
+          <el-button type="text"
+            icon="el-icon-delete"
+            style="margin-left:0"
+            class="color-danger"
+            @click="handleDelete(scope.row)">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-pagination background
+    class="pagination"
+      layout="total, prev, pager, next"
+      :current-page="query.pageNo"
+      :page-size="query.pageSize"
+      :total="toolPageTotal"
+      @current-change="handleToolPageChange"></el-pagination>
     </div>
     <ProductAdd :visible="editVisible"
       @close="editVisible = false"
@@ -96,7 +143,7 @@
           <el-button type="text"
             icon="el-icon-download"
             class="color-success"
-            v-if="!slotProps.scopeData.retNum || (slotProps.scopeData.useNumber > slotProps.scopeData.retNum)"
+            v-show="!slotProps.scopeData.retNum || (slotProps.scopeData.useNumber > slotProps.scopeData.retNum)"
             @click="showReturnMesuring(slotProps.scopeData)">归还
           </el-button>
           <el-button type="text"
@@ -169,7 +216,7 @@
 </template>
 
 <script>
-import { onMounted, watch, computed, ref, reactive } from 'vue'
+import { onMounted, watch, computed, ref, reactive, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import BaseTable from '../components/BaseTable.vue'
@@ -186,27 +233,22 @@ import {
   delToolBuyRecord,
 } from '@/api/tool'
 
+import { getList } from '@/api/index'
+
 export default {
   components: {
     BaseTable,
     ProductAdd,
     ProductDetail,
   },
-  name: 'product-manage',
-  beforeRouteUpdate(to, from, next) {
-    if (to.name == 'tool') {
-      this.toolTypeId = to.query.id
-      this.initToolInfo()
-    }
-    next()
-  },
+  name: 'tool-manage',
   setup() {
     const route = useRoute()
     const store = useStore()
     const columns = ref()
     const formItems = ref()
     const toolTypeId = ref(null)
-    const toolTypeInfo = ref({})
+    const toolTypeInfo = ref(null)
     const initToolInfo = () => {
       if (!toolTypeId.value) toolTypeId.value = route.query.id
       columns.value = [
@@ -225,7 +267,7 @@ export default {
         { label: '库房剩余数量', key: 'availableNum', required: true },
         { label: '总购数量', key: 'totalBuy', required: true },
       ]
-      setTimeout(() => {
+      nextTick(() => {
         toolTypeInfo.value = store.state.toolTypes.find(
           (t) => t.id == route.query.id
         )
@@ -243,17 +285,55 @@ export default {
             })
           })
         }
-      }, 500)
+        handleSearch()
+      })
     }
-    initToolInfo()
+    const specialFields = computed(() => {
+      if (toolTypeInfo.value?.specField) {
+        return toolTypeInfo.value.specField.split('|').map((f, index) => {
+          return {
+            label: f,
+            prop: 'key' + index,
+            slot: 'key' + index
+          }
+        })
+      } else {
+        return []
+      }
+    })
+    const getSpecialFieldData = (specialRowData, label) => {
+      if (!specialRowData) return ''
+      let specialData = JSON.parse(specialRowData)
+      if (specialData[label] !== undefined) {
+        return specialData[label]
+      }
+      return ''
+    }
+    console.log('setup run')
+    onMounted(() => {
+      initToolInfo()
+    })
     const toolTable = ref({})
     const query = reactive({
       name: '',
       specification: '',
+      pageNo: 1,
+      pageSize: 20
     })
+    const tableData = ref([])
+    const toolPageTotal = ref(0)
+    // 分页导航
+    const handleToolPageChange = (val) => {
+      query.pageNo = val
+      handleSearch(true)
+    }
     // 查询操作
-    const handleSearch = () => {
-      toolTable.value.refresh(query)
+    const handleSearch = (keepNowPage) => {
+      if (!keepNowPage) query.pageNo = 1
+      getList('/tool-manage/tool/pages', {...query, toolType: toolTypeId.value }).then((res) => {
+        tableData.value = res.data.records
+        toolPageTotal.value = res.data.total || 0
+      })
     }
 
     // 删除操作
@@ -274,11 +354,27 @@ export default {
     const editVisible = ref(false)
     let editItemData = ref(null)
     const handleEdit = (row) => {
+      let disArr = ['purchaseUnit', 'availableNum', 'totalBuy']
+      formItems.value.forEach(item => {
+        if (disArr.includes(item.key)) {
+          item.disabled = true
+        }
+      })
+      let editData = JSON.parse(JSON.stringify(row))
+      let specialData = JSON.parse(row.specialField)
+      specialFields.value.forEach((f) => {
+        editData[f.prop] = specialData[f.label]
+      })
+      // console.log(row)
+      // console.log(formItems.value)
       editVisible.value = true
-      editItemData.value = row
+      editItemData.value = editData
     }
 
-    const handleAdd = () => {
+    const handleAdd = () => {      
+      formItems.value.forEach(item => {
+          item.disabled = false
+      })
       editVisible.value = true
       editItemData.value = null
     }
@@ -296,7 +392,7 @@ export default {
       })
       ElMessage.success('添加成功')
       editVisible.value = false
-      handleSearch()
+      handleSearch(true)
     }
 
     const detailVisible = ref(false)
@@ -324,26 +420,30 @@ export default {
       })
       ElMessage.success('领用成功')
       addLendVisible.value = false
-      lendRecordTable.value.refresh()
+      lendRecordTable.value.refresh({}, true)
     }
     // 归还
     const returnMesuringVisible = ref(false)
     const editLendRecord = ref(null)
     const returnMesuringItems = [
-      { label: '归还数量', key: 'nums', required: true, type: 'number' },
+      { label: '归还入库数量', key: 'nums', required: false, type: 'number' },
+      { label: '报废数量', key: 'waste', required: false, type: 'number' },
     ]
     const showReturnMesuring = (row) => {
       returnMesuringVisible.value = true
       editLendRecord.value = row
     }
     const returnMesuringSubmit = async (formData) => {
+      if (!formData.nums && !formData.waste) {
+        ElMessage.error('入库数量和报废数量不能同时为空')
+      }
       await returnTool({
         id: editLendRecord.value?.id,
         ...formData,
       })
       ElMessage.success('归还成功')
       returnMesuringVisible.value = false
-      lendRecordTable.value.refresh()
+      lendRecordTable.value.refresh({}, true)
     }
     // 删除领用记录
     const handleLendRecordDelete = (row) => {
@@ -386,7 +486,7 @@ export default {
       })
       ElMessage.success('添加成功')
       addBuyVisible.value = false
-      handleSearch()
+      handleSearch(true)
     }
     // 删除领用记录
     const handleBuyRecordDelete = (row) => {
@@ -398,7 +498,7 @@ export default {
           await delToolBuyRecord({ recordId: row.id })
           ElMessage.success('删除成功')
           handleBuySearch()
-          handleSearch()
+          handleSearch(true)
         })
         .catch(() => {})
     }
@@ -435,6 +535,10 @@ export default {
         {
           label: '归还数量',
           prop: 'retNum',
+        },
+        {
+          label: '报废数量',
+          prop: 'waste',
         },
         {
           label: '归还时间',
@@ -525,6 +629,11 @@ export default {
         },
       ],
       initToolInfo,
+      specialFields,
+      getSpecialFieldData,
+      tableData,
+      toolPageTotal,
+      handleToolPageChange
     }
   },
 }

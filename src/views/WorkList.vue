@@ -115,8 +115,8 @@ export default {
     })
     // 查询操作
     const worklistTable = ref({})
-    const handleSearch = () => {
-      worklistTable.value.refresh(query)
+    const handleSearch = (keepNowPage) => {
+      worklistTable.value.refresh(query, keepNowPage)
     }
 
     // 开工完工操作
@@ -144,13 +144,13 @@ export default {
       await startWork({ workId: editItemData.value.id, ...formData })
       ElMessage.success('操作成功')
       startWorkVisible.value = false
-      handleSearch()
+      handleSearch(true)
     }
     const finishWorkSubmit = async (formData) => {
       await finishWork({ workId: editItemData.value.id, ...formData })
       ElMessage.success('操作成功')
       finishWorkVisible.value = false
-      handleSearch()
+      handleSearch(true)
     }
 
     const store = useStore()
@@ -242,6 +242,10 @@ export default {
       {
         label: '已预支工资',
         prop: 'advanceWages',
+      },
+      {
+        label: '预支时间',
+        prop: 'advanceDate',
       },
       {
         label: '结账状态',

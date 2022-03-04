@@ -8,18 +8,25 @@ import {
 } from '../store'
 const routes = [{
     path: '/',
-    redirect: '/product'
+    redirect: '/product-unfinish'
 }, {
     path: "/",
     name: "Home",
     component: Home,
     children: [{
-        path: "/product",
-        name: "product",
+        path: "/product-unfinish",
+        name: "product-unfinish",
         meta: {
-            title: '产品管理'
+            title: '未完结产品'
         },
-        component: () => import( /* webpackChunkName: "product" */ "../views/ProductManage.vue")
+        component: () => import( /* webpackChunkName: "product-unfinish" */ "../views/ProductManage.vue")
+    },{
+        path: "/product-finish",
+        name: "product-finish",
+        meta: {
+            title: '已完结产品'
+        },
+        component: () => import( /* webpackChunkName: "product-finish" */ "../views/ProductManage.vue")
     }, {
         path: "/mesuring",
         name: "mesuring",

@@ -18,6 +18,24 @@
             end-placeholder="结束日期">
           </el-date-picker>
         </el-form-item>
+        <el-form-item label="完工时间">
+          <el-date-picker v-model="query.finishTimeRange"
+            value-format="YYYY-MM-DD"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="预支时间">
+          <el-date-picker v-model="query.prePaytimeRange"
+            value-format="YYYY-MM-DD"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期">
+          </el-date-picker>
+        </el-form-item>
         <el-form-item label="结账状态">
           <el-select v-model="query.checkStatus"
             placeholder="结账状态"
@@ -129,6 +147,8 @@ export default {
       partCode: '',
       user: '',
       timeRange: [],
+      finishTimeRange: [],
+      prePaytimeRange: [],
       checkStatus: '',
       serial: '',
       status: '',
@@ -136,14 +156,20 @@ export default {
     })
     // 查询操作
     const worklistTable = ref({})
-    const handleSearch = () => {
+    const handleSearch = (keepNowPage) => {
       const queryObj = {
         ...query,
         timeRange: undefined,
         checkDateStart: (query.timeRange && query.timeRange[0]) || undefined,
         checkDateEnd: (query.timeRange && query.timeRange[1]) || undefined,
+        finishTimeRange: undefined,
+        finishDateStart: (query.finishTimeRange && query.finishTimeRange[0]) || undefined,
+        finishDateEnd: (query.finishTimeRange && query.finishTimeRange[1]) || undefined,
+        prePaytimeRange: undefined,
+        prePayDateStart: (query.prePaytimeRange && query.prePaytimeRange[0]) || undefined,
+        prePayDateEnd: (query.prePaytimeRange && query.prePaytimeRange[1]) || undefined,
       }
-      worklistTable.value.refresh(queryObj)
+      worklistTable.value.refresh(queryObj, keepNowPage)
     }
 
     const editItemData = ref(null)
@@ -154,7 +180,7 @@ export default {
         .then(async () => {
           await payWork({ workingId: row.id, checkStatus: command })
           ElMessage.success('操作成功')
-          handleSearch()
+          handleSearch(true)
         })
         .catch(() => {})
     }
@@ -167,7 +193,7 @@ export default {
       await prePayWork({ workId: editItemData.value.id, ...formData })
       ElMessage.success('操作成功')
       prePayVisible.value = false
-      handleSearch()
+      handleSearch(true)
     }
     return {
       columns: [
@@ -247,6 +273,10 @@ export default {
         {
           label: '已预支工资',
           prop: 'advanceWages',
+        },
+        {
+          label: '预支时间',
+          prop: 'advanceDate',
         },
         {
           label: '结账状态',

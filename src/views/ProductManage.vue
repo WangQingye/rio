@@ -28,7 +28,12 @@
           <el-input v-model="query.remark"
             placeholder="调度备注"></el-input>
         </el-form-item>
-        <el-form-item label="状态">
+        <el-form-item label="上账备注">
+          <el-input v-model="query.remark1"
+            placeholder="上账备注"></el-input>
+        </el-form-item>
+        <el-form-item label="状态"
+          v-if="!isFinish">
           <el-select v-model="query.status"
             placeholder="状态"
             clearable
@@ -39,9 +44,18 @@
               value="PROCESSING"></el-option>
             <el-option label="已完工"
               value="COMPLETED"></el-option>
-            <el-option label="已完结"
-              value="CLOSED"></el-option>
+            <!-- <el-option label="已完结"
+              value="CLOSED"></el-option> -->
           </el-select>
+        </el-form-item>
+        <el-form-item label="完结时间" v-if="isFinish">
+          <el-date-picker v-model="query.closeTimeRange"
+            value-format="YYYY-MM-DD"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期">
+          </el-date-picker>
         </el-form-item>
         <el-form-item>
           <el-button type="primary"
@@ -55,6 +69,7 @@
       <BaseTable :cols="columns"
         needExport
         ref="productTable"
+        :autoInitData="false"
         :url="'/products-manage/product/list'">
         <template v-slot:status="slotProps">
           <el-tag :type="slotProps.scopeData.status === 'COMPLETED'? 'success': slotProps.scopeData.status === 'NOT_STARTED'? 'danger': ''">{{ {'NOT_STARTED':'未开工', 'PROCESSING': '生产中', 'COMPLETED': '已完工', 'CLOSED': '已完结'}[slotProps.scopeData.status] }}</el-tag>
@@ -111,13 +126,14 @@
 </template>
 
 <script>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import BaseTable from '@/components/BaseTable.vue'
 // import MyButton from '@/components/MyButton.vue'
 import ProductAdd from './ProductAdd.vue'
 import ProductDetail from './ProductDetail.vue'
 import PartDetail from './PartDetail.vue'
+import { useRoute, useRouter } from 'vue-router'
 import { editProduct, delProduct } from '@/api/product'
 
 export default {
@@ -130,6 +146,10 @@ export default {
   },
   name: 'product-manage',
   setup() {
+    const route = useRoute()
+    const isFinish = computed(() => {
+      return route.path.indexOf('unfinish') == -1
+    })
     const query = reactive({
       serial: '',
       code: '',
@@ -138,13 +158,28 @@ export default {
       partName: '',
       remark: '',
       status: '',
+      remark1: '',
+      closeTimeRange: [],
     })
 
     // 查询操作
     const productTable = ref()
-    const handleSearch = () => {
-      productTable.value.refresh(query)
+    const handleSearch = (keepNowPage) => {
+      const data = JSON.parse(JSON.stringify(query))
+      if (isFinish.value) {
+        data.status = 'CLOSED'
+      } else if (!isFinish.value && data.status == '') {
+        data.status = 'UNCLOSED'
+      }
+      const queryObj = {
+        ...data,
+        closeTimeRange: undefined,
+        closeTimeStart: (query.closeTimeRange && query.closeTimeRange[0]) || undefined,
+        closeTimeEnd: (query.closeTimeRange && query.closeTimeRange[1]) || undefined,
+      }
+      productTable.value.refresh(queryObj, keepNowPage)
     }
+    setTimeout(handleSearch, 100)
 
     // 删除操作
     const handleDelete = (row) => {
@@ -178,7 +213,8 @@ export default {
       } else {
         if (
           editItemData.value.status === 'COMPLETED' &&
-          formData.status !== 'CLOSED'
+          formData.status !== 'CLOSED' &&
+          formData.status !== 'COMPLETED'
         ) {
           ElMessage.error('完工状态只能修改为已完结')
           return
@@ -189,7 +225,7 @@ export default {
       if (arr[2].length < 3) {
         let str = ''
         for (let i = 0; i < 3 - arr[2].length; i++) {
-          str += '0'          
+          str += '0'
         }
         arr[2] = str + arr[2]
       }
@@ -197,7 +233,7 @@ export default {
       await editProduct({ id: editItemData.value?.id, ...formData, serialSort })
       ElMessage.success('添加成功')
       editVisible.value = false
-      handleSearch()
+      handleSearch(true)
     }
 
     const detailVisible = ref(false)
@@ -286,6 +322,10 @@ export default {
         {
           label: '最终甲方检验合格数',
           prop: 'requiredQualified',
+        },
+        {
+          label: '完结时间',
+          prop: 'closeTime',
         },
       ],
       formItems: [
@@ -378,6 +418,13 @@ export default {
           hideOnAdd: true,
           required: false,
         },
+        {
+          label: '完结时间',
+          key: 'closeTime',
+          hideOnAdd: true,
+          required: false,
+          type: 'date',
+        },
       ],
       query,
       editVisible,
@@ -392,6 +439,7 @@ export default {
       partDetailVisible,
       showPartDetail,
       productTable,
+      isFinish,
     }
   },
 }

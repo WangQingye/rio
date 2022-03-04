@@ -80,8 +80,18 @@ export default {
       ) {
         items.value.push({
           icon: 'el-icon-lx-cascades',
-          index: '/product',
+          index: '/product-unfinish',
           title: '产品管理',
+          subs: [
+            {
+              index: '/product-unfinish',
+              title: '未完结产品',
+            },
+            {
+              index: '/product-finish',
+              title: '已完结产品',
+            }
+          ]
         })
       }
       // 四个角色可以看到仓库相关
@@ -149,7 +159,7 @@ export default {
           },
         ]
       )
-      if (userType === 'SYS_ADMIN' || userType === 'SYS_CONTACT' || userType === 'SYS_PRODUCT') router.push('/product')
+      if (userType === 'SYS_ADMIN' || userType === 'SYS_CONTACT' || userType === 'SYS_PRODUCT') router.push('/product-unfinish')
       if (userType === 'SYS_STORE') router.push('/mesuring')
       if (userType === 'SYS_FINANCIAL') router.push('/work-pay')
       if (userType === 'SYS_EMPLOYEE') router.push('/work-list')

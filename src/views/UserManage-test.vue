@@ -52,11 +52,6 @@
         </template>
       </BaseTable>
     </div>
-    <ProductAdd :visible="editVisible"
-      @close="editVisible = false"
-      :itemData="editItemData"
-      :formItems="formItems"
-      @dialog-submit="editSubmit"></ProductAdd>
     <ProductDetail :visible="detailVisible"
       @close="detailVisible = false"
       :itemData="editItemData"></ProductDetail>
@@ -93,19 +88,18 @@
 import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import BaseTable from '../components/BaseTable.vue'
-import ProductAdd from './ProductAdd.vue'
 import ProductDetail from './ProductDetail.vue'
 import WorkList from './WorkList.vue'
 import LendList from './LendList.vue'
+import useFormDialog from './useFormDialog'
 import { editUser, getRoleList, delUser } from '@/api/user'
 
 export default {
   components: {
     BaseTable,
-    ProductAdd,
     ProductDetail,
     LendList,
-    WorkList
+    WorkList,
   },
   name: 'product-manage',
   setup() {
@@ -137,25 +131,26 @@ export default {
     }
 
     // 表格编辑时弹窗和保存
-    const editVisible = ref(false)
+    let editDialog
     let editItemData = ref(null)
     const handleEdit = (row) => {
-      editVisible.value = true
-      editItemData.value = row
-      editItemData.value.role = row.roles[0].id
+      let rowData = row
+      rowData.role = row.roles[0].id
+      editDialog.show(rowData)
     }
     const handleAdd = () => {
-      editVisible.value = true
-      editItemData.value = null
+      editDialog.show()
     }
     const editSubmit = async (row) => {
-      await editUser({
-        id: editItemData.value?.id,
-        ...row,
-        password: row.phone,
-      })
-      ElMessage.success('操作成功')
-      editVisible.value = false
+      console.log(row)
+      console.log(editUser)
+      // await editUser({
+      //   id: editItemData.value?.id,
+      //   ...row,
+      //   password: row.phone,
+      // })
+      // ElMessage.success('操作成功')
+      // editVisible.value = false
       handleSearch(true)
     }
 
@@ -191,6 +186,10 @@ export default {
           placeholder: '',
         },
       ]
+      editDialog = useFormDialog({
+        formItems: formItems.value,
+        submitFunc: editSubmit
+      })
     })
     const userDetailVisible = ref(false)
     const userDetailInfo = ref({})
@@ -221,7 +220,6 @@ export default {
       query,
       tableData,
       pageTotal,
-      editVisible,
       handleSearch,
       handleDelete,
       handleEdit,
@@ -234,7 +232,7 @@ export default {
       userDetailVisible,
       userDetailInfo,
       showUserDetail,
-      detailActive
+      detailActive,
     }
   },
 }

@@ -223,8 +223,8 @@ export default {
     })
     // 查询操作
     const cutterTable = ref()
-    const handleSearch = () => {
-      cutterTable.value.refresh(query)
+    const handleSearch = (keepNowPage) => {
+      cutterTable.value.refresh(query, keepNowPage)
     }
     // 删除操作
     const store = useStore()
@@ -262,7 +262,7 @@ export default {
       await addCutter({ id: editItemData.value?.id, ...formData })
       ElMessage.success('添加成功')
       editVisible.value = false
-      handleSearch()
+      handleSearch(true)
     }
 
     const detailVisible = ref(false)

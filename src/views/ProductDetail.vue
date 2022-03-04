@@ -213,7 +213,7 @@ export default {
         products: props.serialId,
       })
       ElMessage.success('操作成功')
-      stepTable.value.refresh()
+      stepTable.value.refresh({}, true)
       emit('refresh')
       partStepEditVisible.value = false
       getProcessDetail()
