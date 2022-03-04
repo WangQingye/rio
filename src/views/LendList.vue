@@ -193,6 +193,10 @@ export default {
           prop: 'retNum',
         },
         {
+          label: '报废数量',
+          prop: 'waste',
+        },
+        {
           label: '最近归还时间',
           prop: 'retDate',
         },

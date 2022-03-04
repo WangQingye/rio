@@ -163,11 +163,11 @@ export default {
         checkDateStart: (query.timeRange && query.timeRange[0]) || undefined,
         checkDateEnd: (query.timeRange && query.timeRange[1]) || undefined,
         finishTimeRange: undefined,
-        finishDateStart: (query.finishTimeRange && query.finishTimeRange[0]) || undefined,
-        finishDateEnd: (query.finishTimeRange && query.finishTimeRange[1]) || undefined,
+        finalDateStart: (query.finishTimeRange && query.finishTimeRange[0]) || undefined,
+        finalDateEnd: (query.finishTimeRange && query.finishTimeRange[1]) || undefined,
         prePaytimeRange: undefined,
-        prePayDateStart: (query.prePaytimeRange && query.prePaytimeRange[0]) || undefined,
-        prePayDateEnd: (query.prePaytimeRange && query.prePaytimeRange[1]) || undefined,
+        advanceDateStart: (query.prePaytimeRange && query.prePaytimeRange[0]) || undefined,
+        advanceDateEnd: (query.prePaytimeRange && query.prePaytimeRange[1]) || undefined,
       }
       worklistTable.value.refresh(queryObj, keepNowPage)
     }

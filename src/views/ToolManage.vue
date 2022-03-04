@@ -143,7 +143,7 @@
           <el-button type="text"
             icon="el-icon-download"
             class="color-success"
-            v-show="!slotProps.scopeData.retNum || (slotProps.scopeData.useNumber > slotProps.scopeData.retNum)"
+            v-show="!slotProps.scopeData.retNum || (slotProps.scopeData.useNumber > (slotProps.scopeData.retNum + slotProps.scopeData.waste))"
             @click="showReturnMesuring(slotProps.scopeData)">归还
           </el-button>
           <el-button type="text"
@@ -427,7 +427,7 @@ export default {
     const editLendRecord = ref(null)
     const returnMesuringItems = [
       { label: '归还入库数量', key: 'nums', required: false, type: 'number' },
-      { label: '报废数量', key: 'waste', required: false, type: 'number' },
+      { label: '报废数量', key: 'badNum', required: false, type: 'number' },
     ]
     const showReturnMesuring = (row) => {
       returnMesuringVisible.value = true
