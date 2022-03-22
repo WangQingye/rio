@@ -442,6 +442,15 @@ export default {
       isFinish,
     }
   },
+  beforeRouteEnter (to, from, next) {
+    next(vm => {
+      // 通过 `vm` 访问组件实例
+      const userType = vm.$store.state.userInfo.authorities[0].authority
+      if (userType === 'SYS_STORE') vm.$router.push('/mesuring')
+      if (userType === 'SYS_FINANCIAL') vm.$router.push('/work-pay')
+      if (userType === 'SYS_EMPLOYEE' || userType === 'SYS_QUALITY') vm.$router.push('/work-list')
+    })
+  }
 }
 </script>
 

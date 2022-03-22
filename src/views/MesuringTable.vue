@@ -306,6 +306,7 @@ export default {
             '同轴度塞规',
             '航空螺纹塞规',
             '航空螺纹环规',
+            '检测工装'
           ].map((s) => {
             return {
               label: s,

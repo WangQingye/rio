@@ -20,10 +20,10 @@ export default {
     //反向代理配置，注意rewrite写法，开始没看文档在这里踩了坑
     proxy: {
       '/serverBackend': {
-        // target: 'http://162.14.79.68/serverBackend', //代理接口
+        target: 'http://162.14.79.68/serverBackend', //代理接口
         // target: 'http://uatsmart.pigkeeping.cn', //代理接口
         // target: 'http://web.dev4.smartpig.bajietong.net', //代理接口
-        target: 'http://162.14.79.68/serverBackend_test', //代理接口
+        // target: 'http://162.14.79.68/serverBackend_test', //代理接口
         // target: 'http://162.14.79.68', //代理接口
         // target: 'http://172.16.0.138:8090', //代理接口
         changeOrigin: true,
