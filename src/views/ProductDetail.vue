@@ -382,7 +382,7 @@ export default {
         {
           label: '工序单价（元）',
           prop: 'price',
-          noVisible: userType == 'SYS_CONTACT',
+          noVisible: userType == 'SYS_CONTACT' || userType == 'SYS_QUALITY',
         },
         {
           label: '备注',

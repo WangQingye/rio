@@ -328,6 +328,12 @@ export default {
     const returnMesuringItems = [
       { label: '归还数量', key: 'retNum', required: true, type: 'number' },
       {
+        label: '全新数量',
+        key: 'newNum',
+        required: true,
+        type: 'number',
+      },
+      {
         label: '归还后可二次使用数量',
         key: 'availableNum',
         required: true,
@@ -344,8 +350,8 @@ export default {
          ElMessage.error('归还总数大于领用数量')
          return
       }
-      if ((Number(formData.availableNum) + Number(formData.badNum)) != Number(formData.retNum) ) {
-         ElMessage.error('归还数量必须等于二次可使用数量加上报废数量')
+      if ((Number(formData.newNum) + Number(formData.availableNum) + Number(formData.badNum)) != Number(formData.retNum) ) {
+         ElMessage.error('归还数量必须等于全新数量+二次可使用数量+报废数量')
          return
       }
       await returnCutter({
@@ -507,12 +513,16 @@ export default {
           prop: 'useNumber',
         },
         {
+          label: '领用日期',
+          prop: 'created',
+        },
+        {
           label: '归还数量',
           prop: 'retNum',
         },
         {
-          label: '领用日期',
-          prop: 'created',
+          label: '归还全新数量',
+          prop: 'newNum',
         },
         {
           label: '归还后可二次使用数量',
