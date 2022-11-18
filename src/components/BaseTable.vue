@@ -95,6 +95,10 @@ export default {
       type: Object,
       default: () => {},
     },
+    beforeExport: {
+      type: Function,
+      default: null,
+    },
   },
   setup(props, context) {
     const query = reactive({
@@ -172,7 +176,13 @@ export default {
       getData()
     }
     const exportTable = () => {
-      getExcel(props.url, searchObj.value)
+      if (props.beforeExport) {
+        props.beforeExport(() => {
+          getExcel(props.url, searchObj.value)
+        })
+      } else {
+        getExcel(props.url, searchObj.value)
+      }
     }
     
     const showCols = computed(() => {

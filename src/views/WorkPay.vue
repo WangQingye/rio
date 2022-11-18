@@ -279,6 +279,10 @@ export default {
           prop: 'advanceDate',
         },
         {
+          label: '剩余预计工资',
+          prop: 'surplusWages',
+        },
+        {
           label: '结账状态',
           prop: 'checkStatus',
           slot: 'checkStatus',

@@ -1,127 +1,69 @@
 <template>
   <div>
     <div class="container">
-      <el-form :inline="true"
-        :model="query"
-        class="demo-form-inline">
+      <el-form :inline="true" :model="query" class="demo-form-inline">
         <el-form-item label="序号">
-          <el-input v-model="query.serial"
-            placeholder="序号"></el-input>
+          <el-input v-model="query.serial" placeholder="序号"></el-input>
         </el-form-item>
         <el-form-item label="任务号">
-          <el-input v-model="query.code"
-            placeholder="任务号"></el-input>
+          <el-input v-model="query.code" placeholder="任务号"></el-input>
         </el-form-item>
         <el-form-item label="产品代号">
-          <el-input v-model="query.productCode"
-            placeholder="产品代号"></el-input>
+          <el-input v-model="query.productCode" placeholder="产品代号"></el-input>
         </el-form-item>
         <el-form-item label="零件代号">
-          <el-input v-model="query.partCode"
-            placeholder="零件代号"></el-input>
+          <el-input v-model="query.partCode" placeholder="零件代号"></el-input>
         </el-form-item>
         <el-form-item label="零件名称">
-          <el-input v-model="query.partName"
-            placeholder="零件名称"></el-input>
+          <el-input v-model="query.partName" placeholder="零件名称"></el-input>
         </el-form-item>
         <el-form-item label="调度备注">
-          <el-input v-model="query.remark"
-            placeholder="调度备注"></el-input>
+          <el-input v-model="query.remark" placeholder="调度备注"></el-input>
         </el-form-item>
         <el-form-item label="上账备注">
-          <el-input v-model="query.remark1"
-            placeholder="上账备注"></el-input>
+          <el-input v-model="query.remark1" placeholder="上账备注"></el-input>
         </el-form-item>
-        <el-form-item label="状态"
-          v-if="!isFinish">
-          <el-select v-model="query.status"
-            placeholder="状态"
-            clearable
-            class="handle-select mr10">
-            <el-option label="未开工"
-              value="NOT_STARTED"></el-option>
-            <el-option label="生产中"
-              value="PROCESSING"></el-option>
-            <el-option label="已完工"
-              value="COMPLETED"></el-option>
+        <el-form-item label="状态" v-if="!isFinish">
+          <el-select v-model="query.status" placeholder="状态" clearable class="handle-select mr10">
+            <el-option label="未开工" value="NOT_STARTED"></el-option>
+            <el-option label="生产中" value="PROCESSING"></el-option>
+            <el-option label="已完工" value="COMPLETED"></el-option>
             <!-- <el-option label="已完结"
               value="CLOSED"></el-option> -->
           </el-select>
         </el-form-item>
         <el-form-item label="完结时间" v-if="isFinish">
-          <el-date-picker v-model="query.closeTimeRange"
-            value-format="YYYY-MM-DD"
-            type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期">
+          <el-date-picker v-model="query.closeTimeRange" value-format="YYYY-MM-DD" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期">
           </el-date-picker>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary"
-            @click="handleSearch">查询</el-button>
+          <el-button type="primary" @click="handleSearch">查询</el-button>
         </el-form-item>
       </el-form>
-      <el-button type="primary"
-        icon="el-icon-plus"
-        style="margin-bottom: 20px;"
-        @click="handleAdd">添加批次</el-button>
-      <BaseTable :cols="columns"
-        needExport
-        ref="productTable"
-        :autoInitData="false"
-        :url="'/products-manage/product/list'">
+      <el-button type="primary" icon="el-icon-plus" style="margin-bottom: 20px;" @click="handleAdd">添加批次</el-button>
+      <BaseTable :cols="columns" needExport ref="productTable" :autoInitData="false" :beforeExport="beforeExport" :url="'/products-manage/product/list'">
         <template v-slot:status="slotProps">
           <el-tag :type="slotProps.scopeData.status === 'COMPLETED'? 'success': slotProps.scopeData.status === 'NOT_STARTED'? 'danger': ''">{{ {'NOT_STARTED':'未开工', 'PROCESSING': '生产中', 'COMPLETED': '已完工', 'CLOSED': '已完结'}[slotProps.scopeData.status] }}</el-tag>
         </template>
         <template v-slot:factoryProcess="slotProps">
-          <el-link href="javascript:void(0)"
-            style="display: block"
-            v-for="work in slotProps.scopeData.workings"
-            :key="work.id"
-            :type="{'NORMAL': 'danger', 'RUNNING':'success', 'CLOSED': 'primary'}[work.status]">{{`${work.workingName}-${{'NORMAL': '未开工', 'RUNNING':'进行中', 'CLOSED': '已完工'}[work.status]}`}}</el-link>
+          <el-link href="javascript:void(0)" style="display: block" v-for="work in slotProps.scopeData.workings" :key="work.id" :type="{'NORMAL': 'danger', 'RUNNING':'success', 'CLOSED': 'primary'}[work.status]">{{`${work.workingName}-${{'NORMAL': '未开工', 'RUNNING':'进行中', 'CLOSED': '已完工'}[work.status]}`}}</el-link>
         </template>
         <template v-slot:serial="slotProps">
-          <el-link href="javascript:void(0)"
-            type="primary"
-            @click="showDetail(slotProps.scopeData)">{{slotProps.scopeData.serial}}</el-link>
+          <el-link href="javascript:void(0)" type="primary" @click="showDetail(slotProps.scopeData)">{{slotProps.scopeData.serial}}</el-link>
         </template>
         <template v-slot:partCode="slotProps">
-          <el-link href="javascript:void(0)"
-            type="primary"
-            @click="showPartDetail(slotProps.scopeData)">{{slotProps.scopeData.partCode}}</el-link>
+          <el-link href="javascript:void(0)" type="primary" @click="showPartDetail(slotProps.scopeData)">{{slotProps.scopeData.partCode}}</el-link>
         </template>
         <template v-slot:operation="slotProps">
-          <el-button type="text"
-            icon="el-icon-edit"
-            @click="handleEdit(slotProps.scopeData)">编辑
+          <el-button type="text" icon="el-icon-edit" @click="handleEdit(slotProps.scopeData)">编辑
           </el-button>
-          <el-button type="text"
-            icon="el-icon-delete"
-            class="red"
-            @click="handleDelete(slotProps.scopeData)">删除</el-button>
+          <el-button type="text" icon="el-icon-delete" class="red" @click="handleDelete(slotProps.scopeData)">删除</el-button>
         </template>
       </BaseTable>
     </div>
-    <ProductAdd :visible="editVisible"
-      @close="editVisible = false"
-      :itemData="editItemData"
-      :formItems="formItems"
-      key="product-edit"
-      @dialog-submit="editSubmit"></ProductAdd>
-    <ProductDetail :visible="detailVisible"
-      @close="detailVisible = false"
-      key="detail"
-      @refresh="handleSearch"
-      v-if="editItemData?.id"
-      :serialId="editItemData?.id"
-      :serial="editItemData?.serial"></ProductDetail>
-    <PartDetail :visible="partDetailVisible"
-      @close="partDetailVisible = false"
-      key="detail1"
-      v-if="editItemData"
-      :serialId="editItemData?.id"
-      :partCode="editItemData?.partCode"></PartDetail>
+    <ProductAdd :visible="editVisible" @close="editVisible = false" :itemData="editItemData" :formItems="formItems" key="product-edit" @dialog-submit="editSubmit"></ProductAdd>
+    <ProductDetail :visible="detailVisible" @close="detailVisible = false" key="detail" @refresh="handleSearch" v-if="editItemData?.id" :serialId="editItemData?.id" :serial="editItemData?.serial"></ProductDetail>
+    <PartDetail :visible="partDetailVisible" @close="partDetailVisible = false" key="detail1" v-if="editItemData" :serialId="editItemData?.id" :partCode="editItemData?.partCode"></PartDetail>
   </div>
 </template>
 
@@ -174,8 +116,10 @@ export default {
       const queryObj = {
         ...data,
         closeTimeRange: undefined,
-        closeTimeStart: (query.closeTimeRange && query.closeTimeRange[0]) || undefined,
-        closeTimeEnd: (query.closeTimeRange && query.closeTimeRange[1]) || undefined,
+        closeTimeStart:
+          (query.closeTimeRange && query.closeTimeRange[0]) || undefined,
+        closeTimeEnd:
+          (query.closeTimeRange && query.closeTimeRange[1]) || undefined,
       }
       productTable.value.refresh(queryObj, keepNowPage)
     }
@@ -247,6 +191,24 @@ export default {
     const showPartDetail = (row) => {
       partDetailVisible.value = true
       editItemData.value = row
+    }
+
+    // 导出前校验
+    const beforeExport = (success) => {
+      ElMessageBox.prompt('输入校验码', '导出', {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+      })
+        .then(({ value }) => {
+          let date = new Date()
+          let month = date.getMonth() + 1
+          let day = date.getDate()
+          if (value == (Number(`${month}${day}`) * 2 + 1)) {
+            success()
+          } else {
+            ElMessage.error('校验码错误')
+          }
+        })
     }
     return {
       columns: [
@@ -440,17 +402,19 @@ export default {
       showPartDetail,
       productTable,
       isFinish,
+      beforeExport,
     }
   },
-  beforeRouteEnter (to, from, next) {
-    next(vm => {
+  beforeRouteEnter(to, from, next) {
+    next((vm) => {
       // 通过 `vm` 访问组件实例
       const userType = vm.$store.state.userInfo.authorities[0].authority
       if (userType === 'SYS_STORE') vm.$router.push('/mesuring')
       if (userType === 'SYS_FINANCIAL') vm.$router.push('/work-pay')
-      if (userType === 'SYS_EMPLOYEE' || userType === 'SYS_QUALITY') vm.$router.push('/work-list')
+      if (userType === 'SYS_EMPLOYEE' || userType === 'SYS_QUALITY')
+        vm.$router.push('/work-list')
     })
-  }
+  },
 }
 </script>
 
